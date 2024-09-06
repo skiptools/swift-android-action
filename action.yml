@@ -1,36 +1,19 @@
-name: 'Hello World'
-description: 'Greet someone'
+name: 'Swift Android Test'
+description: 'Cross-compiles a swift package for Android and runs the test cases in an Android emulator'
 inputs:
-  who-to-greet:  # id of input
-    description: 'Who to greet'
+  swift-version:
+    description: 'The version of the Swift toolchain to use'
     required: true
-    default: 'World'
-outputs:
-  random-number:
-    description: "Random number"
-    value: ${{ steps.random-number-generator.outputs.random-number }}
+    default: '5.10.1'
+  package-path:
+    description: 'The folder where the swift package is checked out'
+    required: true
+    default: '.'
 runs:
   using: "composite"
   steps:
-    - name: Set Greeting
-      run: echo "Hello $INPUT_WHO_TO_GREET."
-      shell: bash
-      env:
-        INPUT_WHO_TO_GREET: ${{ inputs.who-to-greet }}
-
-    - name: Random Number Generator
-      id: random-number-generator
-      run: echo "random-number=$(echo $RANDOM)" >> $GITHUB_OUTPUT
-      shell: bash
-
-    - name: Set GitHub Path
-      run: echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
-      shell: bash
-      env:
-        GITHUB_ACTION_PATH: ${{ github.action_path }}
-
-    - name: Run goodbye.sh
-      if: false
-      run: goodbye.sh
-      shell: bash
+    - name: Install Toolchain
+      run: brew install swift-android-sdk/toolchain/swift-android-sdk@${{ inputs.swift-version }} skiptools/skip/skip
+    - name: Build package
+      run: skip android build --build-tests --package-path ${{ inputs.package-path }}
 
