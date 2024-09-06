@@ -14,6 +14,9 @@ runs:
   steps:
     - name: Install Toolchain
       run: brew install swift-android-sdk/toolchain/swift-android-sdk@${{ inputs.swift-version }} skiptools/skip/skip
+      shell: bash
     - name: Build package
       run: skip android build --build-tests --package-path ${{ inputs.package-path }}
+      shell: bash
+        
 
