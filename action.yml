@@ -9,14 +9,34 @@ inputs:
     description: 'The folder where the swift package is checked out'
     required: true
     default: '.'
+  run-tests:
+    description: 'Whether to run the tests or just the build'
+    required: true
+    default: 'true'
+  android-api-level:
+    description: 'The API level of the Android emulator to run against'
+    required: true
+    default: 24
 runs:
   using: "composite"
   steps:
+    - name: Cache Homebrew packages
+      uses: actions/cache@v4
+      with:
+        path: ~/Library/Caches/Homebrew
+        key: homebrew-packages
     - name: Install Toolchain
-      run: brew install swift-android-sdk/toolchain/swift-android-sdk@${{ inputs.swift-version }} skiptools/skip/skip
+      run: brew install skiptools/skip/skip swift-android-sdk/toolchain/swift-android-sdk@${{ inputs.swift-version }}
       shell: bash
-    - name: Build package
+    - name: Build Swift package for Android
       run: skip android build --build-tests --package-path ${{ inputs.package-path }}
       shell: bash
-        
+    - name: Run Swift tests on Android emulator
+      if: ${{ inputs.run-tests == 'true' }}
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ inputs.android-api-level }}
+        arch: x86_64
+        script: |
+          skip android test --package-path ${{ inputs.package-path }}
 
