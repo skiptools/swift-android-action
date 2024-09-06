@@ -9,6 +9,14 @@ inputs:
     description: 'The folder where the swift package is checked out'
     required: true
     default: '.'
+  swift-build-flags:
+    description: 'Additional flags to pass to the swift build command'
+    required: false
+    default: ''
+  inputs.android-emulator-options:
+    description: 'Additional options to pass to the Android emulator'
+    required: false
+    default: ''
   run-tests:
     description: 'Whether to run the tests or just the build'
     required: true
@@ -29,14 +37,15 @@ runs:
       run: brew install skiptools/skip/skip swift-android-sdk/toolchain/swift-android-sdk@${{ inputs.swift-version }}
       shell: bash
     - name: Build Swift package for Android
-      run: skip android build --build-tests --package-path ${{ inputs.package-path }}
+      run: skip android build --build-tests --package-path ${{ inputs.package-path }} ${{ inputs.swift-build-flags }}
       shell: bash
     - name: Run Swift tests on Android emulator
       if: ${{ inputs.run-tests == 'true' }}
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: ${{ inputs.android-api-level }}
+        emulator-options: ${{ inputs.android-emulator-options }}
         arch: x86_64
         script: |
-          skip android test --package-path ${{ inputs.package-path }}
+          skip android test --package-path ${{ inputs.package-path }} ${{ inputs.swift-build-flags }}
 
