@@ -30,6 +30,7 @@ runs:
         GITHUB_ACTION_PATH: ${{ github.action_path }}
 
     - name: Run goodbye.sh
+      if: false
       run: goodbye.sh
       shell: bash
 
