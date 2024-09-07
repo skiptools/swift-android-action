@@ -1,6 +1,10 @@
 # Swift Android native cross-compiler and test runner action
 
-GitHub action to build and run Swift package tests on an Android emulator
+GitHub action to build and run Swift package tests on an Android emulator.
+This uses the [swift-android-toolchain](https://github.com/skiptools/swift-android-toolchain)
+project to provide a cross-compile to build
+Swift natively for Android on a macOS host.
+
 
 You can add this action to your Swift CI workflow from the
 [GitHub Marketplace](https://github.com/marketplace/actions/swift-android-action),
