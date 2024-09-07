@@ -1,5 +1,8 @@
 name: 'Swift Android Action'
 description: 'Cross-compiles a swift package for Android and runs the test cases in an Android emulator'
+branding:
+  icon: 'target'
+  color: 'orange'
 inputs:
   swift-version:
     description: 'The version of the Swift toolchain to use'
