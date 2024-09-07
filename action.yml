@@ -20,7 +20,7 @@ inputs:
   inputs.android-emulator-boot-timeout:
     description: 'Emulator boot timeout in seconds'
     required: true
-    default: '600'
+    default: 600
   run-tests:
     description: 'Whether to run the tests or just the build'
     required: true
