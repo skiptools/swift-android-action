@@ -1,4 +1,4 @@
-# swift-test
+# Swift Android native cross-compiler and test runner action
 
 GitHub action to build and run Swift package tests on an Android emulator
 
