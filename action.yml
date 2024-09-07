@@ -38,7 +38,7 @@ runs:
         path: ~/Library/Caches/Homebrew
         key: homebrew-packages
     - name: Install Toolchain
-      run: brew install skiptools/skip/skip swift-android-sdk/toolchain/swift-android-sdk@${{ inputs.swift-version }}
+      run: brew install skiptools/skip/swift-android-toolchain@${{ inputs.swift-version }}
       shell: bash
     - name: Build Swift package for Android
       run: skip android build --build-tests --package-path ${{ inputs.package-path }} ${{ inputs.swift-build-flags }}
