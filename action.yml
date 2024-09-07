@@ -14,9 +14,13 @@ inputs:
     required: false
     default: ''
   inputs.android-emulator-options:
-    description: 'Additional options to pass to the Android emulator'
+    description: 'Options to pass to the Android emulator'
     required: false
-    default: ''
+    default: '-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim'
+  inputs.android-emulator-boot-timeout:
+    description: 'Emulator boot timeout in seconds'
+    required: false
+    default: '600'
   run-tests:
     description: 'Whether to run the tests or just the build'
     required: true
@@ -44,6 +48,7 @@ runs:
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: ${{ inputs.android-api-level }}
+        emulator-boot-timeout: ${{ inputs.android-emulator-boot-timeout }}
         emulator-options: ${{ inputs.android-emulator-options }}
         arch: x86_64
         script: skip android test --package-path ${{ inputs.package-path }} ${{ inputs.swift-build-flags }}
