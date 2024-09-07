@@ -33,6 +33,10 @@ jobs:
 
 ```
 
+For an example of a workflow in action, see a run history
+for the [Swift Algorithms](https://github.com/skiptools/swift-algorithms) package at:
+[https://github.com/skiptools/swift-algorithms/actions](https://github.com/skiptools/swift-algorithms/actions)
+
 
 
 ## Releasing
