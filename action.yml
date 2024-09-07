@@ -11,15 +11,15 @@ inputs:
     default: '.'
   swift-build-flags:
     description: 'Additional flags to pass to the swift build command'
-    required: false
+    required: true
     default: ''
   inputs.android-emulator-options:
     description: 'Options to pass to the Android emulator'
-    required: false
+    required: true
     default: '-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim'
   inputs.android-emulator-boot-timeout:
     description: 'Emulator boot timeout in seconds'
-    required: false
+    required: true
     default: '600'
   run-tests:
     description: 'Whether to run the tests or just the build'
