@@ -3,7 +3,37 @@
 GitHub action to build and run Swift package tests on an Android emulator
 
 You can add this action to your Swift CI workflow from the
-[GitHub Marketplace](https://github.com/marketplace/actions/swift-android-action).
+[GitHub Marketplace](https://github.com/marketplace/actions/swift-android-action),
+or you can manually create a workflow by adding a
+`.github/workflows/swift-ci.yml` file to your project.
+This sample action will run your Swift package's test cases
+on a host macOS machine, as well as on an Android emulator
+and an iOS simulator.
+
+```yml
+name: Swift Package CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches:
+      - '*'
+jobs:
+  test:
+    # important: must be macos-13, since the Android emulator does not work on macos-14
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Test Swift Package Locally"
+        run: swift test
+      - name: "Test Swift Package on Android"
+        uses: skiptools/swift-android-action@v1
+      - name: "Test Swift Package on iOS"
+        run: xcodebuild test -scheme "$(xcodebuild -list -json | jq -r '.workspace.schemes[-1]')" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 15"
+
+```
+
+
 
 ## Releasing
 
