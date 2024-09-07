@@ -41,7 +41,39 @@ For an example of a workflow in action, see a run history
 for the [Swift Algorithms](https://github.com/skiptools/swift-algorithms) package at:
 [https://github.com/skiptools/swift-algorithms/actions](https://github.com/skiptools/swift-algorithms/actions)
 
+## Configuration Options
 
+
+```
+  swift-version:
+    description: 'The version of the Swift toolchain to use'
+    required: true
+    default: '5.10.1'
+  package-path:
+    description: 'The folder where the swift package is checked out'
+    required: true
+    default: '.'
+  swift-build-flags:
+    description: 'Additional flags to pass to the swift build command'
+    required: true
+    default: ''
+  android-emulator-options:
+    description: 'Options to pass to the Android emulator'
+    required: true
+    default: '-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim'
+  android-emulator-boot-timeout:
+    description: 'Emulator boot timeout in seconds'
+    required: true
+    default: 600
+  run-tests:
+    description: 'Whether to run the tests or just the build'
+    required: true
+    default: 'true'
+  android-api-level:
+    description: 'The API level of the Android emulator to run against'
+    required: true
+    default: 24
+```
 
 ## Releasing
 
