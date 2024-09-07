@@ -46,6 +46,5 @@ runs:
         api-level: ${{ inputs.android-api-level }}
         emulator-options: ${{ inputs.android-emulator-options }}
         arch: x86_64
-        script: |
-          skip android test --package-path ${{ inputs.package-path }} ${{ inputs.swift-build-flags }}
+        script: skip android test --package-path ${{ inputs.package-path }} ${{ inputs.swift-build-flags }}
 
