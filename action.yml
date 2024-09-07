@@ -1,4 +1,4 @@
-name: 'Swift Android Test'
+name: 'Swift Android Action'
 description: 'Cross-compiles a swift package for Android and runs the test cases in an Android emulator'
 inputs:
   swift-version:
