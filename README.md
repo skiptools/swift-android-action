@@ -24,11 +24,12 @@ on:
       - '*'
 jobs:
   test:
-    # important: must be macos-13, since the Android emulator does not work on macos-14
+    # Runner must be macos-13, since lack of nested virtualization support on macos-14 prevents the Android emulator from working
+    # see: https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#limitations-for-arm64-macos-runners
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
-      - name: "Test Swift Package Locally"
+      - name: "Test Swift Package on macOS"
         run: swift test
       - name: "Test Swift Package on Android"
         uses: skiptools/swift-android-action@v1
@@ -47,32 +48,25 @@ for the [Swift Algorithms](https://github.com/skiptools/swift-algorithms) packag
 ```
   swift-version:
     description: 'The version of the Swift toolchain to use'
-    required: true
     default: '5.10.1'
   package-path:
     description: 'The folder where the swift package is checked out'
-    required: true
     default: '.'
   swift-build-flags:
     description: 'Additional flags to pass to the swift build command'
-    required: true
     default: ''
-  android-emulator-options:
-    description: 'Options to pass to the Android emulator'
-    required: true
-    default: '-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim'
-  android-emulator-boot-timeout:
-    description: 'Emulator boot timeout in seconds'
-    required: true
-    default: 600
   run-tests:
     description: 'Whether to run the tests or just the build'
-    required: true
     default: 'true'
   android-api-level:
     description: 'The API level of the Android emulator to run against'
-    required: true
     default: 24
+  android-emulator-options:
+    description: 'Options to pass to the Android emulator'
+    default: '-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim'
+  android-emulator-boot-timeout:
+    description: 'Emulator boot timeout in seconds'
+    default: 600
 ```
 
 ## Releasing
