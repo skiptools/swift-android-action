@@ -2,8 +2,14 @@
 
 GitHub action to build and run Swift package tests on an Android emulator.
 This uses the [swift-android-toolchain](https://github.com/skiptools/swift-android-toolchain)
-project to provide a cross-compile to build
+project to provide a cross-compiler for building
 Swift natively for Android on a macOS host.
+
+After building the package, it will run the SwiftPM
+test targets on an Android emulator (which it provided by the 
+[Android Emulator Runner action](https://github.com/marketplace/actions/android-emulator-runner)).
+To build the package for Android without running the tests
+(which is considerably faster), set the `run-tests` option to `false`.
 
 
 You can add this action to your Swift CI workflow from the
