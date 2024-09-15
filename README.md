@@ -84,8 +84,7 @@ To create a new release, make a new tag (like 1.0.0),
 and then update the symbolic major v1 tag with:
 
 ```
-git tag -fa v1 -m "Update v1 tag"
-git push origin v1 --force
+git tag -fa v1 -m "Update v1 tag" && git push origin v1 --force
 ```
 
 
