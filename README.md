@@ -61,6 +61,9 @@ for the [Swift Algorithms](https://github.com/skiptools/swift-algorithms) packag
   swift-build-flags:
     description: 'Additional flags to pass to the swift build command'
     default: ''
+  swift-test-flags:
+    description: 'Additional flags to pass to the swift test command'
+    default: ''
   run-tests:
     description: 'Whether to run the tests or just the build'
     default: 'true'

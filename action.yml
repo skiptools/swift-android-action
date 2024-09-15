@@ -16,6 +16,10 @@ inputs:
     description: 'Additional flags to pass to the swift build command'
     required: true
     default: ''
+  swift-test-flags:
+    description: 'Additional flags to pass to the swift test command'
+    required: true
+    default: ''
   android-emulator-options:
     description: 'Options to pass to the Android emulator'
     required: true
@@ -54,5 +58,5 @@ runs:
         emulator-boot-timeout: ${{ inputs.android-emulator-boot-timeout }}
         emulator-options: ${{ inputs.android-emulator-options }}
         arch: x86_64
-        script: skip android test --package-path ${{ inputs.package-path }} ${{ inputs.swift-build-flags }}
+        script: skip android test --package-path ${{ inputs.package-path }} ${{ inputs.swift-build-flags }} ${{ inputs.swift-test-flags }}
 
