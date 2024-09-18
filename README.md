@@ -40,7 +40,7 @@ jobs:
       - name: "Test Swift Package on Android"
         uses: skiptools/swift-android-action@v1
       - name: "Test Swift Package on iOS"
-        run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 15" -scheme "$(xcodebuild -list -json | jq -r '.workspace.schemes[-1]')"
+        run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 15" -scheme "$(xcodebuild -list -json | jq -r '.workspace.schemes[-1]')" -skipPackagePluginValidation
 
 ```
 
