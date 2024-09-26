@@ -48,7 +48,7 @@ runs:
       run: brew install skiptools/skip/swift-android-toolchain@${{ inputs.swift-version }}
       shell: bash
     - name: Build Swift package for Android
-      run: skip android build --build-tests --package-path ${{ inputs.package-path }} ${{ inputs.swift-build-flags }}
+      run: skip android build --build-tests --package-path ${{ inputs.package-path }} --swift-version ${{ inputs.swift-version }} ${{ inputs.swift-build-flags }}
       shell: bash
     - name: Run Swift tests on Android emulator
       if: ${{ inputs.run-tests == 'true' }}
@@ -58,5 +58,5 @@ runs:
         emulator-boot-timeout: ${{ inputs.android-emulator-boot-timeout }}
         emulator-options: ${{ inputs.android-emulator-options }}
         arch: x86_64
-        script: skip android test --package-path ${{ inputs.package-path }} ${{ inputs.swift-build-flags }} ${{ inputs.swift-test-flags }}
+        script: skip android test --package-path ${{ inputs.package-path }} --swift-version ${{ inputs.swift-version }} ${{ inputs.swift-build-flags }} ${{ inputs.swift-test-flags }}
 
