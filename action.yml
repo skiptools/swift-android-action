@@ -35,7 +35,7 @@ inputs:
   android-api-level:
     description: 'The API level of the Android emulator to run against'
     required: true
-    default: 24
+    default: 29
 runs:
   using: "composite"
   steps:
