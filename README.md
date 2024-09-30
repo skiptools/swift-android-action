@@ -54,7 +54,7 @@ for the [Swift Algorithms](https://github.com/skiptools/swift-algorithms) packag
 ```
   swift-version:
     description: 'The version of the Swift toolchain to use'
-    default: '5.10.1'
+    default: '6.0.1'
   package-path:
     description: 'The folder where the swift package is checked out'
     default: '.'
