@@ -7,7 +7,7 @@ inputs:
   swift-version:
     description: 'The version of the Swift toolchain to use'
     required: true
-    default: '6.0.1'
+    default: '6.0'
   package-path:
     description: 'The folder where the swift package is checked out'
     required: true
