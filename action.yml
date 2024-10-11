@@ -25,9 +25,9 @@ inputs:
     required: true
     default: '-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim'
   android-emulator-arch:
-    description: 'Architecture for the Android emulator (x86_64 or arm64-v8)'
+    description: 'Architecture for the Android emulator (x86_64 or arm64-v8a)'
     required: true
-    # TODO: if macos-13: x86_64, macos-15: arm64-v8
+    # TODO: if macos-13: x86_64, macos-15: arm64-v8a
     default: 'x86_64'
   android-emulator-boot-timeout:
     description: 'Emulator boot timeout in seconds'
