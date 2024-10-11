@@ -57,6 +57,6 @@ runs:
         api-level: ${{ inputs.android-api-level }}
         emulator-boot-timeout: ${{ inputs.android-emulator-boot-timeout }}
         emulator-options: ${{ inputs.android-emulator-options }}
-        arch: x86_64
+        #arch: x86_64
         script: skip android test --package-path ${{ inputs.package-path }} --swift-version ${{ inputs.swift-version }} ${{ inputs.swift-build-flags }} ${{ inputs.swift-test-flags }}
 
