@@ -73,6 +73,10 @@ for the [Swift Algorithms](https://github.com/skiptools/swift-algorithms) packag
   android-emulator-options:
     description: 'Options to pass to the Android emulator'
     default: '-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim'
+  android-emulator-arch:
+    description: 'Architecture for the Android emulator (x86_64 or arm64-v8)'
+    required: true
+    default: 'x86_64'
   android-emulator-boot-timeout:
     description: 'Emulator boot timeout in seconds'
     default: 600
