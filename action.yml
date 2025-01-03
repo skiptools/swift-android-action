@@ -146,13 +146,13 @@ runs:
         echo "SWIFT_SDK_HOME 1: ${SWIFT_SDK_HOME}"
 
         # extract the artifact ID from the info.plist in the SDK root
-        SWIFT_SDK_ARTIFACT_ID=$(cat ${SWIFT_SDK_HOME}/info.json | jq -r '.artifacts.[].variants[0].path')
+        SWIFT_SDK_ARTIFACT_ID=$(cat ${SWIFT_SDK_HOME}/info.json | jq -r '.artifacts[] | .variants[0].path')
         SWIFT_SDK_HOME="${SWIFT_SDK_HOME}/${SWIFT_SDK_ARTIFACT_ID}"
         echo "SWIFT_SDK_ARTIFACT_ID: ${SWIFT_SDK_ARTIFACT_ID}"
         echo "SWIFT_SDK_HOME 2: ${SWIFT_SDK_HOME}"
 
         # extract the sdkRootPath from the swift-sdk.json
-        SWIFT_SDK_ROOT_PATH=$(cat ${SWIFT_SDK_HOME}/swift-sdk.json | jq -r '.targetTriples.[].sdkRootPath' | head -n 1)
+        SWIFT_SDK_ROOT_PATH=$(cat ${SWIFT_SDK_HOME}/swift-sdk.json | jq -r '.targetTriples[] | .sdkRootPath' | head -n 1)
         SWIFT_SDK_HOME="${SWIFT_SDK_HOME}/${SWIFT_SDK_ROOT_PATH}"
         echo "SWIFT_SDK_HOME 3: ${SWIFT_SDK_HOME}"
 
@@ -168,13 +168,18 @@ runs:
         set -x
 
         mkdir android-xctest
-        cp -v .build/${SWIFT_SDK_TARGET}/debug/*.xctest android-xctest
+
+        # copy the built test binary
+        cp -va .build/${SWIFT_SDK_TARGET}/debug/*.xctest android-xctest
+
+        # copy any optional resource bundles
+        cp -vaf .build/${SWIFT_SDK_TARGET}/debug/*.resources android-xctest || true
 
         # 6.0.2 keeps libraries in per-API folders
-        cp -vf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/*/lib*.so android-xctest || true
+        cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/*/lib*.so android-xctest || true
 
         # 6.0.3 keeps libraries in the parent folder
-        cp -vf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so android-xctest || true
+        cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so android-xctest || true
 
         rm -v android-xctest/lib{c,dl,log,m,z}.so
 
