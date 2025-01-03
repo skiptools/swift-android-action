@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-24.04', 'ubuntu-22.04', 'ubuntu-20.04', 'macos-12', 'macos-13', 'macos-14-large', 'macos-15', 'macos-15-large', 'windows-2025']
+        os: ['ubuntu-24.04', 'ubuntu-22.04', 'ubuntu-20.04', 'macos-12', 'macos-13', 'macos-15']
     steps:
       - uses: actions/checkout@v4
         with:

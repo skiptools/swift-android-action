@@ -23,7 +23,7 @@ inputs:
   android-emulator-options:
     description: 'Options to pass to the Android emulator'
     required: true
-    default: '-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim'
+    default: '-no-window -gpu swiftshader_indirect -noaudio -no-boot-anim'
   android-emulator-boot-timeout:
     description: 'Emulator boot timeout in seconds'
     required: true
@@ -52,7 +52,7 @@ runs:
           echo "osidpair=macos" >> $GITHUB_OUTPUT
           echo "osid=macos" >> $GITHUB_OUTPUT
         else
-          echo "Unsupported platform: ${RUNNER_OS}"
+          echo "::error::Unsupported platform: ${RUNNER_OS}"
           exit 1
         fi
 
@@ -64,7 +64,7 @@ runs:
           echo "android-sdk-arch=aarch64" >> $GITHUB_OUTPUT
           echo "android-emulator-arch=arm64-v8a" >> $GITHUB_OUTPUT
         else
-          echo "Unsupported architecture: ${RUNNER_ARCH}"
+          echo "::error::Unsupported architecture: ${RUNNER_ARCH}"
           exit 1
         fi
 
@@ -86,7 +86,7 @@ runs:
         elif [ ${RUNNER_OS} == 'macOS' ]; then
           curl -fsSL https://download.swift.org/swift-${{ inputs.swift-version }}-release/xcode/${SWIFT_ID}/${SWIFT_ID}-osx.pkg --output swift.pkg
         else
-          echo "Unsupported platform: ${RUNNER_OS}"
+          echo "::error::Unsupported platform: ${RUNNER_OS}"
           exit 1
         fi
     - name: Install Swift Host Toolchain
@@ -171,7 +171,7 @@ runs:
         set -x
 
         if [ ${RUNNER_ARCH} == 'ARM64' ] && [ ${RUNNER_OS} == 'macOS' ]; then
-          echo "::error::Cannot run tests on ARM64 macOS due to HVF error: HV_UNSUPPORTED. See https://github.com/ReactiveCircus/android-emulator-runner/issues/350"
+          echo "::error::Cannot run tests on ARM64 macOS due to HVF error: HV_UNSUPPORTED. See https://github.com/ReactiveCircus/android-emulator-runner/issues/350#issuecomment-2030065889"
           exit 1
         fi
 
@@ -197,13 +197,34 @@ runs:
         done
 
         chmod +x ~/test-toolchain.sh
+    - name: Setup Android Emulator Cache
+      if: ${{ inputs.run-tests == 'true' }}
+      uses: actions/cache@v4
+      id: avd-cache
+      with:
+        path: |
+          ~/.android/avd/*
+          ~/.android/adb*
+        key: avd-${{ inputs.android-api-level }}
+    - name: Create Android Emulator Cache
+      if: ${{ inputs.run-tests == 'true' && steps.avd-cache.outputs.cache-hit != 'true' }}
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        force-avd-creation: false
+        api-level: ${{ inputs.android-api-level }}
+        emulator-boot-timeout: ${{ inputs.android-emulator-boot-timeout }}
+        emulator-options: ${{ inputs.android-emulator-options }}
+        arch: ${{ steps.setup.outputs.android-emulator-arch }}
+        disable-animations: false
+        script: echo "Generated Android Emulator snapshot for caching."
     - name: Run Tests on Android emulator
       if: ${{ inputs.run-tests == 'true' }}
       uses: reactivecircus/android-emulator-runner@v2
       with:
+        force-avd-creation: false
         api-level: ${{ inputs.android-api-level }}
         emulator-boot-timeout: ${{ inputs.android-emulator-boot-timeout }}
-        emulator-options: ${{ inputs.android-emulator-options }}
+        emulator-options: -no-snapshot-save ${{ inputs.android-emulator-options }}
         arch: ${{ steps.setup.outputs.android-emulator-arch }}
         script: ~/test-toolchain.sh
 
