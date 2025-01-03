@@ -49,7 +49,7 @@ runs:
       id: cache-swift
       with:
         path: ~/swift-download
-        key: "swift-${{ inputs.swift-version }}-${RUNNER_OS}}"
+        key: "swift-${{ inputs.swift-version }}-${RUNNER_OS}"
     - name: Download Swift Host Toolchain
       if: steps.cache-swift.outputs.cache-hit != 'true'
       shell: bash
