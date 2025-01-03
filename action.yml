@@ -24,11 +24,6 @@ inputs:
     description: 'Options to pass to the Android emulator'
     required: true
     default: '-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim'
-  android-emulator-arch:
-    description: 'Architecture for the Android emulator (x86_64 or arm64-v8a)'
-    required: true
-    # TODO: if macos-13: x86_64, macos-15: arm64-v8a
-    default: 'x86_64'
   android-emulator-boot-timeout:
     description: 'Emulator boot timeout in seconds'
     required: true
@@ -60,7 +55,20 @@ runs:
           echo "Unsupported platform: ${RUNNER_OS}"
           exit 1
         fi
-    - name: Cache Swift toolchain
+
+        # RUNNER_ARCH	The architecture of the runner executing the job. Possible values are X86, X64, ARM, or ARM64.
+        if [ ${RUNNER_ARCH} == 'X64' ]; then
+          echo "android-sdk-arch=x86_64" >> $GITHUB_OUTPUT
+          echo "android-emulator-arch=x86_64" >> $GITHUB_OUTPUT
+        elif [ ${RUNNER_ARCH} == 'ARM64' ]; then
+          echo "android-sdk-arch=aarch64" >> $GITHUB_OUTPUT
+          echo "android-emulator-arch=arm64-v8a" >> $GITHUB_OUTPUT
+        else
+          echo "Unsupported architecture: ${RUNNER_ARCH}"
+          exit 1
+        fi
+
+    - name: Cache Swift Host Toolchain
       uses: actions/cache@v4
       id: cache-swift
       with:
@@ -104,25 +112,60 @@ runs:
       shell: bash
       run: |
         swift --version
+    - name: Install Swift Android SDK
+      shell: bash
+      run: |
+        SWIFT_SDK_ID="swift-${{ inputs.swift-version }}-RELEASE-android-24-0.1"
+        echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
 
-    #- name: Cache Homebrew packages
-    #  uses: actions/cache@v4
-    #  with:
-    #    path: ~/Library/Caches/Homebrew
-    #    key: homebrew-packages
-    #- name: Install Toolchain
-    #  run: brew install skiptools/skip/swift-android-toolchain@${{ inputs.swift-version }}
-    #  shell: bash
-    #- name: Build Swift package for Android
-    #  run: skip android build --build-tests --arch aarch64 --arch x86_64 --package-path ${{ inputs.package-path }} --swift-version ${{ inputs.swift-version }} ${{ inputs.swift-build-flags }}
-    #  shell: bash
-    #- name: Run Swift tests on Android emulator
-    #  if: ${{ inputs.run-tests == 'true' }}
-    #  uses: reactivecircus/android-emulator-runner@v2
-    #  with:
-    #    api-level: ${{ inputs.android-api-level }}
-    #    emulator-boot-timeout: ${{ inputs.android-emulator-boot-timeout }}
-    #    emulator-options: ${{ inputs.android-emulator-options }}
-    #    arch: ${{ inputs.android-emulator-arch }}
-    #    script: skip android test --arch ${{ inputs.android-emulator-arch }} --package-path ${{ inputs.package-path }} --swift-version ${{ inputs.swift-version }} ${{ inputs.swift-build-flags }} ${{ inputs.swift-test-flags }}
+        SWIFT_SDK_TARGET="${{ steps.setup.outputs.android-sdk-arch }}-unknown-linux-android24"
+        echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
+
+        mkdir -p ${TEMP}/swift-android-toolchain
+        cd ${TEMP}/swift-android-toolchain
+        curl https://github.com/skiptools/swift-android-sdk/releases/download/${{ inputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz
+        swift sdk install ${SWIFT_SDK_ID}.artifactbundle.tar.gz
+
+        swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET}
+
+        if [ ${RUNNER_OS} == 'Linux' ]; then
+          SWIFT_SDK_ROOT=${HOME}/.config/swiftpm/swift-sdks"
+        elif [ ${RUNNER_OS} == 'macOS' ]; then
+          SWIFT_SDK_ROOT=${HOME}/.swiftpm/swift-sdks"
+        else
+          echo "Unsupported platform: ${RUNNER_OS}"
+          exit 1
+        fi
+        echo "SWIFT_SDK_HOME=${SWIFT_SDK_ROOT}/${SWIFT_SDK_ID}.artifactbundle/${SWIFT_SDK_ID}/android-27c-sysroot" >> $GITHUB_ENV
+    - name: Build Swift Package with Android SDK
+      shell: bash
+      run: |
+        SKIP_BRIDGE=1 swift build --build-tests --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -Xclang-linker -Xswiftc -fuse-ld=lld -Xswiftc -DSKIP_BRIDGE
+    - name: Prepare Android Emulator Test Script
+      if: ${{ inputs.run-tests == 'true' }}
+      run: |
+        mkdir android-xctest
+        cp -v .build/${SWIFT_SDK_TARGET}/debug/*.xctest android-xctest
+
+        cp -v ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so android-xctest
+        cp -v ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/*/lib*.so android-xctest
+
+        rm -v android-xctest/lib{c,dl,log,m,z}.so
+
+        set -x
+        echo "adb push android-xctest /data/local/tmp" > ~/test-toolchain.sh
+        for XCTEST in android-xctest/*.xctest; do
+          echo "adb shell /data/local/tmp/${XCTEST}" >> ~/test-toolchain.sh
+        done
+
+        chmod +x ~/test-toolchain.sh
+    - name: Run Tests on Android emulator
+      if: ${{ inputs.run-tests == 'true' }}
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ inputs.android-api-level }}
+        emulator-boot-timeout: ${{ inputs.android-emulator-boot-timeout }}
+        emulator-options: ${{ inputs.android-emulator-options }}
+        arch: ${{ steps.setup.outputs.android-emulator-arch }}
+        script: ~/test-toolchain.sh
 
