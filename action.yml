@@ -7,7 +7,7 @@ inputs:
   swift-version:
     description: 'The version of the Swift toolchain to use'
     required: true
-    default: '6.0'
+    default: '6.0.2'
   package-path:
     description: 'The folder where the swift package is checked out'
     required: true
@@ -44,24 +44,61 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Cache Homebrew packages
+    - name: Install swiftly
+      run: curl -L https://swiftlang.github.io/swiftly/swiftly-install.sh | bash -s -- -y
+    - name: Install Swift toolchain
+      run: swiftly install ${{ inputs.swift-version }}
+
+    - name: Cache Swift toolchain
       uses: actions/cache@v4
+      id: cache-swift
       with:
-        path: ~/Library/Caches/Homebrew
-        key: homebrew-packages
-    - name: Install Toolchain
-      run: brew install skiptools/skip/swift-android-toolchain@${{ inputs.swift-version }}
-      shell: bash
-    - name: Build Swift package for Android
-      run: skip android build --build-tests --arch aarch64 --arch x86_64 --package-path ${{ inputs.package-path }} --swift-version ${{ inputs.swift-version }} ${{ inputs.swift-build-flags }}
-      shell: bash
-    - name: Run Swift tests on Android emulator
-      if: ${{ inputs.run-tests == 'true' }}
-      uses: reactivecircus/android-emulator-runner@v2
-      with:
-        api-level: ${{ inputs.android-api-level }}
-        emulator-boot-timeout: ${{ inputs.android-emulator-boot-timeout }}
-        emulator-options: ${{ inputs.android-emulator-options }}
-        arch: ${{ inputs.android-emulator-arch }}
-        script: skip android test --arch ${{ inputs.android-emulator-arch }} --package-path ${{ inputs.package-path }} --swift-version ${{ inputs.swift-version }} ${{ inputs.swift-build-flags }} ${{ inputs.swift-test-flags }}
+        path: ~/swift-host-toolchain
+        key: "swift-${{ inputs.swift-version }}-${{ runnner.os }}"
+    - name: Download Swift Host Toolchain
+      if: steps.cache-swift.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p ~/swift-host-toolchain
+        cd ~/swift-host-toolchain
+        if [ ${{ runner.os }} == 'Linux' ] then
+          curl https://download.swift.org/swift-${{ inputs.swift-version }}-release/ubuntu2404/swift-${{ inputs.swift-version }}-RELEASE/swift-${{ inputs.swift-version }}-RELEASE-ubuntu24.04.tar.gz --output swift.tar.gz
+        elsif [ ${{ runner.os }} == 'macOS' ] then
+          curl https://download.swift.org/swift-${{ inputs.swift-version }}-release/xcode/swift-${{ inputs.swift-version }}-RELEASE/swift-${{ inputs.swift-version }}-RELEASE-osx.pkg --output swift.pkg
+        else
+          echo "Unsupported platform: ${{ runner.os }}"
+          exit 1
+        fi
+    - name: Install Swift Host Toolchain
+      run: |
+        cd ~/swift-host-toolchain
+        if [ ${{ runner.os }} == 'Linux' ] then
+        elsif [ ${{ runner.os }} == 'macOS' ] then
+          /usr/sbin/installer -pkg swift.pkg -target CurrentUserHomeDirectory
+        else
+          echo "Unsupported platform: ${{ runner.os }}"
+          exit 1
+        fi
+
+
+
+    #- name: Cache Homebrew packages
+    #  uses: actions/cache@v4
+    #  with:
+    #    path: ~/Library/Caches/Homebrew
+    #    key: homebrew-packages
+    #- name: Install Toolchain
+    #  run: brew install skiptools/skip/swift-android-toolchain@${{ inputs.swift-version }}
+    #  shell: bash
+    #- name: Build Swift package for Android
+    #  run: skip android build --build-tests --arch aarch64 --arch x86_64 --package-path ${{ inputs.package-path }} --swift-version ${{ inputs.swift-version }} ${{ inputs.swift-build-flags }}
+    #  shell: bash
+    #- name: Run Swift tests on Android emulator
+    #  if: ${{ inputs.run-tests == 'true' }}
+    #  uses: reactivecircus/android-emulator-runner@v2
+    #  with:
+    #    api-level: ${{ inputs.android-api-level }}
+    #    emulator-boot-timeout: ${{ inputs.android-emulator-boot-timeout }}
+    #    emulator-options: ${{ inputs.android-emulator-options }}
+    #    arch: ${{ inputs.android-emulator-arch }}
+    #    script: skip android test --arch ${{ inputs.android-emulator-arch }} --package-path ${{ inputs.package-path }} --swift-version ${{ inputs.swift-version }} ${{ inputs.swift-build-flags }} ${{ inputs.swift-test-flags }}
 
