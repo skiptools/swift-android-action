@@ -1,0 +1,21 @@
+name: swift-android-action ci
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: skiptools/swift-sqlite
+      - uses: marcprux/swift-android-action@main
+  macos:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: skiptools/swift-sqlite
+      - uses: marcprux/swift-android-action@main
+
