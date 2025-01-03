@@ -49,7 +49,7 @@ runs:
       id: cache-swift
       with:
         path: ~/swift-download
-        key: "swift-${{ inputs.swift-version }}-${RUNNER_OS}"
+        key: "swift-${{ inputs.swift-version }}-${{ runner.os }}"
     - name: Download Swift Host Toolchain
       if: steps.cache-swift.outputs.cache-hit != 'true'
       shell: bash
@@ -58,9 +58,9 @@ runs:
         mkdir -p ~/swift-download
         cd ~/swift-download
         if [ ${RUNNER_OS} == 'Linux' ]; then
-          curl https://download.swift.org/swift-${{ inputs.swift-version }}-release/ubuntu2404/${SWIFT_ID}/${SWIFT_ID}-ubuntu24.04.tar.gz --output swift.tar.gz
+          curl -fsSL https://download.swift.org/swift-${{ inputs.swift-version }}-release/ubuntu2404/${SWIFT_ID}/${SWIFT_ID}-ubuntu24.04.tar.gz --output swift.tar.gz
         elif [ ${RUNNER_OS} == 'macOS' ]; then
-          curl https://download.swift.org/swift-${{ inputs.swift-version }}-release/xcode/${SWIFT_ID}/${SWIFT_ID}-osx.pkg --output swift.pkg
+          curl -fsSL https://download.swift.org/swift-${{ inputs.swift-version }}-release/xcode/${SWIFT_ID}/${SWIFT_ID}-osx.pkg --output swift.pkg
         else
           echo "Unsupported platform: ${RUNNER_OS}"
           exit 1
@@ -74,7 +74,6 @@ runs:
           mkdir -p ${HOME}/swift/$SWIFT_ID
           tar -xzf swift.tar.gz -C ~/swift/$SWIFT_ID --strip 1
           echo "SWIFT_INSTALLATION=$HOME/swift/$SWIFT_ID/usr" >> $GITHUB_ENV
-          echo "$HOME/swift/$SWIFT_ID/usr/bin" >> $GITHUB_PATH
         elif [ ${RUNNER_OS} == 'macOS' ]; then
           /usr/sbin/installer -pkg swift.pkg -target CurrentUserHomeDirectory
           echo "SWIFT_INSTALLATION=${HOME}/Library/Developer/Toolchains/${SWIFT_ID}.xctoolchain/usr" >> $GITHUB_ENV
@@ -83,9 +82,11 @@ runs:
           echo "Unsupported platform: ${RUNNER_OS}"
           exit 1
         fi
+        echo "$SWIFT_INSTALLATION/bin" >> $GITHUB_PATH
+    - name: Check Swift Version
+      shell: bash
+      run: |
         swift --version
-
-
 
     #- name: Cache Homebrew packages
     #  uses: actions/cache@v4
