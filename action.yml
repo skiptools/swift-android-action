@@ -103,7 +103,7 @@ runs:
           SWIFT_INSTALLATION=${HOME}/Library/Developer/Toolchains/${SWIFT_ID}.xctoolchain/usr
           echo "TOOLCHAINS=$(plutil -extract CFBundleIdentifier raw ${SWIFT_INSTALLATION}/Info.plist)" >> $GITHUB_ENV
         else
-          echo "Unsupported platform: ${RUNNER_OS}"
+          echo "::error::Unsupported platform: ${RUNNER_OS}"
           exit 1
         fi
         echo "SWIFT_INSTALLATION=${SWIFT_INSTALLATION}" >> $GITHUB_ENV
@@ -116,14 +116,17 @@ runs:
       shell: bash
       run: |
         set +x
-        SWIFT_SDK_ID="swift-${{ inputs.swift-version }}-RELEASE-android-24-0.1"
+        SWIFT_SDK_ANROID_API="24"
+        echo "SWIFT_SDK_ANROID_API=${SWIFT_SDK_ANROID_API}" >> $GITHUB_ENV
+
+        SWIFT_SDK_ID="swift-${{ inputs.swift-version }}-RELEASE-android-${SWIFT_SDK_ANROID_API}-0.1"
         echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
 
         # variant that identifies the SDK
-        SWIFT_SDK_ID_SHORT="swift-${{ inputs.swift-version }}-release-android-24-sdk"
+        SWIFT_SDK_ID_SHORT="swift-${{ inputs.swift-version }}-release-android-${SWIFT_SDK_ANROID_API}-sdk"
         echo "SWIFT_SDK_ID_SHORT=${SWIFT_SDK_ID_SHORT}" >> $GITHUB_ENV
 
-        SWIFT_SDK_TARGET="${{ steps.setup.outputs.android-sdk-arch }}-unknown-linux-android24"
+        SWIFT_SDK_TARGET="${{ steps.setup.outputs.android-sdk-arch }}-unknown-linux-android${SWIFT_SDK_ANROID_API}"
         echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
 
         mkdir -p ${RUNNER_TEMP}/swift-android-toolchain
@@ -138,7 +141,7 @@ runs:
         elif [ ${RUNNER_OS} == 'macOS' ]; then
           SWIFT_SDK_ROOT="${HOME}/.swiftpm/swift-sdks"
         else
-          echo "Unsupported platform for SDK: ${RUNNER_OS}"
+          echo "::error::Unsupported platform for SDK: ${RUNNER_OS}"
           exit 1
         fi
 
@@ -167,6 +170,11 @@ runs:
       run: |
         set -x
 
+        if [ ${RUNNER_ARCH} == 'ARM64' ] && [ ${RUNNER_OS} == 'macOS' ]; then
+          echo "::error::Cannot run tests on ARM64 macOS due to HVF error: HV_UNSUPPORTED. See https://github.com/ReactiveCircus/android-emulator-runner/issues/350"
+          exit 1
+        fi
+
         mkdir android-xctest
 
         # copy the built test binary
@@ -176,7 +184,7 @@ runs:
         cp -vaf .build/${SWIFT_SDK_TARGET}/debug/*.resources android-xctest || true
 
         # 6.0.2 keeps libraries in per-API folders
-        cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/*/lib*.so android-xctest || true
+        cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/${SWIFT_SDK_ANROID_API}/lib*.so android-xctest || true
 
         # 6.0.3 keeps libraries in the parent folder
         cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so android-xctest || true
