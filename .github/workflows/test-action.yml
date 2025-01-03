@@ -4,8 +4,8 @@ on:
   push:
     branches: [ main ]
 jobs:
-  linux:
-    runs-on: ubuntu-latest
+  ubuntu:
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
