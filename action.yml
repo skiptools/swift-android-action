@@ -115,8 +115,13 @@ runs:
     - name: Install Swift Android SDK
       shell: bash
       run: |
+        set +x
         SWIFT_SDK_ID="swift-${{ inputs.swift-version }}-RELEASE-android-24-0.1"
         echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
+
+        # variant that identifies the SDK
+        SWIFT_SDK_ID_SHORT="swift-${{ inputs.swift-version }}-release-android-24-sdk"
+        echo "SWIFT_SDK_ID_SHORT=${SWIFT_SDK_ID_SHORT}" >> $GITHUB_ENV
 
         SWIFT_SDK_TARGET="${{ steps.setup.outputs.android-sdk-arch }}-unknown-linux-android24"
         echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
@@ -136,7 +141,18 @@ runs:
           echo "Unsupported platform for SDK: ${RUNNER_OS}"
           exit 1
         fi
-        echo "SWIFT_SDK_HOME=${SWIFT_SDK_ROOT}/${SWIFT_SDK_ID}.artifactbundle/${SWIFT_SDK_ID}/android-27c-sysroot" >> $GITHUB_ENV
+
+        SWIFT_SDK_HOME="${SWIFT_SDK_ROOT}/${SWIFT_SDK_ID}.artifactbundle"
+
+        # extract the artifact ID from the info.plist in the SDK root
+        SWIFT_SDK_ARTIFACT_ID=$(cat ${SWIFT_SDK_HOME}/info.json | jq -r '.artifacts | keys[0]')
+        SWIFT_SDK_HOME="${SWIFT_SDK_HOME}/${SWIFT_SDK_ARTIFACT_ID}"
+
+        # extract the sdkRootPath from the swift-sdk.json
+        SWIFT_SDK_ROOT_PATH=$(cat ${SWIFT_SDK_HOME}/swift-sdk.json | jq -r '.targetTriples.[].sdkRootPath' | head -n 1)
+        SWIFT_SDK_HOME="${SWIFT_SDK_HOME}/${SWIFT_SDK_ROOT_PATH}"
+
+        echo "SWIFT_SDK_HOME=${SWIFT_SDK_HOME}" >> $GITHUB_ENV
     - name: Build Swift Package with Android SDK
       shell: bash
       run: |
@@ -145,6 +161,8 @@ runs:
       if: ${{ inputs.run-tests == 'true' }}
       shell: bash
       run: |
+        set -x
+
         mkdir android-xctest
         cp -v .build/${SWIFT_SDK_TARGET}/debug/*.xctest android-xctest
 
@@ -156,7 +174,6 @@ runs:
 
         rm -v android-xctest/lib{c,dl,log,m,z}.so
 
-        set -x
         echo "adb push android-xctest /data/local/tmp" > ~/test-toolchain.sh
         for XCTEST in android-xctest/*.xctest; do
           echo "adb shell /data/local/tmp/${XCTEST}" >> ~/test-toolchain.sh
