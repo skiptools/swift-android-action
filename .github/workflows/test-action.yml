@@ -9,10 +9,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-24.04', 'ubuntu-22.04', 'ubuntu-20.04', 'macos-12', 'macos-13', 'macos-15']
+        os: ['ubuntu-24.04', 'ubuntu-22.04', 'ubuntu-20.04', 'macos-13', 'macos-15']
     steps:
       - uses: actions/checkout@v4
         with:
           repository: skiptools/swift-sqlite
       - uses: marcprux/swift-android-action@main
+        with:
+          # cannot run tests on macOS ARM
+          run-tests: ${{ matrix.os != 'macos-15' }}
 

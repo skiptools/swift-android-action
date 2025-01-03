@@ -226,5 +226,6 @@ runs:
         emulator-boot-timeout: ${{ inputs.android-emulator-boot-timeout }}
         emulator-options: -no-snapshot-save ${{ inputs.android-emulator-options }}
         arch: ${{ steps.setup.outputs.android-emulator-arch }}
+        disable-animations: true
         script: ~/test-toolchain.sh
 
