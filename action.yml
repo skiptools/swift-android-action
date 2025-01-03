@@ -121,8 +121,8 @@ runs:
         SWIFT_SDK_TARGET="${{ steps.setup.outputs.android-sdk-arch }}-unknown-linux-android24"
         echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
 
-        mkdir -p ${TEMP}/swift-android-toolchain
-        cd ${TEMP}/swift-android-toolchain
+        mkdir -p ${TMPDIR}/swift-android-toolchain
+        cd ${TMPDIR}/swift-android-toolchain
         curl https://github.com/skiptools/swift-android-sdk/releases/download/${{ inputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz
         swift sdk install ${SWIFT_SDK_ID}.artifactbundle.tar.gz
 
