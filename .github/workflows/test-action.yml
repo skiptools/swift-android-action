@@ -4,15 +4,11 @@ on:
   push:
     branches: [ main ]
 jobs:
-  ubuntu:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          repository: skiptools/swift-sqlite
-      - uses: marcprux/swift-android-action@main
-  macos:
-    runs-on: macos-13
+  demo:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ['ubuntu-24.04', 'ubuntu-22.04', 'macos-13']
     steps:
       - uses: actions/checkout@v4
         with:
