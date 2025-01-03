@@ -146,7 +146,7 @@ runs:
         echo "SWIFT_SDK_HOME 1: ${SWIFT_SDK_HOME}"
 
         # extract the artifact ID from the info.plist in the SDK root
-        SWIFT_SDK_ARTIFACT_ID=$(cat ${SWIFT_SDK_HOME}/info.json | jq -r '.artifacts | keys[0]')
+        SWIFT_SDK_ARTIFACT_ID=$(cat ${SWIFT_SDK_HOME}/info.json | jq -r '.artifacts.[].variants[0].path')
         SWIFT_SDK_HOME="${SWIFT_SDK_HOME}/${SWIFT_SDK_ARTIFACT_ID}"
         echo "SWIFT_SDK_ARTIFACT_ID: ${SWIFT_SDK_ARTIFACT_ID}"
         echo "SWIFT_SDK_HOME 2: ${SWIFT_SDK_HOME}"
