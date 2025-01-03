@@ -129,11 +129,11 @@ runs:
         swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET}
 
         if [ ${RUNNER_OS} == 'Linux' ]; then
-          SWIFT_SDK_ROOT=${HOME}/.config/swiftpm/swift-sdks"
+          SWIFT_SDK_ROOT="${HOME}/.config/swiftpm/swift-sdks"
         elif [ ${RUNNER_OS} == 'macOS' ]; then
-          SWIFT_SDK_ROOT=${HOME}/.swiftpm/swift-sdks"
+          SWIFT_SDK_ROOT="${HOME}/.swiftpm/swift-sdks"
         else
-          echo "Unsupported platform: ${RUNNER_OS}"
+          echo "Unsupported platform for SDK: ${RUNNER_OS}"
           exit 1
         fi
         echo "SWIFT_SDK_HOME=${SWIFT_SDK_ROOT}/${SWIFT_SDK_ID}.artifactbundle/${SWIFT_SDK_ID}/android-27c-sysroot" >> $GITHUB_ENV
@@ -149,10 +149,10 @@ runs:
         cp -v .build/${SWIFT_SDK_TARGET}/debug/*.xctest android-xctest
 
         # 6.0.2 keeps libraries in per-API folders
-        cp -vf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/*/lib*.so android-xctest
+        cp -vf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/*/lib*.so android-xctest || true
 
         # 6.0.3 keeps libraries in the parent folder
-        cp -vf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so android-xctest
+        cp -vf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so android-xctest || true
 
         rm -v android-xctest/lib{c,dl,log,m,z}.so
 
