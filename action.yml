@@ -148,8 +148,11 @@ runs:
         mkdir android-xctest
         cp -v .build/${SWIFT_SDK_TARGET}/debug/*.xctest android-xctest
 
-        cp -v ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so android-xctest
-        cp -v ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/*/lib*.so android-xctest
+        # 6.0.2 keeps libraries in per-API folders
+        cp -vf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/*/lib*.so android-xctest
+
+        # 6.0.3 keeps libraries in the parent folder
+        cp -vf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so android-xctest
 
         rm -v android-xctest/lib{c,dl,log,m,z}.so
 
