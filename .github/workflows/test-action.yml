@@ -16,7 +16,8 @@ jobs:
         with:
           repository: apple/swift-algorithms
           path: apple/swift-algorithms
-      - uses: marcprux/swift-android-action@main
+      - name: Test apple/swift-algorithms
+        uses: marcprux/swift-android-action@main
         with:
           package-path: apple/swift-algorithms
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
@@ -30,17 +31,16 @@ jobs:
         uses: marcprux/swift-android-action@main
         with:
           package-path: apple/swift-crypto
-          run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
+          run-tests: false # needs patches and custom resource copying
 
       - name: Checkout apple/swift-nio
-        # error: value of optional type 'UnsafeMutablePointer<CInterop.PlatformChar>?' (aka 'Optional<UnsafeMutablePointer<Int8>>') must be unwrapped to a value of type 'UnsafeMutablePointer<CInterop.PlatformChar>' (aka 'UnsafeMutablePointer<Int8>')
-        if: false
         uses: actions/checkout@v4
         with:
           repository: apple/swift-nio
           path: apple/swift-nio
       - name: Test apple/swift-nio
         uses: marcprux/swift-android-action@main
+        # error: value of optional type 'UnsafeMutablePointer<CInterop.PlatformChar>?' (aka 'Optional<UnsafeMutablePointer<Int8>>') must be unwrapped to a value of type 'UnsafeMutablePointer<CInterop.PlatformChar>' (aka 'UnsafeMutablePointer<Int8>')
         if: false
         with:
           package-path: apple/swift-nio
