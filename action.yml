@@ -233,5 +233,5 @@ runs:
         arch: ${{ steps.setup.outputs.android-emulator-arch }}
         disable-animations: true
         working-directory: ${{ inputs.package-path }}
-        script: run-android-tests.sh
+        script: ${{ inputs.package-path }}/.build/run-android-tests.sh
 
