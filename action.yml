@@ -7,7 +7,6 @@ inputs:
   swift-version:
     description: 'The version of the Swift toolchain to use'
     required: true
-    default: '6.0.2'
   package-path:
     description: 'The folder where the swift package is checked out'
     required: true
@@ -68,23 +67,30 @@ runs:
           exit 1
         fi
 
-    - name: Cache Swift Host Toolchain
+        # translate swift-version "latest" into our known latest version
+        if [ ${{ inputs.swift-version }} == 'latest' ]; then
+          echo "swift-version=6.0.2" >> $GITHUB_OUTPUT
+        else
+          echo "swift-version=${{ inputs.swift-version }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Cache Swift ${{ steps.setup.outputs.swift-version }} Host Toolchain
       uses: actions/cache@v4
       id: cache-swift
       with:
         path: ~/swift-download
-        key: "swift-${{ inputs.swift-version }}-${{ steps.setup.outputs.osid }}"
+        key: "swift-${{ steps.setup.outputs.swift-version }}-${{ steps.setup.outputs.osid }}"
     - name: Download Swift Host Toolchain
       if: steps.cache-swift.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        SWIFT_ID="swift-${{ inputs.swift-version }}-RELEASE"
+        SWIFT_ID="swift-${{ steps.setup.outputs.swift-version }}-RELEASE"
         mkdir -p ~/swift-download
         cd ~/swift-download
         if [ ${RUNNER_OS} == 'Linux' ]; then
-          curl -fsSL https://download.swift.org/swift-${{ inputs.swift-version }}-release/${{ steps.setup.outputs.osid }}/${SWIFT_ID}/${SWIFT_ID}-${{ steps.setup.outputs.osidpair }}.tar.gz --output swift.tar.gz
+          curl -fsSL https://download.swift.org/swift-${{ steps.setup.outputs.swift-version }}-release/${{ steps.setup.outputs.osid }}/${SWIFT_ID}/${SWIFT_ID}-${{ steps.setup.outputs.osidpair }}.tar.gz --output swift.tar.gz
         elif [ ${RUNNER_OS} == 'macOS' ]; then
-          curl -fsSL https://download.swift.org/swift-${{ inputs.swift-version }}-release/xcode/${SWIFT_ID}/${SWIFT_ID}-osx.pkg --output swift.pkg
+          curl -fsSL https://download.swift.org/swift-${{ steps.setup.outputs.swift-version }}-release/xcode/${SWIFT_ID}/${SWIFT_ID}-osx.pkg --output swift.pkg
         else
           echo "::error::Unsupported platform: ${RUNNER_OS}"
           exit 1
@@ -93,7 +99,7 @@ runs:
       shell: bash
       run: |
         cd ~/swift-download
-        SWIFT_ID="swift-${{ inputs.swift-version }}-RELEASE"
+        SWIFT_ID="swift-${{ steps.setup.outputs.swift-version }}-RELEASE"
         if [ ${RUNNER_OS} == 'Linux' ]; then
           mkdir -p ${HOME}/swift/$SWIFT_ID
           tar -xzf swift.tar.gz -C ~/swift/$SWIFT_ID --strip 1
@@ -119,11 +125,11 @@ runs:
         SWIFT_SDK_ANROID_API="24"
         echo "SWIFT_SDK_ANROID_API=${SWIFT_SDK_ANROID_API}" >> $GITHUB_ENV
 
-        SWIFT_SDK_ID="swift-${{ inputs.swift-version }}-RELEASE-android-${SWIFT_SDK_ANROID_API}-0.1"
+        SWIFT_SDK_ID="swift-${{ steps.setup.outputs.swift-version }}-RELEASE-android-${SWIFT_SDK_ANROID_API}-0.1"
         echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
 
         # variant that identifies the SDK
-        SWIFT_SDK_ID_SHORT="swift-${{ inputs.swift-version }}-release-android-${SWIFT_SDK_ANROID_API}-sdk"
+        SWIFT_SDK_ID_SHORT="swift-${{ steps.setup.outputs.swift-version }}-release-android-${SWIFT_SDK_ANROID_API}-sdk"
         echo "SWIFT_SDK_ID_SHORT=${SWIFT_SDK_ID_SHORT}" >> $GITHUB_ENV
 
         SWIFT_SDK_TARGET="${{ steps.setup.outputs.android-sdk-arch }}-unknown-linux-android${SWIFT_SDK_ANROID_API}"
@@ -131,7 +137,7 @@ runs:
 
         mkdir -p ${RUNNER_TEMP}/swift-android-toolchain
         cd ${RUNNER_TEMP}/swift-android-toolchain
-        curl -fsSL https://github.com/skiptools/swift-android-toolchain/releases/download/${{ inputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz --output ${SWIFT_SDK_ID}.artifactbundle.tar.gz
+        curl -fsSL https://github.com/skiptools/swift-android-toolchain/releases/download/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz --output ${SWIFT_SDK_ID}.artifactbundle.tar.gz
 
         # first check if it already installed (we may be running this workflow multiple times for an action, in which case it will already be present)
         swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET} || swift sdk install ${SWIFT_SDK_ID}.artifactbundle.tar.gz
