@@ -92,7 +92,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: "Test Swift Package on macOS"
         run: swift test
-      - name: "Test Swift Package on Android"
+      - name: "Build Swift Package on Android"
         uses: skiptools/swift-android-action@v2
         with:
           run-tests: false
