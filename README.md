@@ -128,9 +128,7 @@ jobs:
 ```
 
 For an example of this workflow in action, see a run history
-for the [Swift Algorithms](https://github.com/skiptools/swift-algorithms) package at:
-[https://github.com/skiptools/swift-algorithms/actions](https://github.com/skiptools/swift-algorithms/actions)
-
+for the [swift-sqlite](https://github.com/skiptools/swift-sqlite/actions) package.
 
 ## Development
 
