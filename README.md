@@ -1,6 +1,6 @@
 # Swift Android native cross-compiler and test runner action
 
-GitHub action to build and run Swift package tests on an Android emulator.
+This GitHub action will build and run Swift package tests on an Android emulator.
 This uses the [swift-android-toolchain](https://github.com/skiptools/swift-android-toolchain)
 project to provide a cross-compiler for building
 Swift natively for Android on a Linux or macOS host.
@@ -80,7 +80,7 @@ jobs:
 
 ### Platform Support
 
-This action can be run on any of the GitHub `ubuntu-*` and `macos-*` [runner images](https://github.com/actions/runner-images). However, due to the inability of macOS on ARM to run nested virtualization ([issue](https://github.com/ReactiveCircus/android-emulator-runner/issues/350)), the Android emulator cannot be run on these platforms, and so running on any macOS image that uses ARM (including `macos-14` and `macos-15`) requires disabling tests with `run-tests: false`. Running tests are supported on `macos-13`, as well as the (paid) large Intel images like `macos-14-large` and `macos-15-large`.
+This action can be run on any of the GitHub `ubuntu-*` and `macos-*` [runner images](https://github.com/actions/runner-images). However, due to the inability of macOS on ARM to run nested virtualization ([issue](https://github.com/ReactiveCircus/android-emulator-runner/issues/350)), the Android emulator cannot be run on these platforms, and so running on any macOS image that uses ARM (including `macos-14` and `macos-15`) requires disabling tests with `run-tests: false`. Running tests are supported on `macos-13`, as well as the large Intel macOS images like `macos-14-large` and `macos-15-large`.
 
 ## Complete Universal CI Example
 
