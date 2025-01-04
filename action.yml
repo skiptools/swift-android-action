@@ -132,7 +132,9 @@ runs:
         mkdir -p ${RUNNER_TEMP}/swift-android-toolchain
         cd ${RUNNER_TEMP}/swift-android-toolchain
         curl -fsSL https://github.com/skiptools/swift-android-toolchain/releases/download/${{ inputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz --output ${SWIFT_SDK_ID}.artifactbundle.tar.gz
-        swift sdk install ${SWIFT_SDK_ID}.artifactbundle.tar.gz
+
+        # first check if it already installed (we may be running this workflow multiple times for an action, in which case it will already be present)
+        swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET} || swift sdk install ${SWIFT_SDK_ID}.artifactbundle.tar.gz
 
         swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET}
 
@@ -193,12 +195,12 @@ runs:
 
         rm -v android-xctest/lib{c,dl,log,m,z}.so
 
-        echo "adb push android-xctest /data/local/tmp" > ~/test-toolchain.sh
+        echo "adb push android-xctest /data/local/tmp" > .build/run-android-tests.sh
         for XCTEST in android-xctest/*.xctest; do
-          echo "adb shell /data/local/tmp/${XCTEST}" >> ~/test-toolchain.sh
+          echo "adb shell /data/local/tmp/${XCTEST}" >> .build/run-android-tests.sh
         done
 
-        chmod +x ~/test-toolchain.sh
+        chmod +x .build/run-android-tests.sh
     - name: Setup Android Emulator Cache
       if: ${{ inputs.run-tests == 'true' }}
       uses: actions/cache@v4
@@ -218,6 +220,7 @@ runs:
         emulator-options: ${{ inputs.android-emulator-options }}
         arch: ${{ steps.setup.outputs.android-emulator-arch }}
         disable-animations: false
+        working-directory: ${{ inputs.package-path }}
         script: echo "Generated Android Emulator snapshot for caching."
     - name: Run Tests on Android emulator
       if: ${{ inputs.run-tests == 'true' }}
@@ -229,5 +232,6 @@ runs:
         emulator-options: -no-snapshot-save ${{ inputs.android-emulator-options }}
         arch: ${{ steps.setup.outputs.android-emulator-arch }}
         disable-animations: true
-        script: ~/test-toolchain.sh
+        working-directory: ${{ inputs.package-path }}
+        script: .build/run-android-tests.sh
 
