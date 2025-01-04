@@ -215,7 +215,7 @@ runs:
 
         rm -v android-xctest/lib{c,dl,log,m,z}.so
 
-        if [ "${{ inputs.copy-files == 'true' }}" != '' ]; then
+        if [ "${{ inputs.copy-files }}" != '' ]; then
           cp -vaf ${{ inputs.copy-files }} android-xctest
         fi
 
