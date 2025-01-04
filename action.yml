@@ -170,7 +170,7 @@ runs:
     - name: Prepare Android Emulator Test Script
       if: ${{ inputs.run-tests == 'true' }}
       shell: bash
-      working-directory: ${{ inputs.package-path }}
+      working-directory: ${{ inputs.package-path }}/.build
       run: |
         set -x
 
@@ -182,10 +182,10 @@ runs:
         mkdir android-xctest
 
         # copy the built test binary
-        cp -va .build/${SWIFT_SDK_TARGET}/debug/*.xctest android-xctest
+        cp -va ${SWIFT_SDK_TARGET}/debug/*.xctest android-xctest
 
         # copy any optional resource bundles
-        cp -vaf .build/${SWIFT_SDK_TARGET}/debug/*.resources android-xctest || true
+        cp -vaf ${SWIFT_SDK_TARGET}/debug/*.resources android-xctest || true
 
         # 6.0.2 keeps libraries in per-API folders
         cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/${SWIFT_SDK_ANROID_API}/lib*.so android-xctest || true
@@ -195,12 +195,12 @@ runs:
 
         rm -v android-xctest/lib{c,dl,log,m,z}.so
 
-        echo "adb push android-xctest /data/local/tmp" > .build/run-android-tests.sh
+        echo "adb push android-xctest /data/local/tmp" > run-android-tests.sh
         for XCTEST in android-xctest/*.xctest; do
-          echo "adb shell /data/local/tmp/${XCTEST}" >> .build/run-android-tests.sh
+          echo "adb shell /data/local/tmp/${XCTEST}" >> run-android-tests.sh
         done
 
-        chmod +x .build/run-android-tests.sh
+        chmod +x run-android-tests.sh
     - name: Setup Android Emulator Cache
       if: ${{ inputs.run-tests == 'true' }}
       uses: actions/cache@v4
@@ -220,7 +220,7 @@ runs:
         emulator-options: ${{ inputs.android-emulator-options }}
         arch: ${{ steps.setup.outputs.android-emulator-arch }}
         disable-animations: false
-        working-directory: ${{ inputs.package-path }}
+        working-directory: ${{ inputs.package-path }}/.build
         script: echo "Generated Android Emulator snapshot for caching."
     - name: Run Tests on Android emulator
       if: ${{ inputs.run-tests == 'true' }}
@@ -233,5 +233,5 @@ runs:
         arch: ${{ steps.setup.outputs.android-emulator-arch }}
         disable-animations: true
         working-directory: ${{ inputs.package-path }}
-        script: .build/run-android-tests.sh
+        script: run-android-tests.sh
 
