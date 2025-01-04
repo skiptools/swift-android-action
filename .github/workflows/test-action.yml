@@ -13,9 +13,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: skiptools/swift-sqlite
+          repository: apple/swift-algorithms
+          path: apple/swift-algorithms
       - uses: marcprux/swift-android-action@main
         with:
-          # cannot run tests on macOS ARM
-          run-tests: ${{ matrix.os != 'macos-15' }}
+          package-path: apple/swift-algorithms
+          run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
+      - uses: actions/checkout@v4
+        with:
+          repository: skiptools/swift-sqlite
+          path: skiptools/swift-sqlite
+      - uses: marcprux/swift-android-action@main
+        with:
+          package-path: skiptools/swift-sqlite
+          run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
 

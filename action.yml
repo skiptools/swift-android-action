@@ -162,11 +162,13 @@ runs:
         echo "SWIFT_SDK_HOME=${SWIFT_SDK_HOME}" >> $GITHUB_ENV
     - name: Build Swift Package with Android SDK
       shell: bash
+      working-directory: ${{ inputs.package-path }}
       run: |
         SKIP_BRIDGE=1 swift build --build-tests --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -Xclang-linker -Xswiftc -fuse-ld=lld -Xswiftc -DSKIP_BRIDGE
     - name: Prepare Android Emulator Test Script
       if: ${{ inputs.run-tests == 'true' }}
       shell: bash
+      working-directory: ${{ inputs.package-path }}
       run: |
         set -x
 
