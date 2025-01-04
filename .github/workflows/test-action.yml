@@ -11,7 +11,8 @@ jobs:
       matrix:
         os: ['ubuntu-24.04', 'ubuntu-22.04', 'ubuntu-20.04', 'macos-13', 'macos-15']
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout apple/swift-algorithms
+        uses: actions/checkout@v4
         with:
           repository: apple/swift-algorithms
           path: apple/swift-algorithms
@@ -20,7 +21,8 @@ jobs:
           package-path: apple/swift-algorithms
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
 
-      - uses: actions/checkout@v4
+      - name: Checkout apple/swift-crypto
+        uses: actions/checkout@v4
         with:
           repository: apple/swift-crypto
           path: apple/swift-crypto
@@ -29,16 +31,21 @@ jobs:
           package-path: apple/swift-crypto
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
 
-      - uses: actions/checkout@v4
+      - name: Checkout apple/swift-nio
+        # error: value of optional type 'UnsafeMutablePointer<CInterop.PlatformChar>?' (aka 'Optional<UnsafeMutablePointer<Int8>>') must be unwrapped to a value of type 'UnsafeMutablePointer<CInterop.PlatformChar>' (aka 'UnsafeMutablePointer<Int8>')
+        if: false
+        uses: actions/checkout@v4
         with:
           repository: apple/swift-nio
           path: apple/swift-nio
       - uses: marcprux/swift-android-action@main
+        if: false
         with:
           package-path: apple/swift-nio
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
 
-      - uses: actions/checkout@v4
+      - name: Checkout apple/swift-system
+        uses: actions/checkout@v4
         with:
           repository: apple/swift-system
           path: apple/swift-system
@@ -47,7 +54,8 @@ jobs:
           package-path: apple/swift-system
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
 
-      - uses: actions/checkout@v4
+      - name: Checkout apple/swift-collections
+        uses: actions/checkout@v4
         with:
           repository: apple/swift-collections
           path: apple/swift-collections
@@ -56,7 +64,8 @@ jobs:
           package-path: apple/swift-collections
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
 
-      - uses: actions/checkout@v4
+      - name: Checkout apple/swift-atomics
+        uses: actions/checkout@v4
         with:
           repository: apple/swift-atomics
           path: apple/swift-atomics
@@ -65,7 +74,22 @@ jobs:
           package-path: apple/swift-atomics
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
 
-      - uses: actions/checkout@v4
+      - name: Checkout jpsim/Yams
+        uses: actions/checkout@v4
+        with:
+          repository: jpsim/Yams
+          path: jpsim/Yams
+      - name: Patch jpsim/Yams
+        shell: bash
+        working-directory: jpsim/Yams
+        run: perl -pi -e 's% fixturesDirectory + \"/SourceKitten#289% \"/data/local/tmp/pack%' Tests/YamsTests/PerformanceTests.swift
+      - uses: marcprux/swift-android-action@main
+        with:
+          package-path: jpsim/Yams
+          run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
+
+      - name: Checkout skiptools/swift-sqlite
+        uses: actions/checkout@v4
         with:
           repository: skiptools/swift-sqlite
           path: skiptools/swift-sqlite
