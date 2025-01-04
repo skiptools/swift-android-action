@@ -67,15 +67,15 @@ jobs:
 
 | Parameter | Default | Description  |
 |-----|-----|-----|
-| swift-version | 6.0.2 | The version of the Swift toolchain to use |
-| package-path | . | 'The folder where the swift package is checked out' |
-| swift-build-flags | '' | Additional flags to pass to the swift build command' |
-| swift-test-flags | '' | 'Additional flags to pass to the swift test command' |
-| build-tests | true | 'Whether to build the package tests or just the sources' |
-| run-tests | true | 'Whether to run the tests or just perform the build' |
-| android-api-level | 29 | 'The API level of the Android emulator to run against' |
-| android-emulator-options | '-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim' | 'Options to pass to the Android emulator' |
-| android-emulator-boot-timeout | 600 | 'Emulator boot timeout in seconds' |
+| swift-version | The version of the Swift toolchain to use | 6.0.2 |
+| package-path | 'The folder where the swift package is checked out' | . |
+| swift-build-flags | Additional flags to pass to the swift build command' | '' |
+| swift-test-flags | 'Additional flags to pass to the swift test command' | '' |
+| build-tests | 'Whether to build the package tests or just the sources' | true |
+| run-tests | 'Whether to run the tests or just perform the build' | true |
+| android-api-level | 'The API level of the Android emulator to run against' | 29 |
+| android-emulator-options | 'Options to pass to the Android emulator' | '-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim' |
+| android-emulator-boot-timeout | 'Emulator boot timeout in seconds' | 600 |
 
 ## Complete Universal CI Example
 
