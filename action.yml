@@ -7,7 +7,7 @@ inputs:
   swift-version:
     description: 'The version of the Swift toolchain to use'
     required: true
-    default: '6.0'
+    default: 'latest'
   package-path:
     description: 'The folder where the swift package is checked out'
     required: true
@@ -23,18 +23,21 @@ inputs:
   android-emulator-options:
     description: 'Options to pass to the Android emulator'
     required: true
-    default: '-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim'
-  android-emulator-arch:
-    description: 'Architecture for the Android emulator (x86_64 or arm64-v8a)'
-    required: true
-    # TODO: if macos-13: x86_64, macos-15: arm64-v8a
-    default: 'x86_64'
+    default: '-no-window -gpu swiftshader_indirect -noaudio -no-boot-anim'
   android-emulator-boot-timeout:
     description: 'Emulator boot timeout in seconds'
     required: true
     default: 600
   run-tests:
     description: 'Whether to run the tests or just the build'
+    required: true
+    default: 'true'
+  copy-files:
+    description: 'Additional files to copy to emulator for testing'
+    required: true
+    default: ''
+  build-tests:
+    description: 'Whether to build the tests or just the sources'
     required: true
     default: 'true'
   android-api-level:
@@ -44,24 +47,218 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Cache Homebrew packages
+    - name: Setup swift-android-action
+      id: setup
+      shell: bash
+      run: |
+        if [ ${RUNNER_OS} == 'Linux' ]; then
+          # fetch OS variables like ID ("ubuntu") and VERSION_ID ("24.04")
+          . /etc/os-release
+          echo "osidpair=${ID}${VERSION_ID}" >> $GITHUB_OUTPUT
+          echo "osid=${ID}$(echo ${VERSION_ID} | tr -d '.')" >> $GITHUB_OUTPUT
+        elif [ ${RUNNER_OS} == 'macOS' ]; then
+          echo "osidpair=macos" >> $GITHUB_OUTPUT
+          echo "osid=macos" >> $GITHUB_OUTPUT
+        else
+          echo "::error::Unsupported platform: ${RUNNER_OS}"
+          exit 1
+        fi
+
+        # RUNNER_ARCH	The architecture of the runner executing the job. Possible values are X86, X64, ARM, or ARM64.
+        if [ ${RUNNER_ARCH} == 'X64' ]; then
+          echo "android-sdk-arch=x86_64" >> $GITHUB_OUTPUT
+          echo "android-emulator-arch=x86_64" >> $GITHUB_OUTPUT
+        elif [ ${RUNNER_ARCH} == 'ARM64' ]; then
+          echo "android-sdk-arch=aarch64" >> $GITHUB_OUTPUT
+          echo "android-emulator-arch=arm64-v8a" >> $GITHUB_OUTPUT
+        else
+          echo "::error::Unsupported architecture: ${RUNNER_ARCH}"
+          exit 1
+        fi
+
+        # translate swift-version "latest" into our known latest version
+        if [ "${{ inputs.swift-version }}" == 'latest' ]; then
+          echo "swift-version=6.0.2" >> $GITHUB_OUTPUT
+        else
+          echo "swift-version=${{ inputs.swift-version }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Cache Swift ${{ steps.setup.outputs.swift-version }} Host Toolchain
       uses: actions/cache@v4
+      id: cache-swift
       with:
-        path: ~/Library/Caches/Homebrew
-        key: homebrew-packages
-    - name: Install Toolchain
-      run: brew install skiptools/skip/swift-android-toolchain@${{ inputs.swift-version }}
+        path: ~/swift-download
+        key: "swift-${{ steps.setup.outputs.swift-version }}-${{ steps.setup.outputs.osid }}"
+
+    - name: Download Swift Host Toolchain
+      if: steps.cache-swift.outputs.cache-hit != 'true'
       shell: bash
-    - name: Build Swift package for Android
-      run: skip android build --build-tests --arch aarch64 --arch x86_64 --package-path ${{ inputs.package-path }} --swift-version ${{ inputs.swift-version }} ${{ inputs.swift-build-flags }}
+      run: |
+        SWIFT_ID="swift-${{ steps.setup.outputs.swift-version }}-RELEASE"
+        mkdir -p ~/swift-download
+        cd ~/swift-download
+        if [ ${RUNNER_OS} == 'Linux' ]; then
+          curl -fsSL https://download.swift.org/swift-${{ steps.setup.outputs.swift-version }}-release/${{ steps.setup.outputs.osid }}/${SWIFT_ID}/${SWIFT_ID}-${{ steps.setup.outputs.osidpair }}.tar.gz --output swift.tar.gz
+        elif [ ${RUNNER_OS} == 'macOS' ]; then
+          curl -fsSL https://download.swift.org/swift-${{ steps.setup.outputs.swift-version }}-release/xcode/${SWIFT_ID}/${SWIFT_ID}-osx.pkg --output swift.pkg
+        else
+          echo "::error::Unsupported platform: ${RUNNER_OS}"
+          exit 1
+        fi
+
+    - name: Install Swift Host Toolchain
       shell: bash
-    - name: Run Swift tests on Android emulator
-      if: ${{ inputs.run-tests == 'true' }}
+      run: |
+        cd ~/swift-download
+        SWIFT_ID="swift-${{ steps.setup.outputs.swift-version }}-RELEASE"
+        if [ ${RUNNER_OS} == 'Linux' ]; then
+          mkdir -p ${HOME}/swift/$SWIFT_ID
+          tar -xzf swift.tar.gz -C ~/swift/$SWIFT_ID --strip 1
+          SWIFT_INSTALLATION=$HOME/swift/$SWIFT_ID/usr
+        elif [ ${RUNNER_OS} == 'macOS' ]; then
+          /usr/sbin/installer -pkg swift.pkg -target CurrentUserHomeDirectory
+          SWIFT_INSTALLATION=${HOME}/Library/Developer/Toolchains/${SWIFT_ID}.xctoolchain/usr
+          echo "TOOLCHAINS=$(plutil -extract CFBundleIdentifier raw ${SWIFT_INSTALLATION}/Info.plist)" >> $GITHUB_ENV
+        else
+          echo "::error::Unsupported platform: ${RUNNER_OS}"
+          exit 1
+        fi
+        echo "SWIFT_INSTALLATION=${SWIFT_INSTALLATION}" >> $GITHUB_ENV
+        echo "${SWIFT_INSTALLATION}/bin" >> $GITHUB_PATH
+
+    - name: Check Swift Version
+      shell: bash
+      run: |
+        swift --version
+
+    - name: Install Swift Android SDK
+      shell: bash
+      run: |
+        set +x
+        SWIFT_SDK_ANROID_API="24"
+        echo "SWIFT_SDK_ANROID_API=${SWIFT_SDK_ANROID_API}" >> $GITHUB_ENV
+
+        SWIFT_SDK_ID="swift-${{ steps.setup.outputs.swift-version }}-RELEASE-android-${SWIFT_SDK_ANROID_API}-0.1"
+        echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
+
+        # variant that identifies the SDK
+        SWIFT_SDK_ID_SHORT="swift-${{ steps.setup.outputs.swift-version }}-release-android-${SWIFT_SDK_ANROID_API}-sdk"
+        echo "SWIFT_SDK_ID_SHORT=${SWIFT_SDK_ID_SHORT}" >> $GITHUB_ENV
+
+        SWIFT_SDK_TARGET="${{ steps.setup.outputs.android-sdk-arch }}-unknown-linux-android${SWIFT_SDK_ANROID_API}"
+        echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
+
+        mkdir -p ${RUNNER_TEMP}/swift-android-toolchain
+        cd ${RUNNER_TEMP}/swift-android-toolchain
+        curl -fsSL https://github.com/skiptools/swift-android-toolchain/releases/download/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz --output ${SWIFT_SDK_ID}.artifactbundle.tar.gz
+
+        # first check if it already installed (we may be running this workflow multiple times for an action, in which case it will already be present)
+        swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET} &> /dev/null || swift sdk install ${SWIFT_SDK_ID}.artifactbundle.tar.gz
+
+        swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET}
+
+        if [ ${RUNNER_OS} == 'Linux' ]; then
+          SWIFT_SDK_ROOT="${HOME}/.config/swiftpm/swift-sdks"
+        elif [ ${RUNNER_OS} == 'macOS' ]; then
+          SWIFT_SDK_ROOT="${HOME}/.swiftpm/swift-sdks"
+        else
+          echo "::error::Unsupported platform for SDK: ${RUNNER_OS}"
+          exit 1
+        fi
+
+        SWIFT_SDK_HOME="${SWIFT_SDK_ROOT}/${SWIFT_SDK_ID}.artifactbundle"
+
+        # extract the artifact ID from the info.plist in the SDK root
+        SWIFT_SDK_ARTIFACT_ID=$(cat ${SWIFT_SDK_HOME}/info.json | jq -r '.artifacts[] | .variants[0].path')
+        SWIFT_SDK_HOME="${SWIFT_SDK_HOME}/${SWIFT_SDK_ARTIFACT_ID}"
+
+        # extract the sdkRootPath from the swift-sdk.json
+        SWIFT_SDK_ROOT_PATH=$(cat ${SWIFT_SDK_HOME}/swift-sdk.json | jq -r '.targetTriples[] | .sdkRootPath' | head -n 1)
+        SWIFT_SDK_HOME="${SWIFT_SDK_HOME}/${SWIFT_SDK_ROOT_PATH}"
+
+        echo "SWIFT_SDK_HOME=${SWIFT_SDK_HOME}" >> $GITHUB_ENV
+
+    - name: Build Swift Package with Android SDK
+      shell: bash
+      working-directory: ${{ inputs.package-path }}
+      run: |
+        if [ "${{ inputs.build-tests }}" == 'true' ]; then
+          BUILD_TESTS="--build-tests"
+        fi
+        SKIP_BRIDGE=1 swift build ${BUILD_TESTS} --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -Xclang-linker -Xswiftc -fuse-ld=lld -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}
+
+    - name: Prepare Android Emulator Test Script
+      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' }}
+      shell: bash
+      working-directory: ${{ inputs.package-path }}/.build
+      run: |
+        set -x
+
+        if [ ${RUNNER_ARCH} == 'ARM64' ] && [ ${RUNNER_OS} == 'macOS' ]; then
+          echo "::error::Cannot run tests on ARM64 macOS due to HVF error: HV_UNSUPPORTED. See https://github.com/ReactiveCircus/android-emulator-runner/issues/350#issuecomment-2030065889"
+          exit 1
+        fi
+
+        mkdir android-xctest
+
+        # copy the built test binary
+        cp -va ${SWIFT_SDK_TARGET}/debug/*.xctest android-xctest
+
+        # copy any optional resource bundles
+        cp -vaf ${SWIFT_SDK_TARGET}/debug/*.resources android-xctest || true
+
+        # 6.0.2 keeps libraries in per-API folders
+        cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/${SWIFT_SDK_ANROID_API}/lib*.so android-xctest || true
+
+        # 6.0.3 keeps libraries in the parent folder
+        cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so android-xctest || true
+
+        rm -v android-xctest/lib{c,dl,log,m,z}.so
+
+        if [ "${{ inputs.copy-files }}" != '' ]; then
+          cp -vaf ${{ inputs.copy-files }} android-xctest
+        fi
+
+        echo "adb push android-xctest /data/local/tmp" > run-android-tests.sh
+        for XCTEST in android-xctest/*.xctest; do
+          echo "adb shell /data/local/tmp/${XCTEST} ${{ inputs.swift-test-flags }}" >> run-android-tests.sh
+        done
+
+        chmod +x run-android-tests.sh
+
+    - name: Setup Android Emulator Cache
+      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' }}
+      uses: actions/cache@v4
+      id: avd-cache
+      with:
+        path: |
+          ~/.android/avd/*
+          ~/.android/adb*
+        key: avd-${{ inputs.android-api-level }}-${{ steps.setup.outputs.android-emulator-arch }}
+
+    - name: Create Android Emulator Cache
+      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && steps.avd-cache.outputs.cache-hit != 'true' }}
       uses: reactivecircus/android-emulator-runner@v2
       with:
+        force-avd-creation: false
         api-level: ${{ inputs.android-api-level }}
         emulator-boot-timeout: ${{ inputs.android-emulator-boot-timeout }}
         emulator-options: ${{ inputs.android-emulator-options }}
-        arch: ${{ inputs.android-emulator-arch }}
-        script: skip android test --arch ${{ inputs.android-emulator-arch }} --package-path ${{ inputs.package-path }} --swift-version ${{ inputs.swift-version }} ${{ inputs.swift-build-flags }} ${{ inputs.swift-test-flags }}
+        arch: ${{ steps.setup.outputs.android-emulator-arch }}
+        disable-animations: false
+        working-directory: ${{ inputs.package-path }}/.build
+        script: echo "Generated Android Emulator snapshot for caching."
+
+    - name: Run Tests on Android emulator
+      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' }}
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        force-avd-creation: false
+        api-level: ${{ inputs.android-api-level }}
+        emulator-boot-timeout: ${{ inputs.android-emulator-boot-timeout }}
+        emulator-options: -no-snapshot-save ${{ inputs.android-emulator-options }}
+        arch: ${{ steps.setup.outputs.android-emulator-arch }}
+        disable-animations: true
+        working-directory: ${{ inputs.package-path }}/.build
+        script: ./run-android-tests.sh
 

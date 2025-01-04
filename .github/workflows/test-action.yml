@@ -1,0 +1,35 @@
+name: swift-android-action ci
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+jobs:
+  demo:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-24.04', 'ubuntu-22.04', 'ubuntu-20.04', 'macos-13', 'macos-15']
+    steps:
+      - name: Checkout apple/swift-algorithms
+        uses: actions/checkout@v4
+        with:
+          repository: apple/swift-algorithms
+          path: apple/swift-algorithms
+      - name: Test apple/swift-algorithms
+        uses: marcprux/swift-android-action@main
+        with:
+          package-path: apple/swift-algorithms
+          run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
+
+      - name: Checkout skiptools/swift-sqlite
+        uses: actions/checkout@v4
+        with:
+          repository: skiptools/swift-sqlite
+          path: skiptools/swift-sqlite
+      - name: Test skiptools/swift-sqlite
+        uses: marcprux/swift-android-action@main
+        with:
+          package-path: skiptools/swift-sqlite
+          run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
+
