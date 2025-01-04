@@ -17,7 +17,7 @@ jobs:
           repository: apple/swift-algorithms
           path: apple/swift-algorithms
       - name: Test apple/swift-algorithms
-        uses: marcprux/swift-android-action@main
+        uses: skiptools/swift-android-action@v2
         with:
           package-path: apple/swift-algorithms
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
@@ -28,7 +28,7 @@ jobs:
           repository: skiptools/swift-sqlite
           path: skiptools/swift-sqlite
       - name: Test skiptools/swift-sqlite
-        uses: marcprux/swift-android-action@main
+        uses: skiptools/swift-android-action@v2
         with:
           package-path: skiptools/swift-sqlite
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
