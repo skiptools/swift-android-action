@@ -209,7 +209,7 @@ runs:
         path: |
           ~/.android/avd/*
           ~/.android/adb*
-        key: avd-${{ inputs.android-api-level }}
+        key: avd-${{ inputs.android-api-level }}-${{ steps.setup.outputs.android-emulator-arch }}
     - name: Create Android Emulator Cache
       if: ${{ inputs.run-tests == 'true' && steps.avd-cache.outputs.cache-hit != 'true' }}
       uses: reactivecircus/android-emulator-runner@v2
@@ -232,6 +232,6 @@ runs:
         emulator-options: -no-snapshot-save ${{ inputs.android-emulator-options }}
         arch: ${{ steps.setup.outputs.android-emulator-arch }}
         disable-animations: true
-        working-directory: ${{ inputs.package-path }}
-        script: ${{ inputs.package-path }}/.build/run-android-tests.sh
+        working-directory: ${{ inputs.package-path }}/.build
+        script: run-android-tests.sh
 
