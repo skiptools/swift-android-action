@@ -148,18 +148,14 @@ runs:
         fi
 
         SWIFT_SDK_HOME="${SWIFT_SDK_ROOT}/${SWIFT_SDK_ID}.artifactbundle"
-        echo "SWIFT_SDK_HOME 1: ${SWIFT_SDK_HOME}"
 
         # extract the artifact ID from the info.plist in the SDK root
         SWIFT_SDK_ARTIFACT_ID=$(cat ${SWIFT_SDK_HOME}/info.json | jq -r '.artifacts[] | .variants[0].path')
         SWIFT_SDK_HOME="${SWIFT_SDK_HOME}/${SWIFT_SDK_ARTIFACT_ID}"
-        echo "SWIFT_SDK_ARTIFACT_ID: ${SWIFT_SDK_ARTIFACT_ID}"
-        echo "SWIFT_SDK_HOME 2: ${SWIFT_SDK_HOME}"
 
         # extract the sdkRootPath from the swift-sdk.json
         SWIFT_SDK_ROOT_PATH=$(cat ${SWIFT_SDK_HOME}/swift-sdk.json | jq -r '.targetTriples[] | .sdkRootPath' | head -n 1)
         SWIFT_SDK_HOME="${SWIFT_SDK_HOME}/${SWIFT_SDK_ROOT_PATH}"
-        echo "SWIFT_SDK_HOME 3: ${SWIFT_SDK_HOME}"
 
         echo "SWIFT_SDK_HOME=${SWIFT_SDK_HOME}" >> $GITHUB_ENV
     - name: Build Swift Package with Android SDK
@@ -233,5 +229,5 @@ runs:
         arch: ${{ steps.setup.outputs.android-emulator-arch }}
         disable-animations: true
         working-directory: ${{ inputs.package-path }}/.build
-        script: run-android-tests.sh
+        script: ./run-android-tests.sh
 
