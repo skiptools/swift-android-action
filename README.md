@@ -6,7 +6,7 @@ project to provide a cross-compiler for building
 Swift natively for Android on a Linux or macOS host.
 
 After building the package, it will run the SwiftPM
-test targets on an Android emulator (which it provided by the 
+test targets on an Android emulator (which is provided by the 
 [Android Emulator Runner action](https://github.com/marketplace/actions/android-emulator-runner)).
 To build the package for Android without running the tests
 (which is considerably faster), set the `run-tests` option to `false`.
@@ -73,9 +73,14 @@ jobs:
 | swift-test-flags | Additional flags to pass to the swift test command |  |
 | build-tests | Whether to build the package tests or just the sources | true |
 | run-tests | Whether to run the tests or just perform the build | true |
+| copy-files | Additional files to copy to emulator for testing | |
 | android-api-level | The API level of the Android emulator to run against | 29 |
 | android-emulator-options | Options to pass to the Android emulator | -no-window … |
 | android-emulator-boot-timeout | Emulator boot timeout in seconds | 600 |
+
+### Platform Support
+
+This action can be run on any of the GitHub `ubuntu-*` and `macos-*` [runner images](https://github.com/actions/runner-images). However, due to the inability of macOS on ARM to run nested virtualization ([issue](https://github.com/ReactiveCircus/android-emulator-runner/issues/350)), the Android emulator cannot be run on these platforms, and so running on any macOS image that uses ARM (including `macos-14` and `macos-15`) requires disabling tests with `run-tests: false`. Running tests are supported on `macos-13`, as well as the (paid) large Intel images like `macos-14-large` and `macos-15-large`.
 
 ## Complete Universal CI Example
 
