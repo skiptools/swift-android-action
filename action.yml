@@ -32,6 +32,10 @@ inputs:
     description: 'Whether to run the tests or just the build'
     required: true
     default: 'true'
+  build-tests:
+    description: 'Whether to build the tests or just the sources'
+    required: true
+    default: 'true'
   android-api-level:
     description: 'The API level of the Android emulator to run against'
     required: true
@@ -169,7 +173,10 @@ runs:
       shell: bash
       working-directory: ${{ inputs.package-path }}
       run: |
-        SKIP_BRIDGE=1 swift build --build-tests --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -Xclang-linker -Xswiftc -fuse-ld=lld -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}
+        if [ "${{ inputs.build-tests }}" == 'true' ]; then
+          BUILD_TESTS="--build-tests"
+        fi
+        SKIP_BRIDGE=1 swift build ${BUILD_TESTS} --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -Xclang-linker -Xswiftc -fuse-ld=lld -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}
     - name: Prepare Android Emulator Test Script
       if: ${{ inputs.run-tests == 'true' }}
       shell: bash
