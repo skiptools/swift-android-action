@@ -212,9 +212,8 @@ runs:
         TEST_BASE_FOLDER=$(basename "${{ inputs.emulator-test-folder }}")
         BUILD_DIR=".build"
         PACK_DIR="${BUILD_DIR}/${TEST_BASE_FOLDER}"
-        SCRIPT_FILE=${BUILD_DIR}/run-android-tests.sh
 
-        mkdir ${PACK_DIR}
+        mkdir -p ${PACK_DIR}
 
         # copy the built test binary
         cp -va ${BUILD_DIR}/${SWIFT_SDK_TARGET}/debug/*.xctest ${PACK_DIR}
@@ -234,15 +233,16 @@ runs:
           cp -vaf ${{ inputs.copy-files }} ${PACK_DIR}
         fi
 
-        echo "/bin/sh -ex" > ${SCRIPT_FILE}
-        echo "cd ${BUILD_DIR}" >> ${SCRIPT_FILE}
-        echo "adb push ${TEST_BASE_FOLDER} ${REMOTE_FOLDER}" >> ${SCRIPT_FILE}
+        # create the script that will be run once the emulator is launched
+        SCRIPT_FILE="run-android-tests.sh"
+
+        cd ${BUILD_DIR}
+        echo "adb push ${TEST_BASE_FOLDER} ${REMOTE_FOLDER}" > ${SCRIPT_FILE}
         for XCTEST in ${TEST_BASE_FOLDER}/*.xctest; do
-          echo "adb shell ls -la ${REMOTE_FOLDER}/" >> ${SCRIPT_FILE}
-          echo "adb shell ls -la ${REMOTE_FOLDER}/${XCTEST}" >> ${SCRIPT_FILE}
-          echo "adb shell ${REMOTE_FOLDER}/${XCTEST} ${{ inputs.swift-test-flags }}" >> ${SCRIPT_FILE}
           echo "adb shell ${{ inputs.test-env }} ${REMOTE_FOLDER}/${XCTEST} ${{ inputs.swift-test-flags }}" >> ${SCRIPT_FILE}
         done
+
+        cat ${SCRIPT_FILE}
 
         chmod +x ${SCRIPT_FILE}
 
@@ -266,7 +266,7 @@ runs:
         emulator-options: ${{ inputs.android-emulator-options }}
         arch: ${{ steps.setup.outputs.android-emulator-arch }}
         disable-animations: false
-        working-directory: ${{ inputs.package-path }}
+        working-directory: ${{ inputs.package-path }}/.build
         script: echo "Generated Android Emulator snapshot for caching."
 
     - name: Run Tests on Android emulator
@@ -279,6 +279,6 @@ runs:
         emulator-options: -no-snapshot-save ${{ inputs.android-emulator-options }}
         arch: ${{ steps.setup.outputs.android-emulator-arch }}
         disable-animations: true
-        working-directory: ${{ inputs.package-path }}
-        script: .build/run-android-tests.sh
+        working-directory: ${{ inputs.package-path }}/.build
+        script: run-android-tests.sh
 
