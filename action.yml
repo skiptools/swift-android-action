@@ -4,7 +4,9 @@ branding:
   icon: 'target'
   color: 'orange'
 outputs:
-  swift-command: ${{ steps.install.outputs.swiftcmd }}
+  swift-command:
+    description: 'The swift command using the installed toolchain and SDK'
+    value: ${{ steps.install.outputs.swiftcmd }}
 inputs:
   swift-version:
     description: 'The version of the Swift toolchain to use'
@@ -139,10 +141,10 @@ runs:
           echo "::error::Unsupported platform: ${RUNNER_OS}"
           exit 1
         fi
-        echo "SWIFT_INSTALLATION=${SWIFT_INSTALLATION}" >> $GITHUB_ENV
-        echo "${SWIFT_INSTALLATION}/bin" >> $GITHUB_PATH
+        #echo "SWIFT_INSTALLATION=${SWIFT_INSTALLATION}" >> $GITHUB_ENV
+        #echo "${SWIFT_INSTALLATION}/bin" >> $GITHUB_PATH
 
-        echo "swiftcmd=swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
+        echo "swiftcmd=${SWIFT_INSTALLATION}/bin/swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
 
     - name: Check Swift Version
       shell: bash
