@@ -12,13 +12,18 @@ jobs:
       matrix:
         os: ['ubuntu-24.04', 'ubuntu-22.04', 'ubuntu-20.04', 'macos-13', 'macos-15']
     steps:
+      - name: Checkout Action
+        uses: actions/checkout@v4
+        with:
+          path: swift-android-action
+
       - name: Checkout apple/swift-algorithms
         uses: actions/checkout@v4
         with:
           repository: apple/swift-algorithms
           path: apple/swift-algorithms
       - name: Test apple/swift-algorithms
-        uses: ./
+        uses: swift-android-action
         #uses: skiptools/swift-android-action@main
         with:
           package-path: apple/swift-algorithms
@@ -30,7 +35,7 @@ jobs:
           repository: skiptools/swift-sqlite
           path: skiptools/swift-sqlite
       - name: Test skiptools/swift-sqlite
-        uses: ./
+        uses: swift-android-action
         #uses: skiptools/swift-android-action@main
         with:
           package-path: skiptools/swift-sqlite
