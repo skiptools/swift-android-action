@@ -129,9 +129,9 @@ runs:
         cd ~/swift-download
         SWIFT_ID="swift-${{ steps.setup.outputs.swift-version }}-RELEASE"
         if [ ${RUNNER_OS} == 'Linux' ]; then
-          mkdir -p ${HOME}/swift/$SWIFT_ID
-          tar -xzf swift.tar.gz -C ~/swift/$SWIFT_ID --strip 1
-          SWIFT_INSTALLATION=$HOME/swift/$SWIFT_ID/usr
+          mkdir -p ${HOME}/swift/toolchains/$SWIFT_ID
+          tar -xzf swift.tar.gz -C ${HOME}/swift/toolchains/$SWIFT_ID --strip 1
+          SWIFT_INSTALLATION=$HOME/swift/toolchains/$SWIFT_ID/usr
         elif [ ${RUNNER_OS} == 'macOS' ]; then
           /usr/sbin/installer -pkg swift.pkg -target CurrentUserHomeDirectory
           SWIFT_INSTALLATION=${HOME}/Library/Developer/Toolchains/${SWIFT_ID}.xctoolchain/usr
@@ -141,6 +141,7 @@ runs:
           exit 1
         fi
         echo "SWIFT_INSTALLATION=${SWIFT_INSTALLATION}" >> $GITHUB_ENV
+        # needed to override locally-installed `swift` command
         #echo "${SWIFT_INSTALLATION}/bin" >> $GITHUB_PATH
 
     - name: Install Swift Android SDK
@@ -166,9 +167,9 @@ runs:
         curl -fsSL https://github.com/skiptools/swift-android-toolchain/releases/download/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz --output ${SWIFT_SDK_ID}.artifactbundle.tar.gz
 
         # first check if it already installed (we may be running this workflow multiple times for an action, in which case it will already be present)
-        swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET} &> /dev/null || swift sdk install ${SWIFT_SDK_ID}.artifactbundle.tar.gz
+        ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET} &> /dev/null || ${SWIFT_INSTALLATION}/bin/swift sdk install ${SWIFT_SDK_ID}.artifactbundle.tar.gz
 
-        swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET}
+        ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET}
 
         if [ ${RUNNER_OS} == 'Linux' ]; then
           SWIFT_SDK_ROOT="${HOME}/.config/swiftpm/swift-sdks"

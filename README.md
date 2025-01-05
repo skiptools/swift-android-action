@@ -130,6 +130,48 @@ For example:
       test-env: TEST_WORKSPACE=1
 ```
 
+### Installing without Building
+
+You may wish to use this action to just install the toolchain and
+Android SDK without performing the build. For example, if you
+wish to build multiple packages consecutively, and don't need to
+run the test cases. In this case, you can set the
+`build-package` input to false, and then use the action's
+`swift-build` output to get the complete `swift build` command
+with all the appropriate paths and arguments to build using the
+SDK.
+
+For example:
+
+```yml
+  - name: Setup Toolchain
+    id: setup-toolchain
+    uses: skiptools/swift-android-action@v2
+    with:
+      # just set up the toolchain but don't build anything
+      build-package: false
+  - name: Checkout apple/swift-numerics
+    uses: actions/checkout@v4
+  - name: Build Package With Toolchain
+    run: |
+      # build twice, once with debug and once with release
+      ${{ steps.setup-toolchain.outputs.swift-build }} -c debug
+      ${{ steps.setup-toolchain.outputs.swift-build }} -c release
+```
+
+The actual `swift-build` command will vary between operating systems
+and architectures. For example, on Ubuntu 24.04, it might be:
+
+```
+/home/runner/swift/toolchains/swift-6.0.2-RELEASE/usr/bin/swift build --swift-sdk x86_64-unknown-linux-android24
+```
+
+while on macOS-15 it will be:
+
+```
+/Users/runner/Library/Developer/Toolchains/swift-6.0.2-RELEASE.xctoolchain/usr/bin/swift build --swift-sdk aarch64-unknown-linux-android24
+```
+
 
 ## Complete Universal CI Example
 
