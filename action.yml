@@ -237,7 +237,8 @@ runs:
         cd ${BUILD_DIR}
         echo "adb push ${TEST_BASE_FOLDER} ${REMOTE_FOLDER}" > ${SCRIPT_FILE}
         for XCTEST in ${TEST_BASE_FOLDER}/*.xctest; do
-          echo "adb shell ${{ inputs.test-env }} ${REMOTE_FOLDER}/${XCTEST} ${{ inputs.swift-test-flags }}" >> ${SCRIPT_FILE}
+          XCTEST_BASE=$(basename "${XCTEST}")
+          echo "adb shell 'cd ${REMOTE_FOLDER}/${TEST_BASE_FOLDER} && ${{ inputs.test-env }} ./${XCTEST_BASE} ${{ inputs.swift-test-flags }}'" >> ${SCRIPT_FILE}
         done
 
         cat ${SCRIPT_FILE}
