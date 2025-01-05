@@ -3,6 +3,8 @@ description: 'Cross-compiles a swift package for Android and runs the test cases
 branding:
   icon: 'target'
   color: 'orange'
+outputs:
+  swift-command: ${{ steps.install.outputs.swiftcmd }}
 inputs:
   swift-version:
     description: 'The version of the Swift toolchain to use'
@@ -20,7 +22,7 @@ inputs:
     description: 'Additional flags to pass to the swift test command'
     required: true
     default: ''
-  emulator-test-folder:
+  android-emulator-test-folder:
     description: 'Emulator folder where tests are copied and run'
     required: true
     default: '/data/local/tmp/android-xctest'
@@ -36,6 +38,14 @@ inputs:
     description: 'Emulator boot timeout in seconds'
     required: true
     default: 600
+  build-package:
+    description: 'Whether to build the package or just set up the SDK'
+    required: true
+    default: 'true'
+  build-tests:
+    description: 'Whether to build the tests or just the sources'
+    required: true
+    default: 'true'
   run-tests:
     description: 'Whether to run the tests or just the build'
     required: true
@@ -44,14 +54,11 @@ inputs:
     description: 'Additional files to copy to emulator for testing'
     required: true
     default: ''
-  build-tests:
-    description: 'Whether to build the tests or just the sources'
-    required: true
-    default: 'true'
   android-api-level:
     description: 'The API level of the Android emulator to run against'
     required: true
     default: 29
+
 runs:
   using: "composite"
   steps:
@@ -115,6 +122,7 @@ runs:
         fi
 
     - name: Install Swift Host Toolchain
+      id: install
       shell: bash
       run: |
         cd ~/swift-download
@@ -133,6 +141,8 @@ runs:
         fi
         echo "SWIFT_INSTALLATION=${SWIFT_INSTALLATION}" >> $GITHUB_ENV
         echo "${SWIFT_INSTALLATION}/bin" >> $GITHUB_PATH
+
+        echo "swiftcmd=swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
 
     - name: Check Swift Version
       shell: bash
@@ -187,16 +197,17 @@ runs:
         echo "SWIFT_SDK_HOME=${SWIFT_SDK_HOME}" >> $GITHUB_ENV
 
     - name: Build Swift Package with Android SDK
+      if: ${{ inputs.build-package == 'true' }}
       shell: bash
       working-directory: ${{ inputs.package-path }}
       run: |
         if [ "${{ inputs.build-tests }}" == 'true' ]; then
           BUILD_TESTS="--build-tests"
         fi
-        SKIP_BRIDGE=1 swift build ${BUILD_TESTS} --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -Xclang-linker -Xswiftc -fuse-ld=lld -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}
+        SKIP_BRIDGE=1 ${{ steps.install.outputs.swiftcmd }} ${BUILD_TESTS}
 
     - name: Prepare Android Emulator Test Script
-      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' }}
+      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
       shell: bash
       working-directory: ${{ inputs.package-path }}
       run: |
@@ -205,9 +216,9 @@ runs:
           exit 1
         fi
 
-        #inputs.emulator-test-folder = /data/local/tmp/android-xctest
-        REMOTE_FOLDER=$(dirname "${{ inputs.emulator-test-folder }}")
-        TEST_BASE_FOLDER=$(basename "${{ inputs.emulator-test-folder }}")
+        #inputs.android-emulator-test-folder = /data/local/tmp/android-xctest
+        REMOTE_FOLDER=$(dirname "${{ inputs.android-emulator-test-folder }}")
+        TEST_BASE_FOLDER=$(basename "${{ inputs.android-emulator-test-folder }}")
         BUILD_DIR=".build"
         PACK_DIR="${BUILD_DIR}/${TEST_BASE_FOLDER}"
 
@@ -246,7 +257,7 @@ runs:
         chmod +x ${SCRIPT_FILE}
 
     - name: Setup Android Emulator Cache
-      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' }}
+      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
       uses: actions/cache@v4
       id: avd-cache
       with:
@@ -256,7 +267,7 @@ runs:
         key: avd-${{ inputs.android-api-level }}-${{ steps.setup.outputs.android-emulator-arch }}
 
     - name: Create Android Emulator Cache
-      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && steps.avd-cache.outputs.cache-hit != 'true' }}
+      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' && steps.avd-cache.outputs.cache-hit != 'true' }}
       uses: reactivecircus/android-emulator-runner@v2
       with:
         force-avd-creation: false
@@ -269,7 +280,7 @@ runs:
         script: echo "Generated Android Emulator snapshot for caching."
 
     - name: Run Tests on Android emulator
-      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' }}
+      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
       uses: reactivecircus/android-emulator-runner@v2
       with:
         force-avd-creation: false
