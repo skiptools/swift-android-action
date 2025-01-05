@@ -234,9 +234,13 @@ runs:
           cp -vaf ${{ inputs.copy-files }} ${PACK_DIR}
         fi
 
-        echo "cd ${BUILD_DIR}" > ${SCRIPT_FILE}
+        echo "/bin/sh -ex" > ${SCRIPT_FILE}
+        echo "cd ${BUILD_DIR}" >> ${SCRIPT_FILE}
         echo "adb push ${TEST_BASE_FOLDER} ${REMOTE_FOLDER}" >> ${SCRIPT_FILE}
         for XCTEST in ${TEST_BASE_FOLDER}/*.xctest; do
+          echo "adb shell ls -la ${REMOTE_FOLDER}/" >> ${SCRIPT_FILE}
+          echo "adb shell ls -la ${REMOTE_FOLDER}/${XCTEST}" >> ${SCRIPT_FILE}
+          echo "adb shell ${REMOTE_FOLDER}/${XCTEST} ${{ inputs.swift-test-flags }}" >> ${SCRIPT_FILE}
           echo "adb shell ${{ inputs.test-env }} ${REMOTE_FOLDER}/${XCTEST} ${{ inputs.swift-test-flags }}" >> ${SCRIPT_FILE}
         done
 
