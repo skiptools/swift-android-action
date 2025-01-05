@@ -32,8 +32,8 @@ jobs:
       - name: Build Package With Toolchain
         working-directory: apple/swift-numerics
         run: |
-          echo "SWIFT COMMAND: ${{ steps.setup-toolchain.outputs.swiftcmd }}"
-          ${{ steps.setup-toolchain.outputs.swiftcmd }} build
+          echo "SWIFT COMMAND: ${{ steps.setup-toolchain.outputs.swift-command }}"
+          ${{ steps.setup-toolchain.outputs.swift-command }} build
 
       - name: Checkout jpsim/Yams
         uses: actions/checkout@v4
