@@ -156,7 +156,9 @@ For example:
     run: |
       # build twice, once with debug and once with release
       ${{ steps.setup-toolchain.outputs.swift-build }} -c debug
+      ls .build/${{ steps.setup-toolchain.outputs.swift-sdk }}/debug
       ${{ steps.setup-toolchain.outputs.swift-build }} -c release
+      ls .build/${{ steps.setup-toolchain.outputs.swift-sdk }}/release
 ```
 
 The actual `swift-build` command will vary between operating systems

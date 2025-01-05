@@ -7,6 +7,9 @@ outputs:
   swift-build:
     description: 'The swift build command using the installed toolchain and SDK'
     value: ${{ steps.install.outputs.swiftcmd }}
+  swift-sdk:
+    description: 'The swift SDK that is used to build for Android'
+    value: ${{ steps.install.outputs.swift-sdk }}
 inputs:
   swift-version:
     description: 'The version of the Swift toolchain to use'
@@ -193,6 +196,7 @@ runs:
         echo "SWIFT_SDK_HOME=${SWIFT_SDK_HOME}" >> $GITHUB_ENV
 
         echo "swiftcmd=${SWIFT_INSTALLATION}/bin/swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
+        echo "swift-sdk=${SWIFT_SDK_TARGET}" >> $GITHUB_OUTPUT
 
     - name: Check Swift Version
       shell: bash
