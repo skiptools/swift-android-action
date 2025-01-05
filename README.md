@@ -71,6 +71,8 @@ jobs:
 | package-path | The folder where the swift package is checked out | . |
 | swift-build-flags | Additional flags to pass to the swift build command |  |
 | swift-test-flags | Additional flags to pass to the swift test command |  |
+| test-env | Test environment variables key=value |  |
+| emulator-test-folder | Emulator folder where tests are copied and run | /data/local/tmp/android-xctest |
 | build-tests | Whether to build the package tests or just the sources | true |
 | run-tests | Whether to run the tests or just perform the build | true |
 | copy-files | Additional files to copy to emulator for testing | |

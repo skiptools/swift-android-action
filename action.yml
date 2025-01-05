@@ -20,6 +20,14 @@ inputs:
     description: 'Additional flags to pass to the swift test command'
     required: true
     default: ''
+  emulator-test-folder:
+    description: 'Emulator folder where tests are copied and run'
+    required: true
+    default: '/data/local/tmp/android-xctest'
+  test-env:
+    description: 'Test environment variables key=value'
+    required: true
+    default: ''
   android-emulator-options:
     description: 'Options to pass to the Android emulator'
     required: true
@@ -190,7 +198,7 @@ runs:
     - name: Prepare Android Emulator Test Script
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' }}
       shell: bash
-      working-directory: ${{ inputs.package-path }}/.build
+      working-directory: ${{ inputs.package-path }}
       run: |
         set -x
 
@@ -199,32 +207,40 @@ runs:
           exit 1
         fi
 
-        mkdir android-xctest
+        #inputs.emulator-test-folder = /data/local/tmp/android-xctest
+        REMOTE_FOLDER=$(dirname "${{ inputs.emulator-test-folder }}")
+        TEST_BASE_FOLDER=$(basename "${{ inputs.emulator-test-folder }}")
+        BUILD_DIR=".build"
+        PACK_DIR="${BUILD_DIR}/${TEST_BASE_FOLDER}"
+        SCRIPT_FILE=${BUILD_DIR}/run-android-tests.sh
+
+        mkdir ${PACK_DIR}
 
         # copy the built test binary
-        cp -va ${SWIFT_SDK_TARGET}/debug/*.xctest android-xctest
+        cp -va ${BUILD_DIR}/${SWIFT_SDK_TARGET}/debug/*.xctest ${PACK_DIR}
 
         # copy any optional resource bundles
-        cp -vaf ${SWIFT_SDK_TARGET}/debug/*.resources android-xctest || true
-
+        cp -vaf ${BUILD_DIR}/${SWIFT_SDK_TARGET}/debug/*.resources ${PACK_DIR} || true
         # 6.0.2 keeps libraries in per-API folders
-        cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/${SWIFT_SDK_ANROID_API}/lib*.so android-xctest || true
+        cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/${SWIFT_SDK_ANROID_API}/lib*.so ${PACK_DIR} || true
 
         # 6.0.3 keeps libraries in the parent folder
-        cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so android-xctest || true
+        cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so ${PACK_DIR} || true
 
-        rm -v android-xctest/lib{c,dl,log,m,z}.so
+        # clear out libraries that are already provided by Android
+        rm -v ${PACK_DIR}/lib{c,dl,log,m,z}.so || true
 
         if [ "${{ inputs.copy-files }}" != '' ]; then
-          cp -vaf ${{ inputs.copy-files }} android-xctest
+          cp -vaf ${{ inputs.copy-files }} ${PACK_DIR}
         fi
 
-        echo "adb push android-xctest /data/local/tmp" > run-android-tests.sh
-        for XCTEST in android-xctest/*.xctest; do
-          echo "adb shell /data/local/tmp/${XCTEST} ${{ inputs.swift-test-flags }}" >> run-android-tests.sh
+        echo "cd ${BUILD_DIR}" > ${SCRIPT_FILE}
+        echo "adb push ${TEST_BASE_FOLDER} ${REMOTE_FOLDER}" >> ${SCRIPT_FILE}
+        for XCTEST in ${TEST_BASE_FOLDER}/*.xctest; do
+          echo "adb shell ${{ inputs.test-env }} ${REMOTE_FOLDER}/${XCTEST} ${{ inputs.swift-test-flags }}" >> ${SCRIPT_FILE}
         done
 
-        chmod +x run-android-tests.sh
+        chmod +x ${SCRIPT_FILE}
 
     - name: Setup Android Emulator Cache
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' }}
@@ -246,7 +262,7 @@ runs:
         emulator-options: ${{ inputs.android-emulator-options }}
         arch: ${{ steps.setup.outputs.android-emulator-arch }}
         disable-animations: false
-        working-directory: ${{ inputs.package-path }}/.build
+        working-directory: ${{ inputs.package-path }}
         script: echo "Generated Android Emulator snapshot for caching."
 
     - name: Run Tests on Android emulator
@@ -259,6 +275,6 @@ runs:
         emulator-options: -no-snapshot-save ${{ inputs.android-emulator-options }}
         arch: ${{ steps.setup.outputs.android-emulator-arch }}
         disable-animations: true
-        working-directory: ${{ inputs.package-path }}/.build
-        script: ./run-android-tests.sh
+        working-directory: ${{ inputs.package-path }}
+        script: .build/run-android-tests.sh
 
