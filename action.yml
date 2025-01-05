@@ -124,7 +124,6 @@ runs:
         fi
 
     - name: Install Swift Host Toolchain
-      id: install
       shell: bash
       run: |
         cd ~/swift-download
@@ -141,17 +140,11 @@ runs:
           echo "::error::Unsupported platform: ${RUNNER_OS}"
           exit 1
         fi
-        #echo "SWIFT_INSTALLATION=${SWIFT_INSTALLATION}" >> $GITHUB_ENV
+        echo "SWIFT_INSTALLATION=${SWIFT_INSTALLATION}" >> $GITHUB_ENV
         #echo "${SWIFT_INSTALLATION}/bin" >> $GITHUB_PATH
 
-        echo "swiftcmd=${SWIFT_INSTALLATION}/bin/swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
-
-    - name: Check Swift Version
-      shell: bash
-      run: |
-        swift --version
-
     - name: Install Swift Android SDK
+      id: install
       shell: bash
       run: |
         set +x
@@ -197,6 +190,14 @@ runs:
         SWIFT_SDK_HOME="${SWIFT_SDK_HOME}/${SWIFT_SDK_ROOT_PATH}"
 
         echo "SWIFT_SDK_HOME=${SWIFT_SDK_HOME}" >> $GITHUB_ENV
+
+        echo "swiftcmd=${SWIFT_INSTALLATION}/bin/swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
+
+    - name: Check Swift Version
+      shell: bash
+      run: |
+        echo "Swift Command: ${{ steps.install.outputs.swiftcmd }}"
+        ${{ steps.install.outputs.swiftcmd }} --version
 
     - name: Build Swift Package with Android SDK
       if: ${{ inputs.build-package == 'true' }}
