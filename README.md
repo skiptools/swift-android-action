@@ -100,6 +100,35 @@ jobs:
           run-tests: false
 ```
 
+### Test Resources and Environment Variables
+
+Unit tests sometimes need to load local resources, such as configuration
+files and mocking or parsing inputs. This is typically handled
+using [Bundle.module](https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package),
+which will be automatically copied up to the Android emulator when
+testing and so should work transparently.
+
+However, in some cases a test script may expect a specific set
+of local files to be present, such as when a unit test needs to
+examine the contents of the source code itself. In these cases,
+you can use the `copy-files` input parameter to specify local files
+to copy up to the emulator when running.
+
+Similarly, some test cases may expect a certain environment to be set.
+This can be accomplished using the `test-env` parameter, which
+is a space separated list of key=value pairs of environment
+variables to set when running the tests.
+
+For example:
+
+```yml
+  - name: Test Android Package
+    uses: skiptools/swift-android-action@v2
+    with:
+      copy-files: Tests
+      test-env: TEST_WORKSPACE=1
+```
+
 
 ## Complete Universal CI Example
 
