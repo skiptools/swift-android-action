@@ -17,6 +17,46 @@ jobs:
         with:
           path: swift-android-action
 
+      - name: Checkout apple/swift-numerics
+        uses: actions/checkout@v4
+        with:
+          repository: apple/swift-numerics
+          path: apple/swift-numerics
+      - name: Setup Toolchain
+        id: setup-toolchain
+        uses: ./swift-android-action/
+        #uses: skiptools/swift-android-action@v2
+        with:
+          # just set up the toolchain and don't build anything
+          build-package: false
+      - name: Build Package With Toolchain
+        working-directory: apple/swift-numerics
+        run: |
+          echo "SWIFT COMMAND: ${{ steps.setup-toolchain.outputs.swift-build }}"
+          ${{ steps.setup-toolchain.outputs.swift-build }} -c debug
+          ls -la .build/${{ steps.setup-toolchain.outputs.swift-sdk }}/debug
+          ${{ steps.setup-toolchain.outputs.swift-build }} -c release
+          ls -la .build/${{ steps.setup-toolchain.outputs.swift-sdk }}/release
+
+      - name: Checkout jpsim/Yams
+        uses: actions/checkout@v4
+        with:
+          repository: jpsim/Yams
+          path: jpsim/Yams
+      - name: Fix jpsim/Yams for Android
+        working-directory: jpsim/Yams
+        run: |
+          # Android tests that use measure have too high a stddev
+          perl -pi -e 's;self.measure ;do ;g' Tests/YamsTests/PerformanceTests.swift
+      - name: Test jpsim/Yams
+        uses: ./swift-android-action/
+        #uses: skiptools/swift-android-action@v2
+        with:
+          package-path: jpsim/Yams
+          run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
+          copy-files: Tests
+          test-env: TEST_WORKSPACE=1
+
       - name: Checkout apple/swift-algorithms
         uses: actions/checkout@v4
         with:
@@ -24,7 +64,7 @@ jobs:
           path: apple/swift-algorithms
       - name: Test apple/swift-algorithms
         uses: ./swift-android-action/
-        #uses: skiptools/swift-android-action@main
+        #uses: skiptools/swift-android-action@v2
         with:
           package-path: apple/swift-algorithms
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
@@ -36,7 +76,7 @@ jobs:
           path: skiptools/swift-sqlite
       - name: Test skiptools/swift-sqlite
         uses: ./swift-android-action/
-        #uses: skiptools/swift-android-action@main
+        #uses: skiptools/swift-android-action@v2
         with:
           package-path: skiptools/swift-sqlite
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM

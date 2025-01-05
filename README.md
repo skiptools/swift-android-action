@@ -71,9 +71,12 @@ jobs:
 | package-path | The folder where the swift package is checked out | . |
 | swift-build-flags | Additional flags to pass to the swift build command |  |
 | swift-test-flags | Additional flags to pass to the swift test command |  |
+| test-env | Test environment variables key=value |  |
+| build-package | Whether to build the Swit package | true |
 | build-tests | Whether to build the package tests or just the sources | true |
 | run-tests | Whether to run the tests or just perform the build | true |
 | copy-files | Additional files to copy to emulator for testing | |
+| anddroid-emulator-test-folder | Emulator folder where tests are copied and run | /data/local/tmp/android-xctest |
 | android-api-level | The API level of the Android emulator to run against | 29 |
 | android-emulator-options | Options to pass to the Android emulator | -no-window … |
 | android-emulator-boot-timeout | Emulator boot timeout in seconds | 600 |
@@ -96,6 +99,79 @@ jobs:
         uses: skiptools/swift-android-action@v2
         with:
           run-tests: false
+```
+
+### Test Resources and Environment Variables
+
+Unit tests sometimes need to load local resources, such as configuration
+files and mocking or parsing inputs. This is typically handled
+using [Bundle.module](https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package),
+which will be automatically copied up to the Android emulator when
+testing and so should work transparently.
+
+However, in some cases a test script may expect a specific set
+of local files to be present, such as when a unit test needs to
+examine the contents of the source code itself. In these cases,
+you can use the `copy-files` input parameter to specify local files
+to copy up to the emulator when running.
+
+Similarly, some test cases may expect a certain environment to be set.
+This can be accomplished using the `test-env` parameter, which
+is a space separated list of key=value pairs of environment
+variables to set when running the tests.
+
+For example:
+
+```yml
+  - name: Test Android Package
+    uses: skiptools/swift-android-action@v2
+    with:
+      copy-files: Tests
+      test-env: TEST_WORKSPACE=1
+```
+
+### Installing without Building
+
+You may wish to use this action to just install the toolchain and
+Android SDK without performing the build. For example, if you
+wish to build multiple packages consecutively, and don't need to
+run the test cases. In this case, you can set the
+`build-package` input to false, and then use the action's
+`swift-build` output to get the complete `swift build` command
+with all the appropriate paths and arguments to build using the
+SDK.
+
+For example:
+
+```yml
+  - name: Setup Toolchain
+    id: setup-toolchain
+    uses: skiptools/swift-android-action@v2
+    with:
+      # just set up the toolchain but don't build anything
+      build-package: false
+  - name: Checkout apple/swift-numerics
+    uses: actions/checkout@v4
+  - name: Build Package With Toolchain
+    run: |
+      # build twice, once with debug and once with release
+      ${{ steps.setup-toolchain.outputs.swift-build }} -c debug
+      ls .build/${{ steps.setup-toolchain.outputs.swift-sdk }}/debug
+      ${{ steps.setup-toolchain.outputs.swift-build }} -c release
+      ls .build/${{ steps.setup-toolchain.outputs.swift-sdk }}/release
+```
+
+The actual `swift-build` command will vary between operating systems
+and architectures. For example, on Ubuntu 24.04, it might be:
+
+```
+/home/runner/swift/toolchains/swift-6.0.2-RELEASE/usr/bin/swift build --swift-sdk x86_64-unknown-linux-android24
+```
+
+while on macOS-15 it will be:
+
+```
+/Users/runner/Library/Developer/Toolchains/swift-6.0.2-RELEASE.xctoolchain/usr/bin/swift build --swift-sdk aarch64-unknown-linux-android24
 ```
 
 

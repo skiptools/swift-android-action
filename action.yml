@@ -3,6 +3,13 @@ description: 'Cross-compiles a swift package for Android and runs the test cases
 branding:
   icon: 'target'
   color: 'orange'
+outputs:
+  swift-build:
+    description: 'The swift build command using the installed toolchain and SDK'
+    value: ${{ steps.install.outputs.swiftcmd }}
+  swift-sdk:
+    description: 'The swift SDK that is used to build for Android'
+    value: ${{ steps.install.outputs.swift-sdk }}
 inputs:
   swift-version:
     description: 'The version of the Swift toolchain to use'
@@ -20,6 +27,14 @@ inputs:
     description: 'Additional flags to pass to the swift test command'
     required: true
     default: ''
+  android-emulator-test-folder:
+    description: 'Emulator folder where tests are copied and run'
+    required: true
+    default: '/data/local/tmp/android-xctest'
+  test-env:
+    description: 'Test environment variables key=value'
+    required: true
+    default: ''
   android-emulator-options:
     description: 'Options to pass to the Android emulator'
     required: true
@@ -28,6 +43,14 @@ inputs:
     description: 'Emulator boot timeout in seconds'
     required: true
     default: 600
+  build-package:
+    description: 'Whether to build the package or just set up the SDK'
+    required: true
+    default: 'true'
+  build-tests:
+    description: 'Whether to build the tests or just the sources'
+    required: true
+    default: 'true'
   run-tests:
     description: 'Whether to run the tests or just the build'
     required: true
@@ -36,14 +59,11 @@ inputs:
     description: 'Additional files to copy to emulator for testing'
     required: true
     default: ''
-  build-tests:
-    description: 'Whether to build the tests or just the sources'
-    required: true
-    default: 'true'
   android-api-level:
     description: 'The API level of the Android emulator to run against'
     required: true
     default: 29
+
 runs:
   using: "composite"
   steps:
@@ -112,9 +132,9 @@ runs:
         cd ~/swift-download
         SWIFT_ID="swift-${{ steps.setup.outputs.swift-version }}-RELEASE"
         if [ ${RUNNER_OS} == 'Linux' ]; then
-          mkdir -p ${HOME}/swift/$SWIFT_ID
-          tar -xzf swift.tar.gz -C ~/swift/$SWIFT_ID --strip 1
-          SWIFT_INSTALLATION=$HOME/swift/$SWIFT_ID/usr
+          mkdir -p ${HOME}/swift/toolchains/$SWIFT_ID
+          tar -xzf swift.tar.gz -C ${HOME}/swift/toolchains/$SWIFT_ID --strip 1
+          SWIFT_INSTALLATION=$HOME/swift/toolchains/$SWIFT_ID/usr
         elif [ ${RUNNER_OS} == 'macOS' ]; then
           /usr/sbin/installer -pkg swift.pkg -target CurrentUserHomeDirectory
           SWIFT_INSTALLATION=${HOME}/Library/Developer/Toolchains/${SWIFT_ID}.xctoolchain/usr
@@ -124,14 +144,11 @@ runs:
           exit 1
         fi
         echo "SWIFT_INSTALLATION=${SWIFT_INSTALLATION}" >> $GITHUB_ENV
-        echo "${SWIFT_INSTALLATION}/bin" >> $GITHUB_PATH
-
-    - name: Check Swift Version
-      shell: bash
-      run: |
-        swift --version
+        # needed to override locally-installed `swift` command
+        #echo "${SWIFT_INSTALLATION}/bin" >> $GITHUB_PATH
 
     - name: Install Swift Android SDK
+      id: install
       shell: bash
       run: |
         set +x
@@ -153,9 +170,9 @@ runs:
         curl -fsSL https://github.com/skiptools/swift-android-toolchain/releases/download/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz --output ${SWIFT_SDK_ID}.artifactbundle.tar.gz
 
         # first check if it already installed (we may be running this workflow multiple times for an action, in which case it will already be present)
-        swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET} &> /dev/null || swift sdk install ${SWIFT_SDK_ID}.artifactbundle.tar.gz
+        ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET} &> /dev/null || ${SWIFT_INSTALLATION}/bin/swift sdk install ${SWIFT_SDK_ID}.artifactbundle.tar.gz
 
-        swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET}
+        ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET}
 
         if [ ${RUNNER_OS} == 'Linux' ]; then
           SWIFT_SDK_ROOT="${HOME}/.config/swiftpm/swift-sdks"
@@ -178,56 +195,77 @@ runs:
 
         echo "SWIFT_SDK_HOME=${SWIFT_SDK_HOME}" >> $GITHUB_ENV
 
+        echo "swiftcmd=${SWIFT_INSTALLATION}/bin/swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
+        echo "swift-sdk=${SWIFT_SDK_TARGET}" >> $GITHUB_OUTPUT
+
+    - name: Check Swift Version
+      shell: bash
+      run: |
+        echo "Swift Command: ${{ steps.install.outputs.swiftcmd }}"
+        ${{ steps.install.outputs.swiftcmd }} --version
+
     - name: Build Swift Package with Android SDK
+      if: ${{ inputs.build-package == 'true' }}
       shell: bash
       working-directory: ${{ inputs.package-path }}
       run: |
         if [ "${{ inputs.build-tests }}" == 'true' ]; then
           BUILD_TESTS="--build-tests"
         fi
-        SKIP_BRIDGE=1 swift build ${BUILD_TESTS} --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -Xclang-linker -Xswiftc -fuse-ld=lld -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}
+        SKIP_BRIDGE=1 ${{ steps.install.outputs.swiftcmd }} ${BUILD_TESTS}
 
     - name: Prepare Android Emulator Test Script
-      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' }}
+      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
       shell: bash
-      working-directory: ${{ inputs.package-path }}/.build
+      working-directory: ${{ inputs.package-path }}
       run: |
-        set -x
-
         if [ ${RUNNER_ARCH} == 'ARM64' ] && [ ${RUNNER_OS} == 'macOS' ]; then
           echo "::error::Cannot run tests on ARM64 macOS due to HVF error: HV_UNSUPPORTED. See https://github.com/ReactiveCircus/android-emulator-runner/issues/350#issuecomment-2030065889"
           exit 1
         fi
 
-        mkdir android-xctest
+        #inputs.android-emulator-test-folder = /data/local/tmp/android-xctest
+        REMOTE_FOLDER=$(dirname "${{ inputs.android-emulator-test-folder }}")
+        TEST_BASE_FOLDER=$(basename "${{ inputs.android-emulator-test-folder }}")
+        BUILD_DIR=".build"
+        PACK_DIR="${BUILD_DIR}/${TEST_BASE_FOLDER}"
+
+        mkdir -p ${PACK_DIR}
 
         # copy the built test binary
-        cp -va ${SWIFT_SDK_TARGET}/debug/*.xctest android-xctest
+        cp -va ${BUILD_DIR}/${SWIFT_SDK_TARGET}/debug/*.xctest ${PACK_DIR}
 
         # copy any optional resource bundles
-        cp -vaf ${SWIFT_SDK_TARGET}/debug/*.resources android-xctest || true
-
+        cp -vaf ${BUILD_DIR}/${SWIFT_SDK_TARGET}/debug/*.resources ${PACK_DIR} || true
         # 6.0.2 keeps libraries in per-API folders
-        cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/${SWIFT_SDK_ANROID_API}/lib*.so android-xctest || true
+        cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/${SWIFT_SDK_ANROID_API}/lib*.so ${PACK_DIR} || true
 
         # 6.0.3 keeps libraries in the parent folder
-        cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so android-xctest || true
+        cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so ${PACK_DIR} || true
 
-        rm -v android-xctest/lib{c,dl,log,m,z}.so
+        # clear out libraries that are already provided by Android
+        rm -v ${PACK_DIR}/lib{c,dl,log,m,z}.so || true
 
         if [ "${{ inputs.copy-files }}" != '' ]; then
-          cp -vaf ${{ inputs.copy-files }} android-xctest
+          cp -vaf ${{ inputs.copy-files }} ${PACK_DIR}
         fi
 
-        echo "adb push android-xctest /data/local/tmp" > run-android-tests.sh
-        for XCTEST in android-xctest/*.xctest; do
-          echo "adb shell /data/local/tmp/${XCTEST} ${{ inputs.swift-test-flags }}" >> run-android-tests.sh
+        # create the script that will be run once the emulator is launched
+        SCRIPT_FILE="run-android-tests.sh"
+
+        cd ${BUILD_DIR}
+        echo "adb push ${TEST_BASE_FOLDER} ${REMOTE_FOLDER}" > ${SCRIPT_FILE}
+        for XCTEST in ${TEST_BASE_FOLDER}/*.xctest; do
+          XCTEST_BASE=$(basename "${XCTEST}")
+          echo "adb shell 'cd ${REMOTE_FOLDER}/${TEST_BASE_FOLDER} && ${{ inputs.test-env }} ./${XCTEST_BASE} ${{ inputs.swift-test-flags }}'" >> ${SCRIPT_FILE}
         done
 
-        chmod +x run-android-tests.sh
+        cat ${SCRIPT_FILE}
+
+        chmod +x ${SCRIPT_FILE}
 
     - name: Setup Android Emulator Cache
-      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' }}
+      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
       uses: actions/cache@v4
       id: avd-cache
       with:
@@ -237,7 +275,7 @@ runs:
         key: avd-${{ inputs.android-api-level }}-${{ steps.setup.outputs.android-emulator-arch }}
 
     - name: Create Android Emulator Cache
-      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && steps.avd-cache.outputs.cache-hit != 'true' }}
+      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' && steps.avd-cache.outputs.cache-hit != 'true' }}
       uses: reactivecircus/android-emulator-runner@v2
       with:
         force-avd-creation: false
@@ -250,7 +288,7 @@ runs:
         script: echo "Generated Android Emulator snapshot for caching."
 
     - name: Run Tests on Android emulator
-      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' }}
+      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
       uses: reactivecircus/android-emulator-runner@v2
       with:
         force-avd-creation: false
