@@ -23,7 +23,7 @@ jobs:
           repository: apple/swift-algorithms
           path: apple/swift-algorithms
       - name: Test apple/swift-algorithms
-        uses: swift-android-action/
+        uses: ./swift-android-action/
         #uses: skiptools/swift-android-action@main
         with:
           package-path: apple/swift-algorithms
@@ -35,7 +35,7 @@ jobs:
           repository: skiptools/swift-sqlite
           path: skiptools/swift-sqlite
       - name: Test skiptools/swift-sqlite
-        uses: swift-android-action/
+        uses: ./swift-android-action/
         #uses: skiptools/swift-android-action@main
         with:
           package-path: skiptools/swift-sqlite
