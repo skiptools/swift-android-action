@@ -4,8 +4,8 @@ branding:
   icon: 'target'
   color: 'orange'
 outputs:
-  swift-command:
-    description: 'The swift command using the installed toolchain and SDK'
+  swift-build:
+    description: 'The swift build command using the installed toolchain and SDK'
     value: ${{ steps.install.outputs.swiftcmd }}
 inputs:
   swift-version:
