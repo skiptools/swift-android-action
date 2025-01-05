@@ -2,8 +2,8 @@ name: swift-android-action ci
 on:
   workflow_dispatch:
   push:
-    branches:
-      - '*'
+  pull_request:
+
 jobs:
   demo:
     runs-on: ${{ matrix.os }}
@@ -18,7 +18,8 @@ jobs:
           repository: apple/swift-algorithms
           path: apple/swift-algorithms
       - name: Test apple/swift-algorithms
-        uses: skiptools/swift-android-action
+        uses: ./
+        #uses: skiptools/swift-android-action@main
         with:
           package-path: apple/swift-algorithms
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
@@ -29,7 +30,8 @@ jobs:
           repository: skiptools/swift-sqlite
           path: skiptools/swift-sqlite
       - name: Test skiptools/swift-sqlite
-        uses: skiptools/swift-android-action
+        uses: ./
+        #uses: skiptools/swift-android-action@main
         with:
           package-path: skiptools/swift-sqlite
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
