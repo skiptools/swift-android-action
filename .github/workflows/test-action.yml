@@ -28,8 +28,8 @@ jobs:
         with:
           package-path: jpsim/Yams
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
-          copy-files: Test
-          env: TEST_WORKSPACE=1
+          copy-files: Tests
+          test-env: TEST_WORKSPACE=1
 
       - name: Checkout apple/swift-algorithms
         uses: actions/checkout@v4
