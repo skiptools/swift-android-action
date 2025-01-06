@@ -32,7 +32,7 @@ jobs:
         uses: ./swift-android-action/
         #uses: skiptools/swift-android-action@v2
         with:
-          swift-verison: ${{ matrix.swift-version }}
+          swift-version: ${{ matrix.swift-version }}
           package-path: jpsim/Yams
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
           copy-files: Tests
@@ -47,7 +47,7 @@ jobs:
         uses: ./swift-android-action/
         #uses: skiptools/swift-android-action@v2
         with:
-          swift-verison: ${{ matrix.swift-version }}
+          swift-version: ${{ matrix.swift-version }}
           package-path: apple/swift-algorithms
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
 
@@ -60,7 +60,7 @@ jobs:
         uses: ./swift-android-action/
         #uses: skiptools/swift-android-action@v2
         with:
-          swift-verison: ${{ matrix.swift-version }}
+          swift-version: ${{ matrix.swift-version }}
           package-path: skiptools/swift-sqlite
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
 
@@ -83,7 +83,7 @@ jobs:
         with:
           # just set up the toolchain and don't build anything
           build-package: false
-          swift-verison: '6.0.3'
+          swift-version: '6.0.3'
       - name: Checkout apple/swift-numerics
         uses: actions/checkout@v4
         with:
