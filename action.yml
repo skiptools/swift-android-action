@@ -197,7 +197,7 @@ runs:
 
         echo "SWIFT_SDK_HOME=${SWIFT_SDK_HOME}" >> $GITHUB_ENV
 
-        echo "swiftcmd=${SWIFT_INSTALLATION}/bin/swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
+        echo "swiftcmd=TARGET_OS_ANDROID=1 SKIP_BRIDGE=1 ${SWIFT_INSTALLATION}/bin/swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -DTARGET_OS_ANDROID -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
         echo "swift-sdk=${SWIFT_SDK_TARGET}" >> $GITHUB_OUTPUT
 
     - name: Check Swift Version
@@ -214,7 +214,7 @@ runs:
         if [ "${{ inputs.build-tests }}" == 'true' ]; then
           BUILD_TESTS="--build-tests"
         fi
-        SKIP_BRIDGE=1 ${{ steps.install.outputs.swiftcmd }} ${BUILD_TESTS}
+        ${{ steps.install.outputs.swiftcmd }} ${BUILD_TESTS}
 
     - name: Prepare Android Emulator Test Script
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
