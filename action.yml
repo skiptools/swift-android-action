@@ -98,7 +98,9 @@ runs:
 
         # translate swift-version "latest" into our known latest version
         if [ "${{ inputs.swift-version }}" == 'latest' ]; then
-          echo "swift-version=6.0.2" >> $GITHUB_OUTPUT
+          # fetch the most recent release tag from the toolchain repo
+          LATEST_TAG=$(curl -fsSL https://api.github.com/repos/skiptools/swift-android-toolchain/releases/latest | jq -r '.tag_name')
+          echo "swift-version=${LATEST_TAG}" >> $GITHUB_OUTPUT
         else
           echo "swift-version=${{ inputs.swift-version }}" >> $GITHUB_OUTPUT
         fi
