@@ -60,14 +60,14 @@ jobs:
       - name: "Test Swift Package on Android"
         uses: skiptools/swift-android-action@v2
         with:
-          swift-version: 6.0.2
+          swift-version: 6.0.3
 ```
 
 ### Configuration Options
 
 | Parameter | Default | Description  |
 |-----|-----|-----|
-| swift-version | The version of the Swift toolchain to use | 6.0.2 |
+| swift-version | The version of the Swift toolchain to use | 6.0.3 |
 | package-path | The folder where the swift package is checked out | . |
 | swift-build-flags | Additional flags to pass to the swift build command |  |
 | swift-test-flags | Additional flags to pass to the swift test command |  |
@@ -165,13 +165,13 @@ The actual `swift-build` command will vary between operating systems
 and architectures. For example, on Ubuntu 24.04, it might be:
 
 ```
-/home/runner/swift/toolchains/swift-6.0.2-RELEASE/usr/bin/swift build --swift-sdk x86_64-unknown-linux-android24
+/home/runner/swift/toolchains/swift-6.0.3-RELEASE/usr/bin/swift build --swift-sdk x86_64-unknown-linux-android24
 ```
 
 while on macOS-15 it will be:
 
 ```
-/Users/runner/Library/Developer/Toolchains/swift-6.0.2-RELEASE.xctoolchain/usr/bin/swift build --swift-sdk aarch64-unknown-linux-android24
+/Users/runner/Library/Developer/Toolchains/swift-6.0.3-RELEASE.xctoolchain/usr/bin/swift build --swift-sdk aarch64-unknown-linux-android24
 ```
 
 
@@ -213,8 +213,8 @@ jobs:
       - name: "Setup Swift on Windows"
         uses: compnerd/gha-setup-swift@main
         with:
-          branch: swift-6.0.2-release
-          tag: 6.0.2-RELEASE
+          branch: swift-6.0.3-release
+          tag: 6.0.3-RELEASE
       - name: "Test Swift Package on Windows"
         run: swift test
 
