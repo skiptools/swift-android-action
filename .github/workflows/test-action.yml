@@ -51,17 +51,17 @@ jobs:
           package-path: apple/swift-algorithms
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
 
-      - name: Checkout skiptools/swift-sqlite
+      - name: Checkout skiptools/swift-sqlcipher
         uses: actions/checkout@v4
         with:
-          repository: skiptools/swift-sqlite
-          path: skiptools/swift-sqlite
-      - name: Test skiptools/swift-sqlite
+          repository: skiptools/swift-sqlcipher
+          path: skiptools/swift-sqlcipher
+      - name: Test skiptools/swift-sqlcipher
         uses: ./swift-android-action/
         #uses: skiptools/swift-android-action@v2
         with:
           swift-version: ${{ matrix.swift-version }}
-          package-path: skiptools/swift-sqlite
+          package-path: skiptools/swift-sqlcipher
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
 
   toolchain-setup:
