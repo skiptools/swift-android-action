@@ -99,7 +99,9 @@ runs:
         # translate swift-version "latest" into our known latest version
         if [ "${{ inputs.swift-version }}" == 'latest' ]; then
           # fetch the most recent release tag from the toolchain repo
-          LATEST_TAG=$(curl -fsSL -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" --retry-all-errors --retry 100 --retry-max-time 600 https://api.github.com/repos/skiptools/swift-android-toolchain/releases/latest | jq -r '.tag_name')
+          #LATEST_TAG=$(curl -fsSL -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" --retry-all-errors --retry 100 --retry-max-time 600 https://api.github.com/repos/skiptools/swift-android-toolchain/releases/latest | jq -r '.tag_name')
+          # disabled because it frequently gives "The requested URL returned error: 403"
+          LATEST_TAG="6.0.3"
           echo "swift-version=${LATEST_TAG}" >> $GITHUB_OUTPUT
         else
           echo "swift-version=${{ inputs.swift-version }}" >> $GITHUB_OUTPUT
