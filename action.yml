@@ -23,6 +23,10 @@ inputs:
     description: 'Additional flags to pass to the swift build command'
     required: true
     default: ''
+  swift-configuration:
+    description: 'Whether to build in debug or release configuration'
+    required: true
+    default: 'debug'
   swift-test-flags:
     description: 'Additional flags to pass to the swift test command'
     required: true
@@ -216,7 +220,7 @@ runs:
         if [ "${{ inputs.build-tests }}" == 'true' ]; then
           BUILD_TESTS="--build-tests"
         fi
-        ${{ steps.install.outputs.swiftcmd }} ${BUILD_TESTS}
+        ${{ steps.install.outputs.swiftcmd }} -c ${{ inputs.swift-configuration }} ${BUILD_TESTS}
 
     - name: Prepare Android Emulator Test Script
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
@@ -237,10 +241,10 @@ runs:
         mkdir -p ${PACK_DIR}
 
         # copy the built test binary
-        cp -va ${BUILD_DIR}/${SWIFT_SDK_TARGET}/debug/*.xctest ${PACK_DIR}
+        cp -va ${BUILD_DIR}/${SWIFT_SDK_TARGET}/${{ inputs.swift-configuration }}/*.xctest ${PACK_DIR}
 
         # copy any optional resource bundles
-        cp -vaf ${BUILD_DIR}/${SWIFT_SDK_TARGET}/debug/*.resources ${PACK_DIR} || true
+        cp -vaf ${BUILD_DIR}/${SWIFT_SDK_TARGET}/${{ inputs.swift-configuration }}/*.resources ${PACK_DIR} || true
         # 6.0.2 keeps libraries in per-API folders
         cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/${SWIFT_SDK_ANROID_API}/lib*.so ${PACK_DIR} || true
 

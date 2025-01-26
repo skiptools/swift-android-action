@@ -69,6 +69,7 @@ jobs:
 |-----|-----|-----|
 | swift-version | The version of the Swift toolchain to use | 6.0.3 |
 | package-path | The folder where the swift package is checked out | . |
+| swift-configuration | Whether to build with debug or release configuration |  |
 | swift-build-flags | Additional flags to pass to the swift build command |  |
 | swift-test-flags | Additional flags to pass to the swift test command |  |
 | test-env | Test environment variables key=value |  |
@@ -235,6 +236,6 @@ git tag v2.0.2
 git push --tags
 git tag -fa v2 -m "Update v2 tag"
 git push origin v2 --force
+gh release create
 ```
-
 
