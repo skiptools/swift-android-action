@@ -268,6 +268,10 @@ runs:
           echo "adb shell 'cd ${REMOTE_FOLDER}/${TEST_BASE_FOLDER} && ${{ inputs.test-env }} ./${XCTEST_BASE} ${{ inputs.swift-test-flags }}'" >> ${SCRIPT_FILE}
         done
 
+        # ensure the emulator stops when we are done
+        # https://github.com/ReactiveCircus/android-emulator-runner/issues/385#issuecomment-2492035091
+        echo 'killall -INT crashpad_handler || true' >> ${SCRIPT_FILE}
+
         cat ${SCRIPT_FILE}
 
         chmod +x ${SCRIPT_FILE}
