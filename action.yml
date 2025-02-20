@@ -191,17 +191,17 @@ runs:
           exit 1
         fi
 
-        SWIFT_SDK_HOME="${SWIFT_SDK_ROOT}/${SWIFT_SDK_ID}.artifactbundle"
+        SWIFT_SDK_BUNDLE="${SWIFT_SDK_ROOT}/${SWIFT_SDK_ID}.artifactbundle"
 
         # extract the artifact ID from the info.plist in the SDK root
-        SWIFT_SDK_ARTIFACT_ID=$(cat ${SWIFT_SDK_HOME}/info.json | jq -r '.artifacts[] | .variants[0].path')
-        SWIFT_SDK_HOME="${SWIFT_SDK_HOME}/${SWIFT_SDK_ARTIFACT_ID}"
+        SWIFT_SDK_ARTIFACT_ID=$(cat ${SWIFT_SDK_BUNDLE}/info.json | jq -r '.artifacts[] | .variants[0].path')
+        SWIFT_SDK_BUNDLE="${SWIFT_SDK_BUNDLE}/${SWIFT_SDK_ARTIFACT_ID}"
 
         # extract the sdkRootPath from the swift-sdk.json
-        SWIFT_SDK_ROOT_PATH=$(cat ${SWIFT_SDK_HOME}/swift-sdk.json | jq -r '.targetTriples[] | .sdkRootPath' | head -n 1)
-        SWIFT_SDK_HOME="${SWIFT_SDK_HOME}/${SWIFT_SDK_ROOT_PATH}"
+        SWIFT_SDK_ROOT_PATH=$(cat ${SWIFT_SDK_BUNDLE}/swift-sdk.json | jq -r '.targetTriples[] | .sdkRootPath' | head -n 1)
+        SWIFT_SDK_BUNDLE="${SWIFT_SDK_BUNDLE}/${SWIFT_SDK_ROOT_PATH}"
 
-        echo "SWIFT_SDK_HOME=${SWIFT_SDK_HOME}" >> $GITHUB_ENV
+        echo "SWIFT_SDK_BUNDLE=${SWIFT_SDK_BUNDLE}" >> $GITHUB_ENV
 
         echo "swiftcmd=TARGET_OS_ANDROID=1 SKIP_BRIDGE=1 ${SWIFT_INSTALLATION}/bin/swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -DTARGET_OS_ANDROID -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
         echo "swift-sdk=${SWIFT_SDK_TARGET}" >> $GITHUB_OUTPUT
@@ -246,10 +246,10 @@ runs:
         # copy any optional resource bundles
         cp -vaf ${BUILD_DIR}/${SWIFT_SDK_TARGET}/${{ inputs.swift-configuration }}/*.resources ${PACK_DIR} || true
         # 6.0.2 keeps libraries in per-API folders
-        cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/${SWIFT_SDK_ANROID_API}/lib*.so ${PACK_DIR} || true
+        cp -vaf ${SWIFT_SDK_BUNDLE}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/${SWIFT_SDK_ANROID_API}/lib*.so ${PACK_DIR} || true
 
         # 6.0.3 keeps libraries in the parent folder
-        cp -vaf ${SWIFT_SDK_HOME}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so ${PACK_DIR} || true
+        cp -vaf ${SWIFT_SDK_BUNDLE}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so ${PACK_DIR} || true
 
         # clear out libraries that are already provided by Android
         rm -v ${PACK_DIR}/lib{c,dl,log,m,z}.so || true
