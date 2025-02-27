@@ -10,6 +10,9 @@ outputs:
   swift-sdk:
     description: 'The swift SDK that is used to build for Android'
     value: ${{ steps.install.outputs.swift-sdk }}
+  swift-install:
+    description: 'The installation root for the host Swift toolchain'
+    value: ${{ steps.install.outputs.swiftroot }}
 inputs:
   swift-version:
     description: 'The version of the Swift toolchain to use'
@@ -203,6 +206,7 @@ runs:
 
         echo "SWIFT_SDK_BUNDLE=${SWIFT_SDK_BUNDLE}" >> $GITHUB_ENV
 
+        echo "swiftroot=${SWIFT_INSTALLATION}" >> $GITHUB_OUTPUT
         echo "swiftcmd=TARGET_OS_ANDROID=1 SKIP_BRIDGE=1 ${SWIFT_INSTALLATION}/bin/swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -DTARGET_OS_ANDROID -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
         echo "swift-sdk=${SWIFT_SDK_TARGET}" >> $GITHUB_OUTPUT
 
