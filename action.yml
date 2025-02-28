@@ -106,7 +106,7 @@ runs:
         # translate swift-version "latest" into our known latest version
         if [ "${{ inputs.swift-version }}" == 'latest' ]; then
           # fetch the most recent release tag from the toolchain repo
-          #LATEST_TAG=$(curl -fsSL -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" --retry-all-errors --retry 100 --retry-max-time 600 https://api.github.com/repos/skiptools/swift-android-toolchain/releases/latest | jq -r '.tag_name')
+          #LATEST_TAG=$(curl -fsSL -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" --retry 10 --retry-max-time 600 https://api.github.com/repos/skiptools/swift-android-toolchain/releases/latest | jq -r '.tag_name')
           # disabled because it frequently gives "The requested URL returned error: 403"
           LATEST_TAG="6.0.3"
           echo "swift-version=${LATEST_TAG}" >> $GITHUB_OUTPUT
@@ -129,9 +129,9 @@ runs:
         mkdir -p ~/swift-download
         cd ~/swift-download
         if [ ${RUNNER_OS} == 'Linux' ]; then
-          curl -fsSL --retry 8 --retry-all-errors https://download.swift.org/swift-${{ steps.setup.outputs.swift-version }}-release/${{ steps.setup.outputs.osid }}/${SWIFT_ID}/${SWIFT_ID}-${{ steps.setup.outputs.osidpair }}.tar.gz --output swift.tar.gz
+          curl -fsSL --retry 8 --retry-connrefused https://download.swift.org/swift-${{ steps.setup.outputs.swift-version }}-release/${{ steps.setup.outputs.osid }}/${SWIFT_ID}/${SWIFT_ID}-${{ steps.setup.outputs.osidpair }}.tar.gz --output swift.tar.gz
         elif [ ${RUNNER_OS} == 'macOS' ]; then
-          curl -fsSL --retry 8 --retry-all-errors https://download.swift.org/swift-${{ steps.setup.outputs.swift-version }}-release/xcode/${SWIFT_ID}/${SWIFT_ID}-osx.pkg --output swift.pkg
+          curl -fsSL --retry 8 --retry-connrefused https://download.swift.org/swift-${{ steps.setup.outputs.swift-version }}-release/xcode/${SWIFT_ID}/${SWIFT_ID}-osx.pkg --output swift.pkg
         else
           echo "::error::Unsupported platform: ${RUNNER_OS}"
           exit 1
@@ -178,7 +178,7 @@ runs:
 
         mkdir -p ${RUNNER_TEMP}/swift-android-toolchain
         cd ${RUNNER_TEMP}/swift-android-toolchain
-        curl -fsSL --retry 8 --retry-all-errors https://github.com/skiptools/swift-android-toolchain/releases/download/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz --output ${SWIFT_SDK_ID}.artifactbundle.tar.gz
+        curl -fsSL --retry 8 --retry-connrefused https://github.com/skiptools/swift-android-toolchain/releases/download/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz --output ${SWIFT_SDK_ID}.artifactbundle.tar.gz
 
         # first check if it already installed (we may be running this workflow multiple times for an action, in which case it will already be present)
         ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET} &> /dev/null || ${SWIFT_INSTALLATION}/bin/swift sdk install ${SWIFT_SDK_ID}.artifactbundle.tar.gz
