@@ -231,10 +231,11 @@ runs:
       shell: bash
       working-directory: ${{ inputs.package-path }}
       run: |
-        if [ ${RUNNER_ARCH} == 'ARM64' ] && [ ${RUNNER_OS} == 'macOS' ]; then
-          echo "::error::Cannot run tests on ARM64 macOS due to HVF error: HV_UNSUPPORTED. See https://github.com/ReactiveCircus/android-emulator-runner/issues/350#issuecomment-2030065889"
-          exit 1
-        fi
+        # disabled because a self-hosted runner might not be using nested virtualization…
+        #if [ ${RUNNER_ARCH} == 'ARM64' ] && [ ${RUNNER_OS} == 'macOS' ]; then
+        #  echo "::error::Cannot run tests on ARM64 macOS due to HVF error: HV_UNSUPPORTED. See https://github.com/ReactiveCircus/android-emulator-runner/issues/350#issuecomment-2030065889"
+        #  exit 1
+        #fi
 
         #inputs.android-emulator-test-folder = /data/local/tmp/android-xctest
         REMOTE_FOLDER=$(dirname "${{ inputs.android-emulator-test-folder }}")
