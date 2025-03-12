@@ -153,6 +153,12 @@ runs:
         echo "SWIFT_BRANCH: ${SWIFT_BRANCH}"
         echo "swift-branch=${SWIFT_BRANCH}" >> $GITHUB_OUTPUT
 
+        if [[ ${SWIFT_VERSION_ID} != swift-6.0* ]]; then
+          # recent releases require that ANDROID_NDK_ROOT *not* be set 
+          # see https://github.com/finagolfin/swift-android-sdk/issues/207
+          echo "ANDROID_NDK_ROOT=" >> $GITHUB_ENV
+        fi
+
     - name: Cache Swift ${{ steps.setup.outputs.swift-version }} Host Toolchain
       uses: actions/cache@v4
       id: cache-swift
