@@ -81,7 +81,7 @@ inputs:
   android-channel:
     required: false
     type: string
-    default: 'canary'
+    default: 'stable'
   android-profile:
     required: false
     type: string
@@ -89,7 +89,7 @@ inputs:
   android-target:
     required: false
     type: string
-    default: 'aosp_atd'
+    default: 'default'
 
 runs:
   using: "composite"
