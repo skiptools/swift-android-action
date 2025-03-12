@@ -379,7 +379,7 @@ runs:
             # We additionally need to handle the special exit code EXIT_NO_TESTS_FOUND (69 on Android),
             # which can happen when the tests link to Testing, but no tests are executed
             # see: https://github.com/swiftlang/swift-package-manager/blob/1b593469e8ad3daf2cc10e798340bd2de68c402d/Sources/Commands/SwiftTestCommand.swift#L1542
-            patchelf --print-needed ${XCTEST} | grep libTesting.so && TEST_SHELL="${TEST_SHELL} && ${TEST_CMD} --testing-library swift-testing && [ $? -eq 0 ] || [ $? -eq 69 ]" || true
+            patchelf --print-needed ${XCTEST} | grep libTesting.so && TEST_SHELL="${TEST_SHELL} && ${TEST_CMD} --testing-library swift-testing && [ \$? -eq 0 ] || [ \$? -eq 69 ]" || true
           fi
           echo "adb shell '${TEST_SHELL}'" >> ${SCRIPT_FILE}
         done
