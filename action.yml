@@ -220,6 +220,11 @@ runs:
           /usr/sbin/installer -pkg swift.pkg -target CurrentUserHomeDirectory
           SWIFT_INSTALLATION=${HOME}/Library/Developer/Toolchains/${{ steps.setup.outputs.swift-id }}.xctoolchain/usr
           echo "TOOLCHAINS=$(plutil -extract CFBundleIdentifier raw ${SWIFT_INSTALLATION}/Info.plist)" >> $GITHUB_ENV
+
+          # workaround for https://github.com/swiftlang/swift-package-manager/issues/8362
+          cd ${SWIFT_INSTALLATION}
+          cp -f lib/swift/host/plugins/testing/libTestingMacros.dylib lib/swift/host/plugins/ || true
+          cd -
         else
           echo "::error::Unsupported platform: ${RUNNER_OS}"
           exit 1
@@ -227,6 +232,7 @@ runs:
         echo "SWIFT_INSTALLATION=${SWIFT_INSTALLATION}" >> $GITHUB_ENV
         # needed to override locally-installed `swift` command
         #echo "${SWIFT_INSTALLATION}/bin" >> $GITHUB_PATH
+
 
     - name: Install Swift Android SDK
       id: install
