@@ -363,7 +363,7 @@ runs:
         echo "adb push ${TEST_BASE_FOLDER} ${REMOTE_FOLDER}" >> ${SCRIPT_FILE}
         for XCTEST in ${TEST_BASE_FOLDER}/*.xctest; do
           XCTEST_BASE=$(basename "${XCTEST}")
-          echo "adb shell 'cd ${REMOTE_FOLDER}/${TEST_BASE_FOLDER} && ${{ inputs.test-env }} ./${XCTEST_BASE} ${{ inputs.swift-test-flags }}'" >> ${SCRIPT_FILE}
+          echo "adb shell 'cd ${REMOTE_FOLDER}/${TEST_BASE_FOLDER} && ${{ inputs.test-env }} ./${XCTEST_BASE} ${{ inputs.swift-test-flags }} && ${{ inputs.test-env }} ./${XCTEST_BASE} ${{ inputs.swift-test-flags }} --testing-library swift-testing'" >> ${SCRIPT_FILE}
         done
 
         # ensure the emulator stops when we are done
