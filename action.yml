@@ -140,7 +140,7 @@ runs:
         if [ "${SWIFT_BRANCH}" == '' ]; then
           # guess the branch based on the specified Swift version
           if [[ "${SWIFT_VERSION_ID}" == *-RELEASE ]]; then
-            SWIFT_BRANCH="swift-${SWIFT_VERSION}-release""
+            SWIFT_BRANCH="swift-${SWIFT_VERSION}-release"
           elif [[ "${SWIFT_VERSION_ID}" == swift-DEVELOPMENT-* ]]; then
             SWIFT_BRANCH="development"
           else
