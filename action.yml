@@ -103,9 +103,12 @@ runs:
           . /etc/os-release
           echo "osidpair=${ID}${VERSION_ID}" >> $GITHUB_OUTPUT
           echo "osid=${ID}$(echo ${VERSION_ID} | tr -d '.')" >> $GITHUB_OUTPUT
+          # patchelf is needed to check whether an ELF binary contains the Testing library
+          which patchelf || apt install patchelf
         elif [ ${RUNNER_OS} == 'macOS' ]; then
           echo "osidpair=macos" >> $GITHUB_OUTPUT
           echo "osid=macos" >> $GITHUB_OUTPUT
+          which patchelf || brew install patchelf
         else
           echo "::error::Unsupported platform: ${RUNNER_OS}"
           exit 1
