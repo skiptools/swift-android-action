@@ -171,7 +171,7 @@ runs:
         cd ~/swift-download
         if [ ${RUNNER_OS} == 'Linux' ]; then
           mkdir -p ${HOME}/swift/toolchains/${{ steps.setup.outputs.swift-id }}
-          tar -xzf swift.tar.gz -C ${HOME}/swift/toolchains/${{ steps.setup.outputs.swift-id }} --strip 1}
+          tar -xzf swift.tar.gz -C ${HOME}/swift/toolchains/${{ steps.setup.outputs.swift-id }} --strip 1
           SWIFT_INSTALLATION=$HOME/swift/toolchains/${{ steps.setup.outputs.swift-id }}/usr
         elif [ ${RUNNER_OS} == 'macOS' ]; then
           /usr/sbin/installer -pkg swift.pkg -target CurrentUserHomeDirectory
