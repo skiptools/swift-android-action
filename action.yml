@@ -112,17 +112,21 @@ runs:
         # https://github.com/skiptools/swift-android-toolchain/releases/download/6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a/swift-6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a-android-24-0.1.artifactbundle.tar.gz.zip
         # https://download.swift.org/swift-6.1-branch/ubuntu2404/swift-6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a/swift-6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a-ubuntu24.04.tar.gz
 
-        #swift-branch='swift-6.0.3-release'
-        #swift-branch='swift-6.1-branch'
-        #swift-branch='development'
         SWIFT_VERSION=${{ inputs.swift-version }}
+
+        # fetch the most recent release tag from the toolchain repo
+        #LATEST_RELEASE=$(curl -fsSL -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" --retry 10 --retry-max-time 600 https://api.github.com/repos/skiptools/swift-android-toolchain/releases/latest | jq -r '.tag_name')
+        # disabled because it frequently gives "The requested URL returned error: 403"
+
+        # we hardcode the latest builds and will need to update them every time a new snapshot is released
+        LATEST_RELEASE="6.0.3"
+        LATEST_SNAPSHOT="6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a"
+
         # translate swift-version "latest" into our known latest version
-        if [ "${SWIFT_VERSION}" == 'latest' ]; then
-          # fetch the most recent release tag from the toolchain repo
-          #LATEST_TAG=$(curl -fsSL -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" --retry 10 --retry-max-time 600 https://api.github.com/repos/skiptools/swift-android-toolchain/releases/latest | jq -r '.tag_name')
-          # disabled because it frequently gives "The requested URL returned error: 403"
-          LATEST_TAG="6.0.3"
-          SWIFT_VERSION=${LATEST_TAG}
+        if [[ "${SWIFT_VERSION}" == '6.0' || "${SWIFT_VERSION}" == 'latest' ]]; then
+          SWIFT_VERSION="${LATEST_RELEASE}"
+        elif [[ "${SWIFT_VERSION}" == '6.1' || "${SWIFT_VERSION}" == 'snapshot' ]]; then
+          SWIFT_VERSION="${LATEST_SNAPSHOT}"
         fi
 
         echo "SWIFT_VERSION: ${SWIFT_VERSION}"
