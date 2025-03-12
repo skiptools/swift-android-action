@@ -363,7 +363,18 @@ runs:
         echo "adb push ${TEST_BASE_FOLDER} ${REMOTE_FOLDER}" >> ${SCRIPT_FILE}
         for XCTEST in ${TEST_BASE_FOLDER}/*.xctest; do
           XCTEST_BASE=$(basename "${XCTEST}")
-          echo "adb shell 'cd ${REMOTE_FOLDER}/${TEST_BASE_FOLDER} && ${{ inputs.test-env }} ./${XCTEST_BASE} ${{ inputs.swift-test-flags }} && ${{ inputs.test-env }} ./${XCTEST_BASE} ${{ inputs.swift-test-flags }} --testing-library swift-testing'" >> ${SCRIPT_FILE}
+          TEST_CMD="${{ inputs.test-env }} ./${XCTEST_BASE} ${{ inputs.swift-test-flags }}"
+
+          TEST_SHELL="cd ${REMOTE_FOLDER}/${TEST_BASE_FOLDER}"
+          TEST_SHELL="${TEST_SHELL} && ${TEST_CMD}"
+          if [[ "${{ steps.setup.outputs.swift-version }}" != 6.0* ]]; then
+            # for SDKs that support it (i.e., 6.1+), add another invocation using the swift-testing library
+            # see https://github.com/swiftlang/swift-package-manager/issues/8362#issuecomment-2719116854
+            # but only do it when the command links to the Testing library, otherwise it will fail with the error:
+            # Error: Invalid option "--testing-library"
+            patchelf --print-needed ${XCTEST} | grep libTesting.so && TEST_SHELL="${TEST_SHELL} && ${TEST_CMD} --testing-library swift-testing" || true
+          fi
+          echo "adb shell '${TEST_SHELL}'" >> ${SCRIPT_FILE}
         done
 
         # ensure the emulator stops when we are done
