@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-24.04', 'ubuntu-22.04', 'macos-13', 'macos-15']
-        swift-version: ['6.0.3', '6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a']
+        swift-version: ['6.0.3', 'swift-6.1-DEVELOPMENT-SNAPSHOT-2025-02-14-a', '6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a']
     steps:
       - name: Checkout Action
         uses: actions/checkout@v4
@@ -70,7 +70,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-24.04', 'ubuntu-22.04', 'macos-13', 'macos-15']
-        swift-version: ['6.0.3', '6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a']
+        swift-version: ['6.0.3', 'swift-6.1-DEVELOPMENT-SNAPSHOT-2025-02-14-a', '6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a']
     steps:
       - name: Checkout Action
         uses: actions/checkout@v4
