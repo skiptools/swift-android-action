@@ -89,7 +89,7 @@ inputs:
   android-target:
     required: false
     type: string
-    default: 'default'
+    default: 'aosp_atd'
 
 runs:
   using: "composite"
