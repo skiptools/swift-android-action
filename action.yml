@@ -112,21 +112,38 @@ runs:
         # https://github.com/skiptools/swift-android-toolchain/releases/download/6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a/swift-6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a-android-24-0.1.artifactbundle.tar.gz.zip
         # https://download.swift.org/swift-6.1-branch/ubuntu2404/swift-6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a/swift-6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a-ubuntu24.04.tar.gz
 
+        # fetch the most recent release tag from the toolchain repo
+        # disabled because it frequently gives "The requested URL returned error: 403"
+        #LATEST_RELEASE=$(curl -fsSL -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" --retry 10 --retry-max-time 600 https://api.github.com/repos/skiptools/swift-android-toolchain/releases/latest | jq -r '.tag_name')
+
+        # fetch the Atom feed for the latest releases
+        curl -fsSL --retry 8 --retry-connrefused https://github.com/skiptools/swift-android-toolchain/releases.atom --output ~/swift-releases.xml
+        yq -oy '.feed.entry[].title' ~/swift-releases.xml | sort -rn > ~/swift-versions.txt
+
+        # if we hardcode the latest builds, we would need to update them every time a new snapshot is released
+
         SWIFT_VERSION=${{ inputs.swift-version }}
 
-        # fetch the most recent release tag from the toolchain repo
-        #LATEST_RELEASE=$(curl -fsSL -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" --retry 10 --retry-max-time 600 https://api.github.com/repos/skiptools/swift-android-toolchain/releases/latest | jq -r '.tag_name')
-        # disabled because it frequently gives "The requested URL returned error: 403"
-
-        # we hardcode the latest builds and will need to update them every time a new snapshot is released
-        LATEST_RELEASE="6.0.3"
-        LATEST_SNAPSHOT="6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a"
-
         # translate swift-version "latest" into our known latest version
-        if [[ "${SWIFT_VERSION}" == '6.0' || "${SWIFT_VERSION}" == 'latest' ]]; then
-          SWIFT_VERSION="${LATEST_RELEASE}"
-        elif [[ "${SWIFT_VERSION}" == '6.1' || "${SWIFT_VERSION}" == 'snapshot' ]]; then
-          SWIFT_VERSION="${LATEST_SNAPSHOT}"
+        if [[ "${SWIFT_VERSION}" == 'latest' ]]; then
+          #LATEST_RELEASE="6.0.3"
+          #SWIFT_VERSION="${LATEST_RELEASE}"
+          # use the latest non-snapshot release
+          SWIFT_VERSION=$(cat ~/swift-versions.txt | grep -v -- '-SNAPSHOT' | head -n 1)
+        elif [[ "${SWIFT_VERSION}" == 'snapshot' ]]; then
+          #LATEST_SNAPSHOT="6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a"
+          #SWIFT_VERSION="${LATEST_SNAPSHOT}"
+          # use the latest snapshot release
+          SWIFT_VERSION=$(cat ~/swift-versions.txt | grep -- '-SNAPSHOT' | head -n 1)
+        else
+          # match "6.0" to "6.0.3"
+          # match "6.1" to "6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a"
+          SWIFT_VERSION=$(cat ~/swift-versions.txt | grep -- "^${SWIFT_VERSION}" | head -n 1)
+        fi
+
+        if [[ "${SWIFT_VERSION}" == "" ]]; then
+          echo "::error::Could not find any swift version matching: ${{ inputs.swift-version }}"
+          exit 1
         fi
 
         echo "SWIFT_VERSION: ${SWIFT_VERSION}"
