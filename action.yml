@@ -77,7 +77,7 @@ inputs:
   android-api-level:
     description: 'The API level of the Android emulator to run against'
     required: true
-    default: 29
+    default: 30
   android-channel:
     required: false
     type: string
@@ -236,11 +236,6 @@ runs:
           /usr/sbin/installer -pkg swift.pkg -target CurrentUserHomeDirectory
           SWIFT_INSTALLATION=${HOME}/Library/Developer/Toolchains/${{ steps.setup.outputs.swift-id }}.xctoolchain/usr
           echo "TOOLCHAINS=$(plutil -extract CFBundleIdentifier raw ${SWIFT_INSTALLATION}/Info.plist)" >> $GITHUB_ENV
-
-          # workaround for https://github.com/swiftlang/swift-package-manager/issues/8362
-          cd ${SWIFT_INSTALLATION}
-          cp -f lib/swift/host/plugins/testing/libTestingMacros.dylib lib/swift/host/plugins/ || true
-          cd -
         else
           echo "::error::Unsupported platform: ${RUNNER_OS}"
           exit 1
@@ -302,7 +297,9 @@ runs:
         echo "SWIFT_SDK_BUNDLE=${SWIFT_SDK_BUNDLE}" >> $GITHUB_ENV
 
         echo "swiftroot=${SWIFT_INSTALLATION}" >> $GITHUB_OUTPUT
-        echo "swiftcmd=TARGET_OS_ANDROID=1 SKIP_BRIDGE=1 ${SWIFT_INSTALLATION}/bin/swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -DTARGET_OS_ANDROID -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
+
+        # plugin-path is a workaround for https://github.com/swiftlang/swift-package-manager/issues/8362
+        echo "swiftcmd=TARGET_OS_ANDROID=1 SKIP_BRIDGE=1 ${SWIFT_INSTALLATION}/bin/swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -plugin-path -Xswiftc ${SWIFT_INSTALLATION}/lib/swift/host/plugins/testing/testing -Xswiftc -DTARGET_OS_ANDROID -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
         echo "swift-sdk=${SWIFT_SDK_TARGET}" >> $GITHUB_OUTPUT
 
     - name: Check Swift Version

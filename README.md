@@ -87,7 +87,7 @@ Snapshots can be specified with their full name, like "6.1-DEVELOPMENT-SNAPSHOT-
 | run-tests | Whether to run the tests or just perform the build | true |
 | copy-files | Additional files to copy to emulator for testing | |
 | android-emulator-test-folder | Emulator folder where tests are copied | /data/local/tmp/android-xctest |
-| android-api-level | The API level of the Android emulator to run against | 29 |
+| android-api-level | The API level of the Android emulator to run against | 30 |
 | android-channel | SDK component channel: stable, beta, dev, canary | stable |
 | android-profile | Hardware profile used for creating the AVD | pixel |
 | android-target | Target of the system image | aosp_atd |
