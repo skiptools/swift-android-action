@@ -18,6 +18,10 @@ inputs:
     description: 'The version of the Swift toolchain to use'
     required: true
     default: 'latest'
+  swift-branch:
+    description: 'The branch of the Swift toolchain to use'
+    required: true
+    default: ''
   package-path:
     description: 'The folder where the swift package is checked out'
     required: true
@@ -103,16 +107,40 @@ runs:
           exit 1
         fi
 
+        # when the swift-version contains a dash, that means we want to use a development toolchain
+        # e.g., "6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a" will result in using the following SDK and host toolchain:
+        # https://github.com/skiptools/swift-android-toolchain/releases/download/6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a/swift-6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a-android-24-0.1.artifactbundle.tar.gz.zip
+        # https://download.swift.org/swift-6.1-branch/ubuntu2404/swift-6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a/swift-6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a-ubuntu24.04.tar.gz
+
+        #swift-branch='swift-6.0.3-release'
+        #swift-branch='swift-6.1-branch'
+        #swift-branch='development'
         # translate swift-version "latest" into our known latest version
         if [ "${{ inputs.swift-version }}" == 'latest' ]; then
           # fetch the most recent release tag from the toolchain repo
           #LATEST_TAG=$(curl -fsSL -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" --retry 10 --retry-max-time 600 https://api.github.com/repos/skiptools/swift-android-toolchain/releases/latest | jq -r '.tag_name')
           # disabled because it frequently gives "The requested URL returned error: 403"
           LATEST_TAG="6.0.3"
-          echo "swift-version=${LATEST_TAG}" >> $GITHUB_OUTPUT
+          SWIFT_VERSION=${LATEST_TAG}
         else
           echo "swift-version=${{ inputs.swift-version }}" >> $GITHUB_OUTPUT
         fi
+
+        echo "swift-version=${SWIFT_VERSION}" >> $GITHUB_OUTPUT
+
+        if [ "${{ inputs.swift-branch }}" == '' ]; then
+          echo "swift-branch=swift-${SWIFT_VERSION}-release" >> $GITHUB_OUTPUT
+        else
+          echo "swift-branch=${{ inputs.swift-branch }}" >> $GITHUB_OUTPUT
+        fi
+
+        # the swift-id is the basename of the host toolchain download
+        SWIFT_VERSION_ID="swift-${SWIFT_VERSION}"
+        if [[ ${SWIFT_VERSION} != *-* ]]; then
+          # a bare version name like "6.0.3" will have "-RELEASE" tacked on to the end
+          SWIFT_VERSION_ID="${SWIFT_VERSION_ID}-RELEASE"
+        fi
+        echo "swift-id=${SWIFT_VERSION_ID}" >> $GITHUB_OUTPUT
 
     - name: Cache Swift ${{ steps.setup.outputs.swift-version }} Host Toolchain
       uses: actions/cache@v4
@@ -125,13 +153,13 @@ runs:
       if: steps.cache-swift.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        SWIFT_ID="swift-${{ steps.setup.outputs.swift-version }}-RELEASE"
         mkdir -p ~/swift-download
         cd ~/swift-download
+        BASE_URL="https://download.swift.org/${{ steps.setup.outputs.swift-branch }}"
         if [ ${RUNNER_OS} == 'Linux' ]; then
-          curl -fsSL --retry 8 --retry-connrefused https://download.swift.org/swift-${{ steps.setup.outputs.swift-version }}-release/${{ steps.setup.outputs.osid }}/${SWIFT_ID}/${SWIFT_ID}-${{ steps.setup.outputs.osidpair }}.tar.gz --output swift.tar.gz
+          curl -fsSL --retry 8 --retry-connrefused ${BASE_URL}/${{ steps.setup.outputs.osid }}/${{ steps.setup.outputs.swift-id }}/${{ steps.setup.outputs.swift-id }}-${{ steps.setup.outputs.osidpair }}.tar.gz --output swift.tar.gz
         elif [ ${RUNNER_OS} == 'macOS' ]; then
-          curl -fsSL --retry 8 --retry-connrefused https://download.swift.org/swift-${{ steps.setup.outputs.swift-version }}-release/xcode/${SWIFT_ID}/${SWIFT_ID}-osx.pkg --output swift.pkg
+          curl -fsSL --retry 8 --retry-connrefused ${BASE_URL}/xcode/${{ steps.setup.outputs.swift-id }}/${{ steps.setup.outputs.swift-id }}-osx.pkg --output swift.pkg
         else
           echo "::error::Unsupported platform: ${RUNNER_OS}"
           exit 1
@@ -141,14 +169,13 @@ runs:
       shell: bash
       run: |
         cd ~/swift-download
-        SWIFT_ID="swift-${{ steps.setup.outputs.swift-version }}-RELEASE"
         if [ ${RUNNER_OS} == 'Linux' ]; then
-          mkdir -p ${HOME}/swift/toolchains/$SWIFT_ID
-          tar -xzf swift.tar.gz -C ${HOME}/swift/toolchains/$SWIFT_ID --strip 1
-          SWIFT_INSTALLATION=$HOME/swift/toolchains/$SWIFT_ID/usr
+          mkdir -p ${HOME}/swift/toolchains/${{ steps.setup.outputs.swift-id }}
+          tar -xzf swift.tar.gz -C ${HOME}/swift/toolchains/${{ steps.setup.outputs.swift-id }} --strip 1}
+          SWIFT_INSTALLATION=$HOME/swift/toolchains/${{ steps.setup.outputs.swift-id }}/usr
         elif [ ${RUNNER_OS} == 'macOS' ]; then
           /usr/sbin/installer -pkg swift.pkg -target CurrentUserHomeDirectory
-          SWIFT_INSTALLATION=${HOME}/Library/Developer/Toolchains/${SWIFT_ID}.xctoolchain/usr
+          SWIFT_INSTALLATION=${HOME}/Library/Developer/Toolchains/${{ steps.setup.outputs.swift-id }}.xctoolchain/usr
           echo "TOOLCHAINS=$(plutil -extract CFBundleIdentifier raw ${SWIFT_INSTALLATION}/Info.plist)" >> $GITHUB_ENV
         else
           echo "::error::Unsupported platform: ${RUNNER_OS}"
@@ -166,11 +193,11 @@ runs:
         SWIFT_SDK_ANROID_API="24"
         echo "SWIFT_SDK_ANROID_API=${SWIFT_SDK_ANROID_API}" >> $GITHUB_ENV
 
-        SWIFT_SDK_ID="swift-${{ steps.setup.outputs.swift-version }}-RELEASE-android-${SWIFT_SDK_ANROID_API}-0.1"
+        SWIFT_SDK_ID="${{ steps.setup.outputs.swift-id }}-android-${SWIFT_SDK_ANROID_API}-0.1"
         echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
 
         # variant that identifies the SDK
-        SWIFT_SDK_ID_SHORT="swift-${{ steps.setup.outputs.swift-version }}-release-android-${SWIFT_SDK_ANROID_API}-sdk"
+        SWIFT_SDK_ID_SHORT="${{ steps.setup.outputs.swift-branch }}-android-${SWIFT_SDK_ANROID_API}-sdk"
         echo "SWIFT_SDK_ID_SHORT=${SWIFT_SDK_ID_SHORT}" >> $GITHUB_ENV
 
         SWIFT_SDK_TARGET="${{ steps.setup.outputs.android-sdk-arch }}-unknown-linux-android${SWIFT_SDK_ANROID_API}"
