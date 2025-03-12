@@ -128,12 +128,6 @@ runs:
 
         echo "swift-version=${SWIFT_VERSION}" >> $GITHUB_OUTPUT
 
-        if [ "${{ inputs.swift-branch }}" == '' ]; then
-          echo "swift-branch=swift-${SWIFT_VERSION}-release" >> $GITHUB_OUTPUT
-        else
-          echo "swift-branch=${{ inputs.swift-branch }}" >> $GITHUB_OUTPUT
-        fi
-
         # the swift-id is the basename of the host toolchain download
         SWIFT_VERSION_ID="swift-${SWIFT_VERSION}"
         if [[ ${SWIFT_VERSION} != *-* ]]; then
@@ -141,6 +135,21 @@ runs:
           SWIFT_VERSION_ID="${SWIFT_VERSION_ID}-RELEASE"
         fi
         echo "swift-id=${SWIFT_VERSION_ID}" >> $GITHUB_OUTPUT
+
+        SWIFT_BRANCH="${{ inputs.swift-branch }}"
+        if [ "${SWIFT_BRANCH}" == '' ]; then
+          # guess the branch based on the specified Swift version
+          if [[ "${SWIFT_VERSION_ID}" == *-RELEASE ]]; then
+            SWIFT_BRANCH="swift-${SWIFT_VERSION}-release""
+          elif [[ "${SWIFT_VERSION_ID}" == swift-DEVELOPMENT-* ]]; then
+            SWIFT_BRANCH="development"
+          else
+            # convert "6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a" into "swift-6.1-branch"
+            BASE_VERSION=$(echo "${SWIFT_VERSION}" | tr '-' '\n' | head -n 1)
+            SWIFT_BRANCH="swift-${BASE_VERSION}-branch"
+          fi
+        fi
+        echo "swift-branch=${SWIFT_BRANCH}" >> $GITHUB_OUTPUT
 
     - name: Cache Swift ${{ steps.setup.outputs.swift-version }} Host Toolchain
       uses: actions/cache@v4
