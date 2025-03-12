@@ -70,10 +70,26 @@ inputs:
     description: 'Additional files to copy to emulator for testing'
     required: true
     default: ''
+  android-cores:
+    description: 'Number of cores to use for the emulator'
+    required: true
+    default: 2
   android-api-level:
     description: 'The API level of the Android emulator to run against'
     required: true
     default: 29
+  android-channel:
+    required: false
+    type: string
+    default: 'canary'
+  android-profile:
+    required: false
+    type: string
+    default: 'pixel'
+  android-target:
+    required: false
+    type: string
+    default: 'aosp_atd'
 
 runs:
   using: "composite"
@@ -369,7 +385,7 @@ runs:
         path: |
           ~/.android/avd/*
           ~/.android/adb*
-        key: avd-${{ inputs.android-api-level }}-${{ steps.setup.outputs.android-emulator-arch }}
+        key: 'avd-${{ inputs.android-profile }}_${{ inputs.android-channel }}_${{ inputs.android-target }}_${{ inputs.android-api-level }}-${{ steps.setup.outputs.android-emulator-arch }}'
 
     - name: Create Android Emulator Cache
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' && steps.avd-cache.outputs.cache-hit != 'true' }}
@@ -377,6 +393,10 @@ runs:
       with:
         force-avd-creation: false
         api-level: ${{ inputs.android-api-level }}
+        target: ${{ inputs.android-target }}
+        channel: ${{ inputs.android-channel }}
+        profile: ${{ inputs.android-profile }}
+        cores: ${{ inputs.android-cores }}
         emulator-boot-timeout: ${{ inputs.android-emulator-boot-timeout }}
         emulator-options: ${{ inputs.android-emulator-options }}
         arch: ${{ steps.setup.outputs.android-emulator-arch }}
@@ -390,6 +410,10 @@ runs:
       with:
         force-avd-creation: false
         api-level: ${{ inputs.android-api-level }}
+        target: ${{ inputs.android-target }}
+        channel: ${{ inputs.android-channel }}
+        profile: ${{ inputs.android-profile }}
+        cores: ${{ inputs.android-cores }}
         emulator-boot-timeout: ${{ inputs.android-emulator-boot-timeout }}
         emulator-options: -no-snapshot-save ${{ inputs.android-emulator-options }}
         arch: ${{ steps.setup.outputs.android-emulator-arch }}

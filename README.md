@@ -63,6 +63,15 @@ jobs:
           swift-version: 6.0.3
 ```
 
+### Swift Versions
+
+The `swift-version` input can be set to a specific version number (e.g., "6.0.3" or "6.1.1").
+A shortened version like "6.0" or "6.1" will use the latest [release](https://github.com/skiptools/swift-android-toolchain/releases),
+which may be a pre-release build.
+
+Snapshots can be specified with their full name, like "6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a".
+
+
 ### Configuration Options
 
 | Parameter | Description | Default  |
@@ -79,6 +88,10 @@ jobs:
 | copy-files | Additional files to copy to emulator for testing | |
 | android-emulator-test-folder | Emulator folder where tests are copied and run | /data/local/tmp/android-xctest |
 | android-api-level | The API level of the Android emulator to run against | 29 |
+| android-channel | Channel to download the SDK components from - stable, beta, dev, canary | canary |
+| android-profile | Hardware profile used for creating the AVD | pixel |
+| android-target | Target of the system image - default, google_apis, playstore, android-wear, android-wear-cn, android-tv, google-tv, aosp_atd or google_atd | aosp_atd |
+| android-cores | Number of cores to use for the emulator | 2 |
 | android-emulator-options | Options to pass to the Android emulator | -no-window … |
 | android-emulator-boot-timeout | Emulator boot timeout in seconds | 600 |
 
