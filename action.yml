@@ -142,29 +142,29 @@ runs:
         SWIFT_VERSION=${{ inputs.swift-version }}
 
         # try to match versions like 6.0.3, 6.1, 6, nightly-6.1, snapshot, and latest
-        # note the "cat … | { grep PATTERN || true }" technique so we don't error out if we don't match
+        # note the "cat … | ( grep PATTERN || true )" technique so we don't error out if we don't match
         # since we have a nicer error message below when the pattern is unmatched
         if [[ "${SWIFT_VERSION}" == 'latest' ]]; then
           # translate swift-version "latest" into our known latest version
           #LATEST_RELEASE="6.0.3"
           #SWIFT_VERSION="${LATEST_RELEASE}"
           # use the latest non-snapshot release
-          SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | grep -v -- '-SNAPSHOT' | head -n 1)
+          SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | ( grep -v -- '-SNAPSHOT' || true ) | head -n 1)
         elif [[ "${SWIFT_VERSION}" == 'snapshot' ]]; then
           #LATEST_SNAPSHOT="6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a"
           #SWIFT_VERSION="${LATEST_SNAPSHOT}"
           # use the latest snapshot release
-          SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | grep -- '-SNAPSHOT' | head -n 1)
+          SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | ( grep -- '-SNAPSHOT' || true ) | head -n 1)
         elif [[ "${SWIFT_VERSION}" == nightly-* ]]; then
           echo "Checking nightly build for: ${SWIFT_VERSION}"
           # e.g., nightly-6.1 will match 6.1-DEVELOPMENT-SNAPSHOT-*
           SWIFT_VERSION=$(echo ${SWIFT_VERSION} | sed 's;nightly-;;g')
-          SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | grep -- "${SWIFT_VERSION}-DEVELOPMENT-SNAPSHOT" | head -n 1)
+          SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | ( grep -- "${SWIFT_VERSION}-DEVELOPMENT-SNAPSHOT" || true ) | head -n 1)
           echo "Found nightly build: ${SWIFT_VERSION}"
         else
           # match "6.0" to "6.0.3"
           # match "6.1" to "6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a"
-          SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | grep -- "^${SWIFT_VERSION}" | head -n 1)
+          SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | ( grep -- "^${SWIFT_VERSION}" || true ) | head -n 1)
         fi
 
         if [[ "${SWIFT_VERSION}" == "" ]]; then
