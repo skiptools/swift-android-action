@@ -136,8 +136,9 @@ runs:
         #LATEST_RELEASE=$(curl -fsSL -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" --retry 10 --retry-max-time 600 https://api.github.com/repos/skiptools/swift-android-toolchain/releases/latest | jq -r '.tag_name')
 
         # fetch the Atom feed for the latest releases
-        curl -fsSL --retry 8 --retry-connrefused https://github.com/skiptools/swift-android-toolchain/releases.atom --output ~/swift-releases.xml
-        yq -oy '.feed.entry[].title' ~/swift-releases.xml | sort -rn > ~/swift-versions.txt
+        curl -fsSL --retry 8 --retry-connrefused https://github.com/skiptools/swift-android-toolchain/releases.atom --output ${{ runner.temp }}/swift-releases.xml
+        SWIFT_VERSIONS_FILE=${{ runner.temp }}/swift-versions.txt
+        yq -oy '.feed.entry[].title' ${{ runner.temp }}/swift-releases.xml | sort -rn > ${SWIFT_VERSIONS_FILE}
 
         # if we hardcode the latest builds, we would need to update them every time a new snapshot is released
 
@@ -148,20 +149,20 @@ runs:
           #LATEST_RELEASE="6.0.3"
           #SWIFT_VERSION="${LATEST_RELEASE}"
           # use the latest non-snapshot release
-          SWIFT_VERSION=$(cat ~/swift-versions.txt | grep -v -- '-SNAPSHOT' | head -n 1)
+          SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | grep -v -- '-SNAPSHOT' | head -n 1)
         elif [[ "${SWIFT_VERSION}" == 'snapshot' ]]; then
           #LATEST_SNAPSHOT="6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a"
           #SWIFT_VERSION="${LATEST_SNAPSHOT}"
           # use the latest snapshot release
-          SWIFT_VERSION=$(cat ~/swift-versions.txt | grep -- '-SNAPSHOT' | head -n 1)
+          SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | grep -- '-SNAPSHOT' | head -n 1)
         elif [[ "${SWIFT_VERSION}" == nightly-* ]]; then
           # e.g., nightly-6.1 will match 6.1-DEVELOPMENT-SNAPSHOT-*
           SWIFT_VERSION=$(echo ${SWIFT_VERSION} | sed 's;nightly-;;g')
-          SWIFT_VERSION=$(cat ~/swift-versions.txt | grep -- "${SWIFT_VERSION}-SNAPSHOT" | head -n 1)
+          SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | grep -- "${SWIFT_VERSION}-SNAPSHOT" | head -n 1)
         else
           # match "6.0" to "6.0.3"
           # match "6.1" to "6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a"
-          SWIFT_VERSION=$(cat ~/swift-versions.txt | grep -- "^${SWIFT_VERSION}" | head -n 1)
+          SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | grep -- "^${SWIFT_VERSION}" | head -n 1)
         fi
 
         if [[ "${SWIFT_VERSION}" == "" ]]; then
@@ -207,15 +208,15 @@ runs:
       uses: actions/cache@v4
       id: cache-swift
       with:
-        path: ~/swift-download
+        path: ${{ runner.temp }}/swift-download
         key: "swift-${{ steps.setup.outputs.swift-version }}-${{ steps.setup.outputs.osid }}"
 
     - name: Download Swift Host Toolchain
       if: steps.cache-swift.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        mkdir -p ~/swift-download
-        cd ~/swift-download
+        mkdir -p ${{ runner.temp }}/swift-download
+        cd ${{ runner.temp }}/swift-download
         BASE_URL="https://download.swift.org/${{ steps.setup.outputs.swift-branch }}"
 
         if [ ${RUNNER_OS} == 'Linux' ]; then
@@ -234,7 +235,7 @@ runs:
     - name: Install Swift Host Toolchain
       shell: bash
       run: |
-        cd ~/swift-download
+        cd ${{ runner.temp }}/swift-download
         if [ ${RUNNER_OS} == 'Linux' ]; then
           mkdir -p ${HOME}/swift/toolchains/${{ steps.setup.outputs.swift-id }}
           tar -xzf swift.tar.gz -C ${HOME}/swift/toolchains/${{ steps.setup.outputs.swift-id }} --strip 1
