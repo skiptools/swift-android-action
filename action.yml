@@ -168,7 +168,7 @@ runs:
         fi
 
         if [[ "${SWIFT_VERSION}" == "" ]]; then
-          echo "::error::Could not find any swift version matching: ${{ inputs.swift-version }}"
+          echo "::error::Could not find any swift version matching: ${{ inputs.swift-version }} in: $(cat ${SWIFT_VERSIONS_FILE})"
           exit 1
         fi
 
