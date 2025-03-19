@@ -312,7 +312,7 @@ runs:
         echo "swiftroot=${SWIFT_INSTALLATION}" >> $GITHUB_OUTPUT
 
         # plugin-path is a workaround for https://github.com/swiftlang/swift-package-manager/issues/8362
-        echo "swiftcmd=TARGET_OS_ANDROID=1 SKIP_BRIDGE=1 ${SWIFT_INSTALLATION}/bin/swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -plugin-path -Xswiftc ${SWIFT_INSTALLATION}/lib/swift/host/plugins/testing -Xswiftc -DTARGET_OS_ANDROID -Xswiftc -DSKIP_BRIDGE -Xlinker -landroid-spawn -Xswiftc -Xcc -Xswiftc -U_GNU_SOURCE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
+        echo "swiftcmd=TARGET_OS_ANDROID=1 SKIP_BRIDGE=1 ${SWIFT_INSTALLATION}/bin/swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -plugin-path -Xswiftc ${SWIFT_INSTALLATION}/lib/swift/host/plugins/testing -Xswiftc -DTARGET_OS_ANDROID -Xswiftc -DSKIP_BRIDGE -Xswiftc -Xcc -Xswiftc -U_GNU_SOURCE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
         echo "swift-sdk=${SWIFT_SDK_TARGET}" >> $GITHUB_OUTPUT
 
     - name: Check Swift Version
