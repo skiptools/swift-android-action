@@ -62,6 +62,7 @@ jobs:
           swift-version: ${{ matrix.swift-version }}
           build-tests: ${{ matrix.swift-version != '6.0' }} # no Testing in 6.0
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
+          copy-files: Sources Tests
 
   toolchain-setup:
     runs-on: ${{ matrix.os }}
