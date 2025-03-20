@@ -245,10 +245,8 @@ To create a new release, make a new tag (like 2.0.2),
 and then update the symbolic major v2 tag with:
 
 ```
-git tag v2.0.2
-git push --tags
-git tag -fa v2 -m "Update v2 tag"
-git push origin v2 --force
-gh release create
+git tag v2.0.2 && git push --tags
+git tag -fa v2 -m "Update v2 tag" && git push origin v2 --force
+gh release create --generate-notes --latest
 ```
 
