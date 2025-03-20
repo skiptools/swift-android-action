@@ -353,6 +353,9 @@ runs:
         # copy the built test binary
         cp -va ${BUILD_DIR}/${SWIFT_SDK_TARGET}/${{ inputs.swift-configuration }}/*.xctest ${PACK_DIR}
 
+        # copy any dependent .so files that may have been created
+        cp -va ${BUILD_DIR}/${SWIFT_SDK_TARGET}/${{ inputs.swift-configuration }}/*.so ${PACK_DIR} || true
+
         # copy any optional resource bundles
         cp -vaf ${BUILD_DIR}/${SWIFT_SDK_TARGET}/${{ inputs.swift-configuration }}/*.resources ${PACK_DIR} || true
         # 6.0.2 keeps libraries in per-API folders
