@@ -69,7 +69,20 @@ The `swift-version` input can be set to a specific version number (e.g., "6.0.3"
 A shortened version like "6.0" or "6.1" will use the latest [release](https://github.com/skiptools/swift-android-toolchain/releases),
 which may be a pre-release build.
 
-Snapshots can be specified with their full name, like "6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a".
+> [!NOTE]
+> The SDK that is installed is currently the unofficial de-facto Android SDK created from
+> the [swift-android-sdk](https://github.com/swift-android-sdk/swift-android-sdk) fork.
+> As the official Android WG is [formed](https://github.com/swiftlang/swift-org-website/pull/925),
+> we anticipate the release of an official Android SDK, at which time this action will
+> transition to using that bundle.
+
+Snapshots can be specified with their full name, like `6.1-DEVELOPMENT-SNAPSHOT-2025-03-25-a`,
+or the most recent snapshot/nightly build can be specified with `nightly-6.1`. 
+
+> [!NOTE]
+> The Swift Testing framework is only available in the 6.1 SDK, so if your project
+> uses Swift Testing, you should either use the `nightly-6.1` version, or disable
+> testing by setting `build-tests: false`. 
 
 
 ### Configuration Options
@@ -249,4 +262,27 @@ git tag v2.0.2 && git push --tags
 git tag -fa v2 -m "Update v2 tag" && git push origin v2 --force
 gh release create --generate-notes --latest
 ```
+
+## Who is using the Swift Android Action?
+
+These are some of the open-source projects using (or used) the Swift Android Action:
+
+- [Alamofire](https://github.com/Alamofire/Alamofire/tree/master/.github/workflows)
+- [CryptoSwift](https://github.com/krzyzanowskim/CryptoSwift/tree/main/.github/workflows)
+- [Forked](https://github.com/drewmccormack/Forked/tree/main/.github/workflows)
+- [GraphQL](https://github.com/GraphQLSwift/GraphQL/tree/main/.github/workflows)
+- [PromiseKit](https://github.com/mxcl/PromiseKit/tree/master/.github/workflows)
+- [Skip](https://github.com/skiptools/actions/tree/main/.github/workflows)
+- [SwiftGodot](https://github.com/migueldeicaza/SwiftGodot/tree/main/.github/workflows)
+- [SwifterSwift](https://github.com/SwifterSwift/SwifterSwift/tree/master/.github/workflows)
+- [Yams](https://github.com/jpsim/Yams/tree/main/.github/workflows)
+- [egeniq/app-remote-config](https://github.com/egeniq/app-remote-config/tree/main/.github/workflows)
+- [supabase-swift](https://github.com/supabase/supabase-swift/tree/main/.github/workflows)
+- [swift-android-native](https://github.com/skiptools/swift-android-native/tree/main/.github/workflows)
+- [swift-fakes](https://github.com/Quick/swift-fakes/tree/main/.github/workflows)
+- [swift-issue-reporting](https://github.com/pointfreeco/swift-issue-reporting/tree/main/.github/workflows)
+- [swift-png](https://github.com/tayloraswift/swift-png/tree/master/.github/workflows)
+- [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing/tree/main/.github/workflows)
+- [swift-sqlcipher](https://github.com/skiptools/swift-sqlcipher/tree/main/.github/workflows)
+- [vapor/ci](https://github.com/vapor/ci/tree/main/.github/workflows)
 
