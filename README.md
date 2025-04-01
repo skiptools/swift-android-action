@@ -60,7 +60,7 @@ jobs:
       - name: "Test Swift Package on Android"
         uses: skiptools/swift-android-action@v2
         with:
-          swift-version: 6.0.3
+          swift-version: 6.1
 ```
 
 ### Swift Versions
@@ -89,7 +89,7 @@ or the most recent snapshot/nightly build can be specified with `nightly-6.1`.
 
 | Parameter | Description | Default  |
 |-----|-----|-----|
-| swift-version | The version of the Swift toolchain to use | 6.0.3 |
+| swift-version | The version of the Swift toolchain to use | 6.1 |
 | package-path | The folder where the swift package is checked out | . |
 | swift-configuration | Whether to build with debug or release configuration | debug |
 | swift-build-flags | Additional flags to pass to the swift build command |  |
@@ -192,13 +192,13 @@ The actual `swift-build` command will vary between operating systems
 and architectures. For example, on Ubuntu 24.04, it might be:
 
 ```
-/home/runner/swift/toolchains/swift-6.0.3-RELEASE/usr/bin/swift build --swift-sdk x86_64-unknown-linux-android24
+/home/runner/swift/toolchains/swift-6.1-RELEASE/usr/bin/swift build --swift-sdk x86_64-unknown-linux-android24
 ```
 
 while on macOS-15 it will be:
 
 ```
-/Users/runner/Library/Developer/Toolchains/swift-6.0.3-RELEASE.xctoolchain/usr/bin/swift build --swift-sdk aarch64-unknown-linux-android24
+/Users/runner/Library/Developer/Toolchains/swift-6.1-RELEASE.xctoolchain/usr/bin/swift build --swift-sdk aarch64-unknown-linux-android24
 ```
 
 
@@ -232,7 +232,7 @@ jobs:
       - name: "Test Swift Package on macOS"
         run: swift test
       - name: "Test Swift Package on iOS"
-        run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 15" -scheme "$(xcodebuild -list -json | jq -r '.workspace.schemes[-1]')"
+        run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=$(xcrun simctl list devices --json | jq -r '.devices | to_entries[] | .value[] | select(.availability == "(available)" or .isAvailable == true) | .name' | grep -E '^iPhone [0-9]+$' | sort -V | tail -n 1)" -scheme "$(xcodebuild -list -json | jq -r '.workspace.schemes[-1]')"
   windows:
     runs-on: windows-latest
     steps:
@@ -240,8 +240,8 @@ jobs:
       - name: "Setup Swift on Windows"
         uses: compnerd/gha-setup-swift@main
         with:
-          branch: swift-6.0.3-release
-          tag: 6.0.3-RELEASE
+          branch: swift-6.1-release
+          tag: 6.1-RELEASE
       - name: "Test Swift Package on Windows"
         run: swift test
 
@@ -276,6 +276,7 @@ These are some of the open-source projects using (or used) the Swift Android Act
 - [Skip](https://github.com/skiptools/actions/tree/main/.github/workflows)
 - [supabase-swift](https://github.com/supabase/supabase-swift/tree/main/.github/workflows)
 - [swift-android-native](https://github.com/skiptools/swift-android-native/tree/main/.github/workflows)
+- [SwiftCBOR](https://github.com/valpackett/SwiftCBOR/tree/master/.github/workflows)
 - [swift-fakes](https://github.com/Quick/swift-fakes/tree/main/.github/workflows)
 - [swift-issue-reporting](https://github.com/pointfreeco/swift-issue-reporting/tree/main/.github/workflows)
 - [swift-png](https://github.com/tayloraswift/swift-png/tree/master/.github/workflows)

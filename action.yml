@@ -163,8 +163,8 @@ runs:
           echo "Found nightly build: ${SWIFT_VERSION}"
         else
           # match "6.0" to "6.0.3"
-          # match "6.1" to "6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a"
-          SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | ( grep -- "^${SWIFT_VERSION}" || true ) | head -n 1)
+          # DO NOT match "6.1" to "6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a"
+          SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | ( grep -v -- '-SNAPSHOT' || true ) | ( grep -- "^${SWIFT_VERSION}" || true ) | head -n 1)
         fi
 
         if [[ "${SWIFT_VERSION}" == "" ]]; then
