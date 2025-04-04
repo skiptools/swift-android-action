@@ -304,7 +304,7 @@ runs:
         SWIFT_SDK_BUNDLE="${SWIFT_SDK_BUNDLE}/${SWIFT_SDK_ARTIFACT_ID}"
 
         # extract the sdkRootPath from the swift-sdk.json
-        SWIFT_SDK_ROOT_PATH=$(cat ${SWIFT_SDK_BUNDLE}/swift-sdk.json | jq -r '.targetTriples[] | .sdkRootPath' | head -n 1)
+        SWIFT_SDK_ROOT_PATH=$(cat ${SWIFT_SDK_BUNDLE}/swift-sdk.json | yq -r '.targetTriples[] | .sdkRootPath' | head -n 1)
         SWIFT_SDK_BUNDLE="${SWIFT_SDK_BUNDLE}/${SWIFT_SDK_ROOT_PATH}"
 
         echo "SWIFT_SDK_BUNDLE=${SWIFT_SDK_BUNDLE}" >> $GITHUB_ENV
