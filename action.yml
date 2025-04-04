@@ -247,7 +247,8 @@ runs:
         elif [ ${RUNNER_OS} == 'macOS' ]; then
           /usr/sbin/installer -pkg swift.pkg -target CurrentUserHomeDirectory
           SWIFT_INSTALLATION=${HOME}/Library/Developer/Toolchains/${{ steps.setup.outputs.swift-id }}.xctoolchain/usr
-          echo "TOOLCHAINS=$(plutil -extract CFBundleIdentifier raw ${SWIFT_INSTALLATION}/../Info.plist)" >> $GITHUB_ENV
+          # do not add the toolchains variable, which might mess up Xcode builds
+          #echo "TOOLCHAINS=$(plutil -extract CFBundleIdentifier raw ${SWIFT_INSTALLATION}/../Info.plist)" >> $GITHUB_ENV
           which patchelf 2>&1 > /dev/null || brew install patchelf
         else
           echo "::error::Unsupported platform: ${RUNNER_OS}"
