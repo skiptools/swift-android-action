@@ -90,6 +90,14 @@ inputs:
     required: false
     type: string
     default: 'aosp_atd'
+  installed-sdk:
+    required: false
+    type: string
+    default: ''
+  installed-swift:
+    required: false
+    type: string
+    default: ''
 
 runs:
   using: "composite"
@@ -103,9 +111,13 @@ runs:
           . /etc/os-release
           echo "osidpair=${ID}${VERSION_ID}" >> $GITHUB_OUTPUT
           echo "osid=${ID}$(echo ${VERSION_ID} | tr -d '.')" >> $GITHUB_OUTPUT
+          # patchelf is needed to check whether an ELF binary contains the Testing library
+          which patchelf 2>&1 > /dev/null || apt install patchelf
         elif [ ${RUNNER_OS} == 'macOS' ]; then
           echo "osidpair=macos" >> $GITHUB_OUTPUT
           echo "osid=macos" >> $GITHUB_OUTPUT
+          # patchelf is needed to check whether an ELF binary contains the Testing library
+          which patchelf 2>&1 > /dev/null || brew install patchelf
         else
           echo "::error::Unsupported platform: ${RUNNER_OS}"
           exit 1
@@ -209,12 +221,13 @@ runs:
     - name: Cache Swift ${{ steps.setup.outputs.swift-version }} Host Toolchain
       uses: actions/cache@v4
       id: cache-swift
+      if: ${{ inputs.installed-swift == '' }}
       with:
         path: ${{ runner.temp }}/swift-download
         key: "swift-${{ steps.setup.outputs.swift-version }}-${{ steps.setup.outputs.osid }}"
 
     - name: Download Swift Host Toolchain
-      if: steps.cache-swift.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-swift.outputs.cache-hit != 'true' && inputs.installed-swift == '' }}
       shell: bash
       run: |
         mkdir -p ${{ runner.temp }}/swift-download
@@ -235,6 +248,7 @@ runs:
         fi
 
     - name: Install Swift Host Toolchain
+      if: ${{ inputs.installed-swift == '' }}
       shell: bash
       run: |
         cd ${{ runner.temp }}/swift-download
@@ -242,53 +256,31 @@ runs:
           mkdir -p ${HOME}/swift/toolchains/${{ steps.setup.outputs.swift-id }}
           tar -xzf swift.tar.gz -C ${HOME}/swift/toolchains/${{ steps.setup.outputs.swift-id }} --strip 1
           SWIFT_INSTALLATION=$HOME/swift/toolchains/${{ steps.setup.outputs.swift-id }}/usr
-          # patchelf is needed to check whether an ELF binary contains the Testing library
-          which patchelf 2>&1 > /dev/null || apt install patchelf
         elif [ ${RUNNER_OS} == 'macOS' ]; then
           /usr/sbin/installer -pkg swift.pkg -target CurrentUserHomeDirectory
           SWIFT_INSTALLATION=${HOME}/Library/Developer/Toolchains/${{ steps.setup.outputs.swift-id }}.xctoolchain/usr
           # do not add the toolchains variable, which might mess up Xcode builds
           #echo "TOOLCHAINS=$(plutil -extract CFBundleIdentifier raw ${SWIFT_INSTALLATION}/../Info.plist)" >> $GITHUB_ENV
-          which patchelf 2>&1 > /dev/null || brew install patchelf
         else
           echo "::error::Unsupported platform: ${RUNNER_OS}"
           exit 1
         fi
         echo "SWIFT_INSTALLATION=${SWIFT_INSTALLATION}" >> $GITHUB_ENV
-        # needed to override locally-installed `swift` command
-        #echo "${SWIFT_INSTALLATION}/bin" >> $GITHUB_PATH
+        echo "swiftroot=${SWIFT_INSTALLATION}" >> $GITHUB_OUTPUT
 
+    - name: Setup Swift Host Toolchain
+      if: ${{ inputs.installed-swift != '' }}
+      shell: bash
+      run: |
+        SWIFT_INSTALLATION=${{ inputs.installed-swift }}/usr
+        echo "SWIFT_INSTALLATION=${SWIFT_INSTALLATION}" >> $GITHUB_ENV
+        echo "swiftroot=${SWIFT_INSTALLATION}" >> $GITHUB_OUTPUT
 
     - name: Install Swift Android SDK
       id: install
       shell: bash
       run: |
         set +x
-        SWIFT_SDK_ANROID_API="24"
-        echo "SWIFT_SDK_ANROID_API=${SWIFT_SDK_ANROID_API}" >> $GITHUB_ENV
-
-        SWIFT_SDK_ID="${{ steps.setup.outputs.swift-id }}-android-${SWIFT_SDK_ANROID_API}-0.1"
-        echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
-
-        # variant that identifies the SDK
-        SWIFT_SDK_ID_SHORT="${{ steps.setup.outputs.swift-branch }}-android-${SWIFT_SDK_ANROID_API}-sdk"
-        echo "SWIFT_SDK_ID_SHORT=${SWIFT_SDK_ID_SHORT}" >> $GITHUB_ENV
-
-        SWIFT_SDK_TARGET="${{ steps.setup.outputs.android-sdk-arch }}-unknown-linux-android${SWIFT_SDK_ANROID_API}"
-        echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
-
-        mkdir -p ${RUNNER_TEMP}/swift-android-toolchain
-        cd ${RUNNER_TEMP}/swift-android-toolchain
-
-        ANDROID_SDK_URL="https://github.com/skiptools/swift-android-toolchain/releases/download/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz"
-        echo "ANDROID_SDK_URL: ${ANDROID_SDK_URL}"
-        curl -fsSL --retry 8 --retry-connrefused ${ANDROID_SDK_URL} --output ${SWIFT_SDK_ID}.artifactbundle.tar.gz
-
-        # first check if it already installed (we may be running this workflow multiple times for an action, in which case it will already be present)
-        ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET} &> /dev/null || ${SWIFT_INSTALLATION}/bin/swift sdk install ${SWIFT_SDK_ID}.artifactbundle.tar.gz
-
-        ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET}
-
         if [ ${RUNNER_OS} == 'Linux' ]; then
           SWIFT_SDK_ROOT="${HOME}/.config/swiftpm/swift-sdks"
         elif [ ${RUNNER_OS} == 'macOS' ]; then
@@ -298,7 +290,35 @@ runs:
           exit 1
         fi
 
-        SWIFT_SDK_BUNDLE="${SWIFT_SDK_ROOT}/${SWIFT_SDK_ID}.artifactbundle"
+        if [[ "${{ inputs.installed-sdk }}" == '' ]]; then
+          # we already have an SDK installed
+          SWIFT_SDK_TARGET="${{ inputs.installed-sdk }}"
+          echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
+          # for the bundle, we just grab the most recently installed one
+          SWIFT_SDK_BUNDLE=$(ls -1rt ${SWIFT_SDK_ROOT}/*.artifactbundle | tail -n 1)
+        else
+          SWIFT_SDK_ANROID_API="24"
+          echo "SWIFT_SDK_ANROID_API=${SWIFT_SDK_ANROID_API}" >> $GITHUB_ENV
+
+          SWIFT_SDK_ID="${{ steps.setup.outputs.swift-id }}-android-${SWIFT_SDK_ANROID_API}-0.1"
+
+          SWIFT_SDK_TARGET="${{ steps.setup.outputs.android-sdk-arch }}-unknown-linux-android${SWIFT_SDK_ANROID_API}"
+          echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
+
+          mkdir -p ${RUNNER_TEMP}/swift-android-toolchain
+          cd ${RUNNER_TEMP}/swift-android-toolchain
+
+          ANDROID_SDK_URL="https://github.com/skiptools/swift-android-toolchain/releases/download/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz"
+          echo "ANDROID_SDK_URL: ${ANDROID_SDK_URL}"
+          curl -fsSL --retry 8 --retry-connrefused ${ANDROID_SDK_URL} --output ${SWIFT_SDK_ID}.artifactbundle.tar.gz
+
+          # first check if it already installed (we may be running this workflow multiple times for an action, in which case it will already be present)
+          ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET} &> /dev/null || ${SWIFT_INSTALLATION}/bin/swift sdk install ${SWIFT_SDK_ID}.artifactbundle.tar.gz
+
+          ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET}
+
+          SWIFT_SDK_BUNDLE="${SWIFT_SDK_ROOT}/${SWIFT_SDK_ID}.artifactbundle"
+        fi
 
         # extract the artifact ID from the info.plist in the SDK root
         SWIFT_SDK_ARTIFACT_ID=$(cat ${SWIFT_SDK_BUNDLE}/info.json | jq -r '.artifacts[] | .variants[0].path')
@@ -309,8 +329,6 @@ runs:
         SWIFT_SDK_BUNDLE="${SWIFT_SDK_BUNDLE}/${SWIFT_SDK_ROOT_PATH}"
 
         echo "SWIFT_SDK_BUNDLE=${SWIFT_SDK_BUNDLE}" >> $GITHUB_ENV
-
-        echo "swiftroot=${SWIFT_INSTALLATION}" >> $GITHUB_OUTPUT
 
         # plugin-path is a workaround for https://github.com/swiftlang/swift-package-manager/issues/8362
         echo "swiftcmd=TARGET_OS_ANDROID=1 SKIP_BRIDGE=1 ${SWIFT_INSTALLATION}/bin/swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -plugin-path -Xswiftc ${SWIFT_INSTALLATION}/lib/swift/host/plugins/testing -Xswiftc -DTARGET_OS_ANDROID -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT

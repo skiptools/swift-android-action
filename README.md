@@ -94,6 +94,8 @@ or the most recent snapshot/nightly build can be specified with `nightly-6.1`.
 | swift-configuration | Whether to build with debug or release configuration | debug |
 | swift-build-flags | Additional flags to pass to the swift build command |  |
 | swift-test-flags | Additional flags to pass to the swift test command |  |
+| installed-sdk | The name of a pre-installed Swift SDK to use |  |
+| installed-swift | The path to a pre-installed host Swift toolchain |  |
 | test-env | Test environment variables key=value |  |
 | build-package | Whether to build the Swit package | true |
 | build-tests | Whether to build the package tests or just the sources | true |
