@@ -290,7 +290,7 @@ runs:
           exit 1
         fi
 
-        if [[ "${{ inputs.installed-sdk }}" == '' ]]; then
+        if [[ "${{ inputs.installed-sdk }}" != '' ]]; then
           # we already have an SDK installed
           SWIFT_SDK_TARGET="${{ inputs.installed-sdk }}"
           echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
