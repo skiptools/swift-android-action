@@ -295,7 +295,7 @@ runs:
           SWIFT_SDK_TARGET="${{ inputs.installed-sdk }}"
           echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
           # for the bundle, we just grab the most recently installed one
-          SWIFT_SDK_BUNDLE=$(ls -1rt ${SWIFT_SDK_ROOT}/*.artifactbundle | tail -n 1)
+          SWIFT_SDK_BUNDLE=$(ls -1drt ${SWIFT_SDK_ROOT}/*.artifactbundle | tail -n 1)
         else
           SWIFT_SDK_ANROID_API="24"
           echo "SWIFT_SDK_ANROID_API=${SWIFT_SDK_ANROID_API}" >> $GITHUB_ENV
