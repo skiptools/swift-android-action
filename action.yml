@@ -312,15 +312,15 @@ runs:
             # Swift Android SDK 6.2+ targets API 28+
             SWIFT_SDK_ANROID_API="28"
             # 6.2+ no longer includes the API in the artifactbundle name
-            # it also uses an underscore instead of a dash before "android"
-            SWIFT_SDK_ID="${SWIFT_SDK_ID}_android-${SWIFT_SDK_VERSION}"
+            SWIFT_SDK_ID="${SWIFT_SDK_ID}-android-${SWIFT_SDK_VERSION}"
           fi
           ANDROID_SDK_URL="https://github.com/skiptools/swift-android-toolchain/releases/download/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz"
 
           echo "ANDROID_SDK_URL: ${ANDROID_SDK_URL}"
           curl -fsSL --retry 8 --retry-connrefused ${ANDROID_SDK_URL} --output ${SWIFT_SDK_ID}.artifactbundle.tar.gz
 
-          SWIFT_SDK_TARGET="${{ steps.setup.outputs.android-sdk-arch }}-unknown-linux-android${SWIFT_SDK_ANROID_API}"
+          SWIFT_SDK_ARCH=${{ steps.setup.outputs.android-sdk-arch }}"
+          SWIFT_SDK_TARGET="${SWIFT_SDK_ARCH}-unknown-linux-android${SWIFT_SDK_ANROID_API}"
           echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
 
           # first check if it already installed (we may be running this workflow multiple times for an action, in which case it will already be present)
@@ -342,7 +342,9 @@ runs:
         echo "SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH=${SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH}" >> $GITHUB_ENV
 
         # extract the swiftResourcesPath from the swift-sdk.json
-        SWIFT_RESOURCES_ROOT_PATH=$(cat ${SWIFT_ARTIFACTBUNDLE_ROOT}/swift-sdk.json | jq -r '.targetTriples[] | .swiftResourcesPath' | head -n 1)
+        # note that we need to use the right path for the architecure;
+        # we use a crude grep pattern for SWIFT_SDK_ARCH
+        SWIFT_RESOURCES_ROOT_PATH=$(cat ${SWIFT_ARTIFACTBUNDLE_ROOT}/swift-sdk.json | jq -r '.targetTriples[] | .swiftResourcesPath' | grep "${SWIFT_SDK_ARCH}" | head -n 1)
         SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH="${SWIFT_ARTIFACTBUNDLE_ROOT}/${SWIFT_RESOURCES_ROOT_PATH}"
 
         echo "SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH=${SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH}" >> $GITHUB_ENV
