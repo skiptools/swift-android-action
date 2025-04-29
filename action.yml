@@ -300,19 +300,20 @@ runs:
           mkdir -p ${RUNNER_TEMP}/swift-android-toolchain
           cd ${RUNNER_TEMP}/swift-android-toolchain
 
-          SWIFT_SDK_ID="${{ steps.setup.outputs.swift-id }}-android"
+          SWIFT_SDK_ID="${{ steps.setup.outputs.swift-id }}"
           # TODO: identify the version automatically
           SWIFT_SDK_VERSION="0.1"
 
           if [[ "${SWIFT_SDK_ID}" =~ "6.0" || "${SWIFT_SDK_ID}" =~ "6.1" ]]; then
             # Swift Android SDK 6.0/6.1 targets API 24+
             SWIFT_SDK_ANROID_API="24"
-            SWIFT_SDK_ID="${SWIFT_SDK_ID}-${SWIFT_SDK_ANROID_API}-${SWIFT_SDK_VERSION}"
+            SWIFT_SDK_ID="${SWIFT_SDK_ID}-${SWIFT_SDK_ANROID_API}-android-${SWIFT_SDK_VERSION}"
           else
             # Swift Android SDK 6.2+ targets API 28+
             SWIFT_SDK_ANROID_API="28"
             # 6.2+ no longer includes the API in the artifactbundle name
-            SWIFT_SDK_ID="${SWIFT_SDK_ID}-${SWIFT_SDK_VERSION}"
+            # it also uses an underscore instead of a dash before "android"
+            SWIFT_SDK_ID="${SWIFT_SDK_ID}_android-${SWIFT_SDK_VERSION}"
           fi
           ANDROID_SDK_URL="https://github.com/skiptools/swift-android-toolchain/releases/download/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz"
 
