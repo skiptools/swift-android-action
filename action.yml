@@ -303,23 +303,26 @@ runs:
           SWIFT_SDK_ID="${{ steps.setup.outputs.swift-id }}"
           # TODO: identify the version automatically
           SWIFT_SDK_VERSION="0.1"
+          SWIFT_SDK_ARCH="${{ steps.setup.outputs.android-sdk-arch }}"
 
-          if [[ "${SWIFT_SDK_ID}" =~ "6.0" || "${SWIFT_SDK_ID}" =~ "6.1" ]]; then
+          if [[ "${SWIFT_SDK_ID}" =~ "-6.0" || "${SWIFT_SDK_ID}" =~ "-6.1" ]]; then
             # Swift Android SDK 6.0/6.1 targets API 24+
             SWIFT_SDK_ANROID_API="24"
             SWIFT_SDK_ID="${SWIFT_SDK_ID}-android-${SWIFT_SDK_ANROID_API}-${SWIFT_SDK_VERSION}"
+            # resourcePath in info.json in SDK 6.0/6.1 does not contain arch
+            SWIFT_SDK_ARCH_RESOURCE_PATTERN=""
           else
             # Swift Android SDK 6.2+ targets API 28+
             SWIFT_SDK_ANROID_API="28"
             # 6.2+ no longer includes the API in the artifactbundle name
             SWIFT_SDK_ID="${SWIFT_SDK_ID}-android-${SWIFT_SDK_VERSION}"
+            SWIFT_SDK_ARCH_RESOURCE_PATTERN="${SWIFT_SDK_ARCH}"
           fi
           ANDROID_SDK_URL="https://github.com/skiptools/swift-android-toolchain/releases/download/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz"
 
           echo "ANDROID_SDK_URL: ${ANDROID_SDK_URL}"
           curl -fsSL --retry 8 --retry-connrefused ${ANDROID_SDK_URL} --output ${SWIFT_SDK_ID}.artifactbundle.tar.gz
 
-          SWIFT_SDK_ARCH="${{ steps.setup.outputs.android-sdk-arch }}"
           SWIFT_SDK_TARGET="${SWIFT_SDK_ARCH}-unknown-linux-android${SWIFT_SDK_ANROID_API}"
           echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
 
@@ -343,8 +346,8 @@ runs:
 
         # extract the swiftResourcesPath from the swift-sdk.json
         # note that we need to use the right path for the architecure;
-        # we use a crude grep pattern for SWIFT_SDK_ARCH
-        SWIFT_RESOURCES_ROOT_PATH=$(cat ${SWIFT_ARTIFACTBUNDLE_ROOT}/swift-sdk.json | jq -r '.targetTriples[] | .swiftResourcesPath' | grep "${SWIFT_SDK_ARCH}" | head -n 1)
+        # we use a crude grep pattern for SWIFT_SDK_ARCH_RESOURCE_PATTERN
+        SWIFT_RESOURCES_ROOT_PATH=$(cat ${SWIFT_ARTIFACTBUNDLE_ROOT}/swift-sdk.json | jq -r '.targetTriples[] | .swiftResourcesPath' | grep "${SWIFT_SDK_ARCH_RESOURCE_PATTERN}" | head -n 1)
         SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH="${SWIFT_ARTIFACTBUNDLE_ROOT}/${SWIFT_RESOURCES_ROOT_PATH}"
 
         echo "SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH=${SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH}" >> $GITHUB_ENV
