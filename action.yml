@@ -295,7 +295,7 @@ runs:
           SWIFT_SDK_TARGET="${{ inputs.installed-sdk }}"
           echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
           # for the bundle, we just grab the most recently installed one
-          SWIFT_SDK_BUNDLE=$(ls -1drt ${SWIFT_SDK_ROOT}/*.artifactbundle | tail -n 1)
+          SWIFT_SDK_ARTIFACTBUNDLE=$(ls -1drt ${SWIFT_SDK_ROOT}/*.artifactbundle | tail -n 1)
         else
           SWIFT_SDK_ANROID_API="24"
           echo "SWIFT_SDK_ANROID_API=${SWIFT_SDK_ANROID_API}" >> $GITHUB_ENV
@@ -317,18 +317,24 @@ runs:
 
           ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET}
 
-          SWIFT_SDK_BUNDLE="${SWIFT_SDK_ROOT}/${SWIFT_SDK_ID}.artifactbundle"
+          SWIFT_SDK_ARTIFACTBUNDLE="${SWIFT_SDK_ROOT}/${SWIFT_SDK_ID}.artifactbundle"
         fi
 
         # extract the artifact ID from the info.plist in the SDK root
-        SWIFT_SDK_ARTIFACT_ID=$(cat ${SWIFT_SDK_BUNDLE}/info.json | jq -r '.artifacts[] | .variants[0].path')
-        SWIFT_SDK_BUNDLE="${SWIFT_SDK_BUNDLE}/${SWIFT_SDK_ARTIFACT_ID}"
+        SWIFT_SDK_ARTIFACT_ID=$(cat ${SWIFT_SDK_ARTIFACTBUNDLE}/info.json | jq -r '.artifacts[] | .variants[0].path')
+        SWIFT_ARTIFACTBUNDLE_ROOT="${SWIFT_SDK_ARTIFACTBUNDLE}/${SWIFT_SDK_ARTIFACT_ID}"
 
         # extract the sdkRootPath from the swift-sdk.json
-        SWIFT_SDK_ROOT_PATH=$(cat ${SWIFT_SDK_BUNDLE}/swift-sdk.json | jq -r '.targetTriples[] | .sdkRootPath' | head -n 1)
-        SWIFT_SDK_BUNDLE="${SWIFT_SDK_BUNDLE}/${SWIFT_SDK_ROOT_PATH}"
+        SWIFT_SDK_ROOT_PATH=$(cat ${SWIFT_ARTIFACTBUNDLE_ROOT}/swift-sdk.json | jq -r '.targetTriples[] | .sdkRootPath' | head -n 1)
+        SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH="${SWIFT_SDK_ROOT_PATH}/${SWIFT_SDK_ROOT_PATH}"
 
-        echo "SWIFT_SDK_BUNDLE=${SWIFT_SDK_BUNDLE}" >> $GITHUB_ENV
+        echo "SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH=${SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH}" >> $GITHUB_ENV
+
+        # extract the swiftResourcesPath from the swift-sdk.json
+        SWIFT_RESOURCES_ROOT_PATH=$(cat ${SWIFT_ARTIFACTBUNDLE_ROOT}/swift-sdk.json | jq -r '.targetTriples[] | .swiftResourcesPath' | head -n 1)
+        SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH="${SWIFT_SDK_ROOT_PATH}/${SWIFT_RESOURCES_ROOT_PATH}"
+
+        echo "SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH=${SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH}" >> $GITHUB_ENV
 
         # plugin-path is a workaround for https://github.com/swiftlang/swift-package-manager/issues/8362
         echo "swiftcmd=TARGET_OS_ANDROID=1 SKIP_BRIDGE=1 ${SWIFT_INSTALLATION}/bin/swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -plugin-path -Xswiftc ${SWIFT_INSTALLATION}/lib/swift/host/plugins/testing -Xswiftc -DTARGET_OS_ANDROID -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
@@ -378,10 +384,13 @@ runs:
         # copy any optional resource bundles
         cp -vaf ${BUILD_DIR}/${SWIFT_SDK_TARGET}/${{ inputs.swift-configuration }}/*.resources ${PACK_DIR} || true
         # 6.0.2 keeps libraries in per-API folders
-        cp -vaf ${SWIFT_SDK_BUNDLE}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/${SWIFT_SDK_ANROID_API}/lib*.so ${PACK_DIR} || true
+        cp -vaf ${SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/${SWIFT_SDK_ANROID_API}/lib*.so ${PACK_DIR} || true
 
         # 6.0.3 keeps libraries in the parent folder
-        cp -vaf ${SWIFT_SDK_BUNDLE}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so ${PACK_DIR} || true
+        cp -vaf ${SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so ${PACK_DIR} || true
+
+        # 6.2 keeps libraries in the resources root folder
+        cp -vaf ${SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH}/usr/lib/swift-${{ steps.setup.outputs.android-sdk-arch }}/android/lib*.so ${PACK_DIR} || true
 
         # clear out libraries that are already provided by Android
         rm -v ${PACK_DIR}/lib{c,dl,log,m,z}.so || true
