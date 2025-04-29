@@ -297,20 +297,30 @@ runs:
           # for the bundle, we just grab the most recently installed one
           SWIFT_SDK_ARTIFACTBUNDLE=$(ls -1drt ${SWIFT_SDK_ROOT}/*.artifactbundle | tail -n 1)
         else
-          SWIFT_SDK_ANROID_API="24"
-          echo "SWIFT_SDK_ANROID_API=${SWIFT_SDK_ANROID_API}" >> $GITHUB_ENV
-
-          SWIFT_SDK_ID="${{ steps.setup.outputs.swift-id }}-android-${SWIFT_SDK_ANROID_API}-0.1"
-
-          SWIFT_SDK_TARGET="${{ steps.setup.outputs.android-sdk-arch }}-unknown-linux-android${SWIFT_SDK_ANROID_API}"
-          echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
-
           mkdir -p ${RUNNER_TEMP}/swift-android-toolchain
           cd ${RUNNER_TEMP}/swift-android-toolchain
 
+          SWIFT_SDK_ID="${{ steps.setup.outputs.swift-id }}-android"
+          # TODO: identify the version automatically
+          SWIFT_SDK_VERSION="0.1"
+
+          if [[ "${SWIFT_VERSION}" =~ "6.0" || "${SWIFT_VERSION}" =~ "6.1" ]]; then
+            # Swift Android SDK 6.0/6.1 targets API 24+
+            SWIFT_SDK_ANROID_API="24"
+            SWIFT_SDK_ID="${SWIFT_SDK_ID}-${SWIFT_SDK_ANROID_API}-${SWIFT_SDK_VERSION}"
+          else
+            # Swift Android SDK 6.2+ targets API 28+
+            SWIFT_SDK_ANROID_API="28"
+            # 6.2+ no longer includes the API in the artifactbundle name
+            SWIFT_SDK_ID="${SWIFT_SDK_ID}-${SWIFT_SDK_VERSION}"
+          fi
           ANDROID_SDK_URL="https://github.com/skiptools/swift-android-toolchain/releases/download/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz"
+
           echo "ANDROID_SDK_URL: ${ANDROID_SDK_URL}"
           curl -fsSL --retry 8 --retry-connrefused ${ANDROID_SDK_URL} --output ${SWIFT_SDK_ID}.artifactbundle.tar.gz
+
+          SWIFT_SDK_TARGET="${{ steps.setup.outputs.android-sdk-arch }}-unknown-linux-android${SWIFT_SDK_ANROID_API}"
+          echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
 
           # first check if it already installed (we may be running this workflow multiple times for an action, in which case it will already be present)
           ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET} &> /dev/null || ${SWIFT_INSTALLATION}/bin/swift sdk install ${SWIFT_SDK_ID}.artifactbundle.tar.gz
@@ -384,7 +394,7 @@ runs:
         # copy any optional resource bundles
         cp -vaf ${BUILD_DIR}/${SWIFT_SDK_TARGET}/${{ inputs.swift-configuration }}/*.resources ${PACK_DIR} || true
         # 6.0.2 keeps libraries in per-API folders
-        cp -vaf ${SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/${SWIFT_SDK_ANROID_API}/lib*.so ${PACK_DIR} || true
+        cp -vaf ${SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/24/lib*.so ${PACK_DIR} || true
 
         # 6.0.3 keeps libraries in the parent folder
         cp -vaf ${SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so ${PACK_DIR} || true
