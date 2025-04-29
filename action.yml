@@ -326,7 +326,7 @@ runs:
 
         # extract the sdkRootPath from the swift-sdk.json
         SWIFT_SDK_ROOT_PATH=$(cat ${SWIFT_ARTIFACTBUNDLE_ROOT}/swift-sdk.json | jq -r '.targetTriples[] | .sdkRootPath' | head -n 1)
-        SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH="${SWIFT_SDK_ROOT_PATH}/${SWIFT_SDK_ROOT_PATH}"
+        SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH="${SWIFT_ARTIFACTBUNDLE_ROOT}/${SWIFT_SDK_ROOT_PATH}"
 
         echo "SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH=${SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH}" >> $GITHUB_ENV
 
