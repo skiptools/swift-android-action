@@ -169,7 +169,7 @@ runs:
           SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | ( grep -- '-SNAPSHOT' || true ) | head -n 1)
         elif [[ "${SWIFT_VERSION}" == nightly-* ]]; then
           echo "Checking nightly build for: ${SWIFT_VERSION}"
-          # e.g., nightly-6.1 will match 6.1-DEVELOPMENT-SNAPSHOT-*
+          # e.g., nightly-6.2 will match 6.2-DEVELOPMENT-SNAPSHOT-*
           SWIFT_VERSION=$(echo ${SWIFT_VERSION} | sed 's;nightly-;;g')
           SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | ( grep -- "${SWIFT_VERSION}-DEVELOPMENT-SNAPSHOT" || true ) | head -n 1)
           echo "Found nightly build: ${SWIFT_VERSION}"
@@ -332,7 +332,7 @@ runs:
 
         # extract the swiftResourcesPath from the swift-sdk.json
         SWIFT_RESOURCES_ROOT_PATH=$(cat ${SWIFT_ARTIFACTBUNDLE_ROOT}/swift-sdk.json | jq -r '.targetTriples[] | .swiftResourcesPath' | head -n 1)
-        SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH="${SWIFT_SDK_ROOT_PATH}/${SWIFT_RESOURCES_ROOT_PATH}"
+        SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH="${SWIFT_ARTIFACTBUNDLE_ROOT}/${SWIFT_RESOURCES_ROOT_PATH}"
 
         echo "SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH=${SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH}" >> $GITHUB_ENV
 
@@ -390,7 +390,8 @@ runs:
         cp -vaf ${SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/lib*.so ${PACK_DIR} || true
 
         # 6.2 keeps libraries in the resources root folder
-        cp -vaf ${SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH}/usr/lib/swift-${{ steps.setup.outputs.android-sdk-arch }}/android/lib*.so ${PACK_DIR} || true
+        # e.g.: swift-resources/usr/lib/swift-x86_64
+        cp -vaf ${SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH}/android/lib*.so ${PACK_DIR} || true
 
         # clear out libraries that are already provided by Android
         rm -v ${PACK_DIR}/lib{c,dl,log,m,z}.so || true
