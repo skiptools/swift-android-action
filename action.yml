@@ -319,7 +319,7 @@ runs:
           echo "ANDROID_SDK_URL: ${ANDROID_SDK_URL}"
           curl -fsSL --retry 8 --retry-connrefused ${ANDROID_SDK_URL} --output ${SWIFT_SDK_ID}.artifactbundle.tar.gz
 
-          SWIFT_SDK_ARCH=${{ steps.setup.outputs.android-sdk-arch }}"
+          SWIFT_SDK_ARCH="${{ steps.setup.outputs.android-sdk-arch }}"
           SWIFT_SDK_TARGET="${SWIFT_SDK_ARCH}-unknown-linux-android${SWIFT_SDK_ANROID_API}"
           echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
 
