@@ -345,7 +345,7 @@ runs:
         # note that we need to match current architecture or else
         # we will copy the wrong libraries
         RES_ARCH_PREFIX="${{ steps.setup.outputs.android-sdk-arch }}"
-        JQ_RES_ARCH_MATCH=".targetTriples | to_entries[] | select(.key | startswith('${RES_ARCH_PREFIX}')) | .value.swiftResourcesPath"
+        JQ_RES_ARCH_MATCH=".targetTriples | to_entries[] | select(.key | startswith(\"${RES_ARCH_PREFIX}\")) | .value.swiftResourcesPath"
         SWIFT_RESOURCES_ROOT_PATH=$(cat ${SWIFT_ARTIFACTBUNDLE_ROOT}/swift-sdk.json | jq -r "${JQ_RES_ARCH_MATCH}" | head -n 1)
         SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH="${SWIFT_ARTIFACTBUNDLE_ROOT}/${SWIFT_RESOURCES_ROOT_PATH}"
 
