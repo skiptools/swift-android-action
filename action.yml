@@ -338,9 +338,10 @@ runs:
         # run the SDK setup script if it exists
         SWIFT_SDK_SETUP="${SWIFT_ARTIFACTBUNDLE_ROOT}/scripts/setup-android-sdk.sh"
         if [[ -x "${SWIFT_SDK_SETUP}" ]]; then
+          echo "Running SDK setup script at ${SWIFT_SDK_SETUP}"
           ${SWIFT_SDK_SETUP}
         else
-          echo "No setup script to run in ${SWIFT_ARTIFACTBUNDLE_ROOT}/scripts"
+          echo "No SDK setup script to run in ${SWIFT_ARTIFACTBUNDLE_ROOT}/scripts"
         fi
 
         # extract the sdkRootPath from the swift-sdk.json
