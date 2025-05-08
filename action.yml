@@ -335,6 +335,12 @@ runs:
         SWIFT_SDK_ARTIFACT_ID=$(cat ${SWIFT_SDK_ARTIFACTBUNDLE}/info.json | jq -r '.artifacts[] | .variants[0].path')
         SWIFT_ARTIFACTBUNDLE_ROOT="${SWIFT_SDK_ARTIFACTBUNDLE}/${SWIFT_SDK_ARTIFACT_ID}"
 
+        # run the SDK setup script if it exists
+        SWIFT_SDK_SETUP="${SWIFT_ARTIFACTBUNDLE_ROOT}/script/setup-android-sdk.sh"
+        if [[ -x "${SWIFT_SDK_SETUP}" ]]; then
+          ${SWIFT_SDK_SETUP}
+        fi
+
         # extract the sdkRootPath from the swift-sdk.json
         SWIFT_SDK_ROOT_PATH=$(cat ${SWIFT_ARTIFACTBUNDLE_ROOT}/swift-sdk.json | jq -r '.targetTriples[] | .sdkRootPath' | head -n 1)
         SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH="${SWIFT_ARTIFACTBUNDLE_ROOT}/${SWIFT_SDK_ROOT_PATH}"
