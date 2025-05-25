@@ -305,12 +305,13 @@ runs:
           SWIFT_SDK_VERSION="0.1"
           SWIFT_SDK_ARCH="${{ steps.setup.outputs.android-sdk-arch }}"
 
-          if [[ "${SWIFT_SDK_ID}" =~ "-6.0" || "${SWIFT_SDK_ID}" =~ "-6.1" ]]; then
+          # 6.0.x-6.1 (but not 6.1.1)
+          if [[ "${SWIFT_SDK_ID}" =~ "-6.0" || "${SWIFT_SDK_ID}" =~ "-6.1-" ]]; then
             # Swift Android SDK 6.0/6.1 targets API 24+
             SWIFT_SDK_ANROID_API="24"
             SWIFT_SDK_ID="${SWIFT_SDK_ID}-android-${SWIFT_SDK_ANROID_API}-${SWIFT_SDK_VERSION}"
           else
-            # Swift Android SDK 6.2+ targets API 28+
+            # Swift Android SDK 6.1.1+ targets API 28+
             SWIFT_SDK_ANROID_API="28"
             # 6.2+ no longer includes the API in the artifactbundle name
             SWIFT_SDK_ID="${SWIFT_SDK_ID}-android-${SWIFT_SDK_VERSION}"
