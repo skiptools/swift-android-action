@@ -154,7 +154,7 @@ runs:
 
         # yq or xmllint are best for this, but they aren't installed by
         # default on GH Linux runners, we we just use grep
-        grep '<title>' swift-releases.xml | cut -f 2 -d '>' | cut -f 1 -d '<' | grep '^[0-9]' ${{ runner.temp }}/swift-releases.xml | sort -rn > ${SWIFT_VERSIONS_FILE}
+        grep '<title>' ${{ runner.temp }}/swift-releases.xml | cut -f 2 -d '>' | cut -f 1 -d '<' | grep '^[0-9]' | sort -rn > ${SWIFT_VERSIONS_FILE}
 
         # if we hardcode the latest builds, we would need to update them every time a new snapshot is released
 
