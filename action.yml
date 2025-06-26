@@ -147,7 +147,8 @@ runs:
         # fetch the Atom feed for the latest releases
         curl -fsSL --retry 8 --retry-connrefused https://github.com/skiptools/swift-android-toolchain/releases.atom --output ${{ runner.temp }}/swift-releases.xml
         SWIFT_VERSIONS_FILE=${{ runner.temp }}/swift-versions.txt
-        yq -oy '.feed.entry[].title' ${{ runner.temp }}/swift-releases.xml | sort -rn > ${SWIFT_VERSIONS_FILE}
+        #yq -oy '.feed.entry[].title' ${{ runner.temp }}/swift-releases.xml | sort -rn > ${SWIFT_VERSIONS_FILE}
+        xmllint --xpath "/*[local-name()='feed']/*[local-name()='entry']/*[local-name()='title']/text()"  ${{ runner.temp }}/swift-releases.xml | sort -rn > ${SWIFT_VERSIONS_FILE}
 
         # if we hardcode the latest builds, we would need to update them every time a new snapshot is released
 
