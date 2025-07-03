@@ -13,7 +13,7 @@ jobs:
         os: ['ubuntu-24.04', 'ubuntu-22.04', 'macos-13', 'macos-15']
         #swift-version: ['6.0', '6.1']
         swift-version: ['6.0', '6.1', '6.1.1', 'nightly-6.2']
-        ndk-version: ['27', '28']
+        ndk-version: ['27', 'latest']
     steps:
       - name: Checkout Action
         uses: actions/checkout@v4
@@ -39,6 +39,19 @@ jobs:
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
           copy-files: Tests
           test-env: TEST_WORKSPACE=1
+
+      - name: Checkout apple/swift-system
+        uses: actions/checkout@v4
+        with:
+          repository: apple/swift-system
+          path: apple/swift-system
+      - name: Test apple/swift-system
+        uses: ./swift-android-action/
+        with:
+          package-path: apple/swift-system
+          swift-version: ${{ matrix.swift-version }}
+          ndk-version: ${{ matrix.ndk-version }}
+          run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
 
       - name: Checkout skiptools/swift-android-native
         uses: actions/checkout@v4
@@ -69,19 +82,19 @@ jobs:
       - name: Setup Toolchain
         id: setup-toolchain
         uses: ./swift-android-action/
-        #uses: skiptools/swift-android-action@v2
+        #uses: swift-android-sdk/swift-android-action@v2
         with:
           # just set up the toolchain and don't build anything
           build-package: false
           swift-version: ${{ matrix.swift-version }}
           ndk-version: ${{ matrix.ndk-version }}
-      - name: Checkout apple/swift-numerics
+      - name: Checkout apple/swift-algorithms
         uses: actions/checkout@v4
         with:
-          repository: apple/swift-numerics
-          path: apple/swift-numerics
+          repository: apple/swift-algorithms
+          path: apple/swift-algorithms
       - name: Build Package With Toolchain
-        working-directory: apple/swift-numerics
+        working-directory: apple/swift-algorithms
         run: |
           echo "SWIFT COMMAND: ${{ steps.setup-toolchain.outputs.swift-build }}"
           ${{ steps.setup-toolchain.outputs.swift-build }} -c debug

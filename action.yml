@@ -225,10 +225,21 @@ runs:
         echo "swift-branch=${SWIFT_BRANCH}" >> $GITHUB_OUTPUT
 
         NDK_VERSION="${{ inputs.ndk-version }}"
-        if [[ "${NDK_VERSION}" != '' ]]; then
+        if [[ "${NDK_VERSION}" == 'latest' ]]; then
+          # can set latest, which is currently 28. See:
+          # https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md#environment-variables-2
+          # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md#environment-variables-1
+          echo "ANDROID_NDK_HOME={ANDROID_NDK_LATEST_HOME}" >> $GITHUB_ENV
+        elif [[ "${NDK_VERSION}" != '' ]]; then
           # we can set ndk-version to "27" or "27.0" or "27.2.12479018"
-          NDK_BASE=$(dirname "${ANDROID_NDK_ROOT}")
-          echo "ANDROID_NDK_ROOT=$(ls -rd ${NDK_BASE}/${NDK_VERSION}* | head -n 1)" >> $GITHUB_ENV
+          NDK_BASE=$(dirname "${ANDROID_NDK_HOME}")
+          # the setup scripts use "ANDROID_NDK_HOME" for linking the NDK
+          echo "ANDROID_NDK_HOME=$(ls -rd ${NDK_BASE}/${NDK_VERSION}* | head -n 1)" >> $GITHUB_ENV
+        fi
+
+        if [[ ${SWIFT_VERSION_ID} != swift-6.0* ]]; then
+          # see https://github.com/finagolfin/swift-android-sdk/issues/207
+          echo "ANDROID_NDK_ROOT=" >> $GITHUB_ENV
         fi
 
     - name: Cache Swift ${{ steps.setup.outputs.swift-version }} Host Toolchain
@@ -377,11 +388,6 @@ runs:
         # plugin-path is a workaround for https://github.com/swiftlang/swift-package-manager/issues/8362
         echo "swiftcmd=TARGET_OS_ANDROID=1 SKIP_BRIDGE=1 ${SWIFT_INSTALLATION}/bin/swift build --swift-sdk ${SWIFT_SDK_TARGET} -Xswiftc -plugin-path -Xswiftc ${SWIFT_INSTALLATION}/lib/swift/host/plugins/testing -Xswiftc -DTARGET_OS_ANDROID -Xswiftc -DSKIP_BRIDGE ${{ inputs.swift-build-flags }}" >> $GITHUB_OUTPUT
         echo "swift-sdk=${SWIFT_SDK_TARGET}" >> $GITHUB_OUTPUT
-
-        if [[ ${SWIFT_VERSION_ID} != swift-6.0* ]]; then
-          # see https://github.com/finagolfin/swift-android-sdk/issues/207
-          echo "ANDROID_NDK_ROOT=" >> $GITHUB_ENV
-        fi
     - name: Check Swift Version
       shell: bash
       run: |
