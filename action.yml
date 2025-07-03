@@ -229,7 +229,7 @@ runs:
           # can set latest, which is currently 28. See:
           # https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md#environment-variables-2
           # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md#environment-variables-1
-          echo "ANDROID_NDK_HOME={ANDROID_NDK_LATEST_HOME}" >> $GITHUB_ENV
+          echo "ANDROID_NDK_HOME=${ANDROID_NDK_LATEST_HOME}" >> $GITHUB_ENV
         elif [[ "${NDK_VERSION}" != '' ]]; then
           # we can set ndk-version to "27" or "27.0" or "27.2.12479018"
           NDK_BASE=$(dirname "${ANDROID_NDK_HOME}")
