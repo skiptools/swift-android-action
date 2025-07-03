@@ -76,14 +76,8 @@ which may be a pre-release build.
 > we anticipate the release of an official Android SDK, at which time this action will
 > transition to using that bundle.
 
-Snapshots can be specified with their full name, like `6.1-DEVELOPMENT-SNAPSHOT-2025-03-25-a`,
-or the most recent snapshot/nightly build can be specified with `nightly-6.1`. 
-
-> [!WARNING]
-> The Swift Testing framework is only available in the 6.1 SDK, so if your project
-> uses Swift Testing, you should either use the `nightly-6.1` version, or disable
-> testing by setting `build-tests: false`. 
-
+Snapshots can be specified with their full name, like `6.2-DEVELOPMENT-SNAPSHOT-2025-06-27-a`,
+or the most recent snapshot/nightly build can be specified with `nightly-6.2`. 
 
 ### Configuration Options
 
