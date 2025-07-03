@@ -18,6 +18,11 @@ inputs:
     description: 'The version of the Swift toolchain to use'
     required: true
     default: 'latest'
+  ndk-version:
+    description: 'The version of the NDK to use for 6.2+'
+    required: false
+    type: string
+    default: ''
   swift-branch:
     description: 'The branch of the Swift toolchain to use'
     required: true
@@ -219,10 +224,15 @@ runs:
         echo "SWIFT_BRANCH: ${SWIFT_BRANCH}"
         echo "swift-branch=${SWIFT_BRANCH}" >> $GITHUB_OUTPUT
 
-        if [[ ${SWIFT_VERSION_ID} != swift-6.0* ]]; then
-          # recent releases require that ANDROID_NDK_ROOT *not* be set 
+        NDK_VERSION="${{ inputs.ndk-version }}"
+        if [[ ${SWIFT_VERSION_ID} == swift-6.1* ]]; then
+          # 6.1 releases require that ANDROID_NDK_ROOT *not* be set 
           # see https://github.com/finagolfin/swift-android-sdk/issues/207
           echo "ANDROID_NDK_ROOT=" >> $GITHUB_ENV
+        elif [[ "${NDK_VERSION}" != '' ]]; then
+          # we can set ndk-version to "27" or "27.0" or "27.2.12479018"
+          NDK_BASE=$(dirname "${ANDROID_NDK_ROOT}")
+          echo "ANDROID_NDK_ROOT=$(ls -rd ${NDK_BASE}/${NDK_VERSION}* | head -n 1)" >> $GITHUB_ENV
         fi
 
     - name: Cache Swift ${{ steps.setup.outputs.swift-version }} Host Toolchain

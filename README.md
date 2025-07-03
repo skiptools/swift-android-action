@@ -84,6 +84,7 @@ or the most recent snapshot/nightly build can be specified with `nightly-6.2`.
 | Parameter | Description | Default  |
 |-----|-----|-----|
 | swift-version | The version of the Swift toolchain to use | 6.1 |
+| ndk-version | The version of the Android NDK to use | <default> |
 | package-path | The folder where the swift package is checked out | . |
 | swift-configuration | Whether to build with debug or release configuration | debug |
 | swift-build-flags | Additional flags to pass to the swift build command |  |

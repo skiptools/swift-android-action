@@ -13,6 +13,7 @@ jobs:
         os: ['ubuntu-24.04', 'ubuntu-22.04', 'macos-13', 'macos-15']
         #swift-version: ['6.0', '6.1']
         swift-version: ['6.0', '6.1', '6.1.1', 'nightly-6.2']
+        ndk-version: ['27', '28']
     steps:
       - name: Checkout Action
         uses: actions/checkout@v4
@@ -34,6 +35,7 @@ jobs:
         with:
           package-path: jpsim/Yams
           swift-version: ${{ matrix.swift-version }}
+          ndk-version: ${{ matrix.ndk-version }}
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
           copy-files: Tests
           test-env: TEST_WORKSPACE=1
@@ -48,6 +50,7 @@ jobs:
         with:
           package-path: skiptools/swift-android-native
           swift-version: ${{ matrix.swift-version }}
+          ndk-version: ${{ matrix.ndk-version }}
           run-tests: ${{ matrix.os != 'macos-15' }} # no tests on macOS ARM
 
   toolchain-setup:
@@ -57,15 +60,12 @@ jobs:
       matrix:
         os: ['ubuntu-24.04', 'ubuntu-22.04', 'macos-13', 'macos-15']
         swift-version: ['6.0', '6.1', 'nightly-6.2']
+        ndk-version: ['27', '28']
     steps:
       - name: Checkout Action
         uses: actions/checkout@v4
         with:
           path: swift-android-action
-      - name: Setup NDK
-        if: ${{ matrix.os == 'macos-13' }} # macOS-13 defaults to NDK 16, NDK 17+ needed
-        run: |
-            echo "ANDROID_NDK_HOME=$HOME/Library/Android/sdk/ndk/27.2.12479018" >> $GITHUB_ENV
       - name: Setup Toolchain
         id: setup-toolchain
         uses: ./swift-android-action/
@@ -74,6 +74,7 @@ jobs:
           # just set up the toolchain and don't build anything
           build-package: false
           swift-version: ${{ matrix.swift-version }}
+          ndk-version: ${{ matrix.ndk-version }}
       - name: Checkout apple/swift-numerics
         uses: actions/checkout@v4
         with:
