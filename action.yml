@@ -82,19 +82,19 @@ inputs:
   android-api-level:
     description: 'The API level of the Android emulator to run against'
     required: true
-    default: 29
+    default: 30
   android-channel:
     required: false
     type: string
-    default: ''
+    default: 'stable'
   android-profile:
     required: false
     type: string
-    default: ''
+    default: 'pixel'
   android-target:
     required: false
     type: string
-    default: ''
+    default: 'aosp_atd'
   installed-sdk:
     required: false
     type: string
