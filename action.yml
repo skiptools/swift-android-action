@@ -82,7 +82,7 @@ inputs:
   android-api-level:
     description: 'The API level of the Android emulator to run against'
     required: true
-    default: 30
+    default: 29
   android-channel:
     required: false
     type: string
