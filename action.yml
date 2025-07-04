@@ -86,15 +86,15 @@ inputs:
   android-channel:
     required: false
     type: string
-    default: 'stable'
+    default: ''
   android-profile:
     required: false
     type: string
-    default: 'pixel'
+    default: ''
   android-target:
     required: false
     type: string
-    default: 'aosp_atd'
+    default: ''
   installed-sdk:
     required: false
     type: string
