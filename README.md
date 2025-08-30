@@ -72,9 +72,9 @@ which may be a pre-release build.
 > [!NOTE]
 > The SDK that is installed is currently the unofficial de-facto Android SDK created from
 > the [swift-android-sdk](https://github.com/swift-android-sdk/swift-android-sdk) fork.
-> As the official Android WG is [formed](https://github.com/swiftlang/swift-org-website/pull/925),
+> As the official Android WG is [formed](https://www.swift.org/android-workgroup/),
 > we anticipate the release of an official Android SDK, at which time this action will
-> transition to using that bundle.
+> transition to using the authoritative SDK bundle.
 
 Snapshots can be specified with their full name, like `6.2-DEVELOPMENT-SNAPSHOT-2025-08-28-a`,
 or the most recent snapshot/nightly build can be specified with `nightly-6.2`.
@@ -262,7 +262,7 @@ gh release create --generate-notes --latest
 
 ## Who is using the Swift Android Action?
 
-These are some of the open-source projects using (or used) the Swift Android Action:
+These are some of the open-source projects using (or have used) the Swift Android Action:
 
 - [Alamofire](https://github.com/Alamofire/Alamofire/tree/master/.github/workflows)
 - [Bagbutik](https://github.com/MortenGregersen/Bagbutik/tree/main/.github/workflows)
