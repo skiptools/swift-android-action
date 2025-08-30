@@ -1,7 +1,7 @@
 # Swift Android native cross-compiler and test runner action
 
 This GitHub action will build and run Swift package tests on an Android emulator.
-This uses the [swift-android-toolchain](https://github.com/swift-android-sdk/swift-android-toolchain)
+This uses the [swift-android-toolchain](https://github.com/skiptools/swift-android-toolchain)
 project to provide a cross-compiler for building
 Swift natively for Android on a Linux or macOS host.
 
@@ -41,7 +41,7 @@ jobs:
       - name: "Test Swift Package on Linux"
         run: swift test
       - name: "Test Swift Package on Android"
-        uses: swift-android-sdk/swift-android-action@v2
+        uses: skiptools/swift-android-action@v2
 ```
 
 
@@ -58,7 +58,7 @@ jobs:
       - name: "Test Swift Package on Linux"
         run: swift test
       - name: "Test Swift Package on Android"
-        uses: swift-android-sdk/swift-android-action@v2
+        uses: skiptools/swift-android-action@v2
         with:
           swift-version: 6.1
 ```
@@ -66,7 +66,7 @@ jobs:
 ### Swift Versions
 
 The `swift-version` input can be set to a specific version number (e.g., "6.0.3" or "6.1.1").
-A shortened version like "6.0" or "6.1" will use the latest [release](https://github.com/swift-android-sdk/swift-android-toolchain/releases),
+A shortened version like "6.0" or "6.1" will use the latest [release](https://github.com/skiptools/swift-android-toolchain/releases),
 which may be a pre-release build.
 
 > [!NOTE]
@@ -76,7 +76,7 @@ which may be a pre-release build.
 > we anticipate the release of an official Android SDK, at which time this action will
 > transition to using that bundle.
 
-Snapshots can be specified with their full name, like `6.2-DEVELOPMENT-SNAPSHOT-2025-06-27-a`,
+Snapshots can be specified with their full name, like `6.2-DEVELOPMENT-SNAPSHOT-2025-08-28-a`,
 or the most recent snapshot/nightly build can be specified with `nightly-6.2`.
 
 ### Configuration Options
@@ -120,7 +120,7 @@ jobs:
       - name: "Test Swift Package on macOS"
         run: swift test
       - name: "Build Swift Package on Android"
-        uses: swift-android-sdk/swift-android-action@v2
+        uses: skiptools/swift-android-action@v2
         with:
           run-tests: false
 ```
@@ -148,7 +148,7 @@ For example:
 
 ```yml
   - name: Test Android Package
-    uses: swift-android-sdk/swift-android-action@v2
+    uses: skiptools/swift-android-action@v2
     with:
       copy-files: Tests
       test-env: TEST_WORKSPACE=1
@@ -170,7 +170,7 @@ For example:
 ```yml
   - name: Setup Toolchain
     id: setup-toolchain
-    uses: swift-android-sdk/swift-android-action@v2
+    uses: skiptools/swift-android-action@v2
     with:
       # just set up the toolchain but don't build anything
       build-package: false
@@ -221,7 +221,7 @@ jobs:
       - name: "Test Swift Package on Linux"
         run: swift test
       - name: "Test Swift Package on Android"
-        uses: swift-android-sdk/swift-android-action@v2
+        uses: skiptools/swift-android-action@v2
   macos-ios:
     runs-on: macos-latest
     steps:
