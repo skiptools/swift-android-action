@@ -6,7 +6,7 @@ project to provide a cross-compiler for building
 Swift natively for Android on a Linux or macOS host.
 
 After building the package, it will run the SwiftPM
-test targets on an Android emulator (which is provided by the 
+test targets on an Android emulator (which is provided by the
 [Android Emulator Runner action](https://github.com/marketplace/actions/android-emulator-runner)).
 To build the package for Android without running the tests
 (which is considerably faster), set the `run-tests` option to `false`.
@@ -77,7 +77,7 @@ which may be a pre-release build.
 > transition to using that bundle.
 
 Snapshots can be specified with their full name, like `6.2-DEVELOPMENT-SNAPSHOT-2025-06-27-a`,
-or the most recent snapshot/nightly build can be specified with `nightly-6.2`. 
+or the most recent snapshot/nightly build can be specified with `nightly-6.2`.
 
 ### Configuration Options
 
@@ -265,22 +265,34 @@ gh release create --generate-notes --latest
 These are some of the open-source projects using (or used) the Swift Android Action:
 
 - [Alamofire](https://github.com/Alamofire/Alamofire/tree/master/.github/workflows)
+- [Bagbutik](https://github.com/MortenGregersen/Bagbutik/tree/main/.github/workflows)
+- [BigInt](https://github.com/attaswift/BigInt/tree/master/.github/workflows)
 - [CryptoSwift](https://github.com/krzyzanowskim/CryptoSwift/tree/main/.github/workflows)
 - [egeniq/app-remote-config](https://github.com/egeniq/app-remote-config/tree/main/.github/workflows)
 - [Forked](https://github.com/drewmccormack/Forked/tree/main/.github/workflows)
 - [GraphQL](https://github.com/GraphQLSwift/GraphQL/tree/main/.github/workflows)
+- [jose-swift](https://github.com/beatt83/jose-swift/tree/main/.github/workflows)
+- [MemoZ](https://github.com/marcprux/MemoZ/tree/main/.github/workflows)
 - [PromiseKit](https://github.com/mxcl/PromiseKit/tree/master/.github/workflows)
+- [ReactiveKit](https://github.com/DeclarativeHub/ReactiveKit/tree/master/.github/workflows)
 - [Skip](https://github.com/skiptools/actions/tree/main/.github/workflows)
+- [soto-core](https://github.com/soto-project/soto-core/tree/main/.github/workflows)
+- [SQLite.swift](https://github.com/stephencelis/SQLite.swift/tree/master/.github/workflows)
 - [supabase-swift](https://github.com/supabase/supabase-swift/tree/main/.github/workflows)
 - [swift-android-native](https://github.com/skiptools/swift-android-native/tree/main/.github/workflows)
 - [SwiftCBOR](https://github.com/valpackett/SwiftCBOR/tree/master/.github/workflows)
+- [SwiftDraw](https://github.com/swhitty/SwiftDraw/tree/main/.github/workflows)
 - [swift-fakes](https://github.com/Quick/swift-fakes/tree/main/.github/workflows)
+- [SwiftGodot](https://github.com/migueldeicaza/SwiftGodot/tree/main/.github/workflows)
 - [swift-issue-reporting](https://github.com/pointfreeco/swift-issue-reporting/tree/main/.github/workflows)
+- [swift-jni](https://github.com/skiptools/swift-jni/tree/main/.github/workflows)
+- [swift-macro-testing](https://github.com/pointfreeco/swift-macro-testing/tree/main/.github/workflows)
 - [swift-png](https://github.com/tayloraswift/swift-png/tree/master/.github/workflows)
 - [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing/tree/main/.github/workflows)
 - [swift-sqlcipher](https://github.com/skiptools/swift-sqlcipher/tree/main/.github/workflows)
 - [SwifterSwift](https://github.com/SwifterSwift/SwifterSwift/tree/master/.github/workflows)
-- [SwiftGodot](https://github.com/migueldeicaza/SwiftGodot/tree/main/.github/workflows)
+- [universal](https://github.com/marcprux/universal/tree/main/.github/workflows)
 - [vapor/ci](https://github.com/vapor/ci/tree/main/.github/workflows)
+- [WasmKit](https://github.com/swiftwasm/WasmKit/tree/main/.github/workflows)
 - [Yams](https://github.com/jpsim/Yams/tree/main/.github/workflows)
 
