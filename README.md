@@ -247,9 +247,13 @@ jobs:
 For an example of this workflow in action, see a run history
 for the [swift-sqlite](https://github.com/swift-android-sdk/swift-sqlite/actions) package.
 
-## Development
+## Adding Android Support to existing Packages
 
-### Releasing new versions
+Recommendations for adding Android compatibility to
+existing Swift packages can be found at
+[Bringing Swift Packages to Android](https://skip.tools/blog/android-native-swift-packages/).
+
+## Releasing new versions
 
 To create a new release, make a new tag (like 2.0.2),
 and then update the symbolic major v2 tag with:
