@@ -448,7 +448,7 @@ runs:
         cp -vaf ${SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH}/android/lib*.so ${PACK_DIR} || true
 
         # clear out libraries that are already provided by Android
-        rm -v ${PACK_DIR}/lib{c,dl,log,m,z}.so || true
+        rm -v ${PACK_DIR}/lib{c,dl,log,m,z,c++}.so || true
 
         if [ "${{ inputs.copy-files }}" != '' ]; then
           cp -vaf ${{ inputs.copy-files }} ${PACK_DIR}
