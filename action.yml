@@ -448,7 +448,7 @@ runs:
         cp -vaf ${SWIFT_ARTIFACTBUNDLE_RESOURCES_ROOT_PATH}/android/lib*.so ${PACK_DIR} || true
 
         # clear out libraries that are already provided by Android
-        rm -v ${PACK_DIR}/lib{c,dl,log,m,z}.so || true
+        rm -v ${PACK_DIR}/lib{c,dl,log,m,z,c++}.so || true
 
         if [ "${{ inputs.copy-files }}" != '' ]; then
           cp -vaf ${{ inputs.copy-files }} ${PACK_DIR}
@@ -463,6 +463,10 @@ runs:
         for XCTEST in ${TEST_BASE_FOLDER}/*.xctest; do
           XCTEST_BASE=$(basename "${XCTEST}")
           TEST_CMD="${{ inputs.test-env }} ./${XCTEST_BASE} ${{ inputs.swift-test-flags }}"
+          # Conditionally prepend LD_LIBRARY_PATH for Android 23 and below, since DT_RUNPATH support was added in 24
+          if [ "${{ inputs.android-api-level }}" -le 23 ]; then
+            TEST_CMD="LD_LIBRARY_PATH=./ ${TEST_CMD}"
+          fi
 
           TEST_SHELL="cd ${REMOTE_FOLDER}/${TEST_BASE_FOLDER}"
           TEST_SHELL="${TEST_SHELL} && ${TEST_CMD}"
