@@ -1,108 +1,108 @@
-name: 'Swift Android Action'
-description: 'Cross-compiles a swift package for Android and runs the test cases in an Android emulator'
+name: "Swift Android Action"
+description: "Cross-compiles a swift package for Android and runs the test cases in an Android emulator"
 branding:
-  icon: 'target'
-  color: 'orange'
+  icon: "target"
+  color: "orange"
 outputs:
   swift-build:
-    description: 'The swift build command using the installed toolchain and SDK'
+    description: "The swift build command using the installed toolchain and SDK"
     value: ${{ steps.install.outputs.swiftcmd }}
   swift-sdk:
-    description: 'The swift SDK that is used to build for Android'
+    description: "The swift SDK that is used to build for Android"
     value: ${{ steps.install.outputs.swift-sdk }}
   swift-install:
-    description: 'The installation root for the host Swift toolchain'
+    description: "The installation root for the host Swift toolchain"
     value: ${{ steps.install.outputs.swiftroot }}
 inputs:
   swift-version:
-    description: 'The version of the Swift toolchain to use'
+    description: "The version of the Swift toolchain to use"
     required: true
-    default: 'latest'
+    default: "latest"
   ndk-version:
-    description: 'The version of the NDK to use for 6.2+'
+    description: "The version of the NDK to use for 6.2+"
     required: false
     type: string
-    default: ''
+    default: ""
   swift-branch:
-    description: 'The branch of the Swift toolchain to use'
+    description: "The branch of the Swift toolchain to use"
     required: true
-    default: ''
+    default: ""
   package-path:
-    description: 'The folder where the swift package is checked out'
+    description: "The folder where the swift package is checked out"
     required: true
-    default: '.'
+    default: "."
   swift-build-flags:
-    description: 'Additional flags to pass to the swift build command'
+    description: "Additional flags to pass to the swift build command"
     required: true
-    default: ''
+    default: ""
   swift-configuration:
-    description: 'Whether to build in debug or release configuration'
+    description: "Whether to build in debug or release configuration"
     required: true
-    default: 'debug'
+    default: "debug"
   swift-test-flags:
-    description: 'Additional flags to pass to the swift test command'
+    description: "Additional flags to pass to the swift test command"
     required: true
-    default: ''
+    default: ""
   android-emulator-test-folder:
-    description: 'Emulator folder where tests are copied and run'
+    description: "Emulator folder where tests are copied and run"
     required: true
-    default: '/data/local/tmp/android-xctest'
+    default: "/data/local/tmp/android-xctest"
   test-env:
-    description: 'Test environment variables key=value'
+    description: "Test environment variables key=value"
     required: true
-    default: ''
+    default: ""
   android-emulator-options:
-    description: 'Options to pass to the Android emulator'
+    description: "Options to pass to the Android emulator"
     required: true
-    default: '-no-window -gpu swiftshader_indirect -noaudio -no-boot-anim'
+    default: "-no-window -gpu swiftshader_indirect -noaudio -no-boot-anim"
   android-emulator-boot-timeout:
-    description: 'Emulator boot timeout in seconds'
+    description: "Emulator boot timeout in seconds"
     required: true
     default: 600
   build-package:
-    description: 'Whether to build the package or just set up the SDK'
+    description: "Whether to build the package or just set up the SDK"
     required: true
-    default: 'true'
+    default: "true"
   build-tests:
-    description: 'Whether to build the tests or just the sources'
+    description: "Whether to build the tests or just the sources"
     required: true
-    default: 'true'
+    default: "true"
   run-tests:
-    description: 'Whether to run the tests or just the build'
+    description: "Whether to run the tests or just the build"
     required: true
-    default: 'true'
+    default: "true"
   copy-files:
-    description: 'Additional files to copy to emulator for testing'
+    description: "Additional files to copy to emulator for testing"
     required: true
-    default: ''
+    default: ""
   android-cores:
-    description: 'Number of cores to use for the emulator'
+    description: "Number of cores to use for the emulator"
     required: true
     default: 2
   android-api-level:
-    description: 'The API level of the Android emulator to run against'
+    description: "The API level of the Android emulator to run against"
     required: true
     default: 30
   android-channel:
     required: false
     type: string
-    default: 'stable'
+    default: "stable"
   android-profile:
     required: false
     type: string
-    default: 'pixel'
+    default: "pixel"
   android-target:
     required: false
     type: string
-    default: 'aosp_atd'
+    default: "aosp_atd"
   installed-sdk:
     required: false
     type: string
-    default: ''
+    default: ""
   installed-swift:
     required: false
     type: string
-    default: ''
+    default: ""
 
 runs:
   using: "composite"
@@ -463,6 +463,10 @@ runs:
         for XCTEST in ${TEST_BASE_FOLDER}/*.xctest; do
           XCTEST_BASE=$(basename "${XCTEST}")
           TEST_CMD="${{ inputs.test-env }} ./${XCTEST_BASE} ${{ inputs.swift-test-flags }}"
+          # Conditionally prepend LD_LIBRARY_PATH for Android 23 and below, since DT_RUNPATH support was added in 24
+          if [ "${{ inputs.android-api-level }}" -le 23 ]; then
+            TEST_CMD="LD_LIBRARY_PATH=./ ${TEST_CMD}"
+          fi
 
           TEST_SHELL="cd ${REMOTE_FOLDER}/${TEST_BASE_FOLDER}"
           TEST_SHELL="${TEST_SHELL} && ${TEST_CMD}"
@@ -496,7 +500,7 @@ runs:
         path: |
           ~/.android/avd/*
           ~/.android/adb*
-        key: 'avd-${{ inputs.android-profile }}_${{ inputs.android-channel }}_${{ inputs.android-target }}_${{ inputs.android-api-level }}-${{ steps.setup.outputs.android-emulator-arch }}'
+        key: "avd-${{ inputs.android-profile }}_${{ inputs.android-channel }}_${{ inputs.android-target }}_${{ inputs.android-api-level }}-${{ steps.setup.outputs.android-emulator-arch }}"
 
     - name: Create Android Emulator Cache
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' && steps.avd-cache.outputs.cache-hit != 'true' }}
@@ -534,4 +538,3 @@ runs:
         disable-animations: true
         working-directory: ${{ inputs.package-path }}/.build
         script: ./run-android-tests.sh
-
