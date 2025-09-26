@@ -60,14 +60,12 @@ jobs:
       - name: "Test Swift Package on Android"
         uses: skiptools/swift-android-action@v2
         with:
-          swift-version: 6.1
+          swift-version: 6.2
 ```
 
 ### Swift Versions
 
-The `swift-version` input can be set to a specific version number (e.g., "6.0.3" or "6.1.1").
-A shortened version like "6.0" or "6.1" will use the latest [release](https://github.com/skiptools/swift-android-toolchain/releases),
-which may be a pre-release build.
+The `swift-version` input can be set to a specific version number (e.g., "6.2" or "6.1.1").
 
 > [!NOTE]
 > The SDK that is installed is currently the unofficial de-facto Android SDK created from
@@ -83,7 +81,7 @@ or the most recent snapshot/nightly build can be specified with `nightly-6.2`.
 
 | Parameter | Description | Default  |
 |-----|-----|-----|
-| swift-version | The version of the Swift toolchain to use | 6.1 |
+| swift-version | The version of the Swift toolchain to use | 6.2 |
 | ndk-version | The version of the Android NDK to use | <default> |
 | package-path | The folder where the swift package is checked out | . |
 | swift-configuration | Whether to build with debug or release configuration | debug |
@@ -237,8 +235,8 @@ jobs:
       - name: "Setup Swift on Windows"
         uses: compnerd/gha-setup-swift@main
         with:
-          branch: swift-6.1-release
-          tag: 6.1-RELEASE
+          branch: swift-6.2-release
+          tag: 6.2-RELEASE
       - name: "Test Swift Package on Windows"
         run: swift test
 
