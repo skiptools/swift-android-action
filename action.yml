@@ -328,7 +328,7 @@ runs:
           exit 1
         fi
 
-        if [ "${{ inputs.installed-sdk }}" != '' ] && [ "${{ inputs.custom-sdk-url }}" == '']; then
+        if [[ "${{ inputs.installed-sdk }}" != '' && "${{ inputs.custom-sdk-url }}" == '' ]]; then
           # we already have an SDK installed
           SWIFT_SDK_TARGET="${{ inputs.installed-sdk }}"
           echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
@@ -342,7 +342,7 @@ runs:
           SWIFT_SDK_ARCH="${{ steps.setup.outputs.android-sdk-arch }}"
 
           if [[ "${ANDROID_SDK_URL}" != '' ]]; then
-            if [ "${{ inputs.installed-sdk }}" == '' ] || [ "${{ inputs.custom-sdk-id }}" == '' ]; then
+            if [[ "${{ inputs.installed-sdk }}" == '' || "${{ inputs.custom-sdk-id }}" == '' ]]; then
               echo "::error::Options 'custom-sdk-id' and 'installed-sdk' must be provided when downloading custom SDK."
               exit 1
             fi
