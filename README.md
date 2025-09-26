@@ -90,6 +90,8 @@ or the most recent snapshot/nightly build can be specified with `nightly-6.2`.
 | swift-build-flags | Additional flags to pass to the swift build command |  |
 | swift-test-flags | Additional flags to pass to the swift test command |  |
 | installed-sdk | The name of a pre-installed Swift SDK to use |  |
+| custom-sdk-url | A direct url to a custom SDK that will be downloaded. `custom-sdk-id` and `installed-sdk` must be provided, if this is used. |  |
+| custom-sdk-id | The ID of the custom SDK that will be installed |  |
 | installed-swift | The path to a pre-installed host Swift toolchain |  |
 | test-env | Test environment variables key=value |  |
 | build-package | Whether to build the Swit package | true |
