@@ -291,9 +291,16 @@ runs:
       run: |
         cd ${{ runner.temp }}/swift-download
         if [ ${RUNNER_OS} == 'Linux' ]; then
-          mkdir -p ${HOME}/swift/toolchains/${{ steps.setup.outputs.swift-id }}
-          tar -xzf swift.tar.gz -C ${HOME}/swift/toolchains/${{ steps.setup.outputs.swift-id }} --strip 1
-          SWIFT_INSTALLATION=$HOME/swift/toolchains/${{ steps.setup.outputs.swift-id }}/usr
+          
+          if [[ -d "${XDG_CONFIG_HOME}" ]]; then
+            SWIFT_TOOLCHAINS_HOME=${XDG_CONFIG_HOME}/swiftpm/toolchains
+          else
+            SWIFT_TOOLCHAINS_HOME=${HOME}/.swiftpm/toolchains
+          fi
+
+          mkdir -p ${SWIFT_TOOLCHAINS_HOME}/${{ steps.setup.outputs.swift-id }}
+          tar -xzf swift.tar.gz -C ${SWIFT_TOOLCHAINS_HOME}/${{ steps.setup.outputs.swift-id }} --strip 1
+          SWIFT_INSTALLATION=${SWIFT_TOOLCHAINS_HOME}/${{ steps.setup.outputs.swift-id }}/usr
         elif [ ${RUNNER_OS} == 'macOS' ]; then
           /usr/sbin/installer -pkg swift.pkg -target CurrentUserHomeDirectory
           SWIFT_INSTALLATION=${HOME}/Library/Developer/Toolchains/${{ steps.setup.outputs.swift-id }}.xctoolchain/usr
