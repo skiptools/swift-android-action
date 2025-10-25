@@ -398,35 +398,35 @@ runs:
 
             # TODO: we will be excluding the SDK version from the
             # artifactbundle name in the future
-            SWIFT_SDK_ID="${SWIFT_SDK_ID}_android-${SWIFT_SDK_VERSION}"
+            SWIFT_SDK_ARTIFACT="${SWIFT_SDK_ID}_android-${SWIFT_SDK_VERSION}"
 
             # 6.0.x-6.1 (but not 6.1.1)
             if [[ "${SWIFT_SDK_ID}" =~ "-6.0" || "${SWIFT_SDK_ID}" =~ "-6.1-" ]]; then
               # Swift Android SDK 6.0/6.1 targets API 24+
               SWIFT_SDK_ANROID_API="24"
-              SWIFT_SDK_ID="${SWIFT_SDK_ID}-android-${SWIFT_SDK_ANROID_API}-${SWIFT_SDK_VERSION}"
+              SWIFT_SDK_ARTIFACT="${SWIFT_SDK_ID}-android-${SWIFT_SDK_ANROID_API}-${SWIFT_SDK_VERSION}"
               ANDROID_SDK_DOWNLOAD_ROOT="https://github.com/skiptools/swift-android-toolchain/releases/download"
             elif [[ "${SWIFT_SDK_ID}" =~ "-6.1." || "${SWIFT_SDK_ID}" =~ "-6.2" ]]; then
               # 6.2+ no longer includes the API in the artifactbundle name
-              SWIFT_SDK_ID="${SWIFT_SDK_ID}-android-${SWIFT_SDK_VERSION}"
+              SWIFT_SDK_ARTIFACT="${SWIFT_SDK_ID}-android-${SWIFT_SDK_VERSION}"
               ANDROID_SDK_DOWNLOAD_ROOT="https://github.com/skiptools/swift-android-toolchain/releases/download"
             fi
 
-            ANDROID_SDK_URL="${ANDROID_SDK_DOWNLOAD_ROOT}/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz"
+            ANDROID_SDK_URL="${ANDROID_SDK_DOWNLOAD_ROOT}/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ARTIFACT}.artifactbundle.tar.gz"
 
             SWIFT_SDK_TARGET="${SWIFT_SDK_ARCH}-unknown-linux-android${SWIFT_SDK_ANROID_API}"
             echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
           fi
 
           echo "ANDROID_SDK_URL: ${ANDROID_SDK_URL}"
-          curl -fsSL --retry 8 --retry-connrefused ${ANDROID_SDK_URL} --output ${SWIFT_SDK_ID}.artifactbundle.tar.gz
+          curl -fsSL --retry 8 --retry-connrefused ${ANDROID_SDK_URL} --output ${SWIFT_SDK_ARTIFACT}.artifactbundle.tar.gz
 
           # first check if it already installed (we may be running this workflow multiple times for an action, in which case it will already be present)
-          ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET} &> /dev/null || ${SWIFT_INSTALLATION}/bin/swift sdk install ${SWIFT_SDK_ID}.artifactbundle.tar.gz
+          ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ARTIFACT} ${SWIFT_SDK_TARGET} &> /dev/null || ${SWIFT_INSTALLATION}/bin/swift sdk install ${SWIFT_SDK_ARTIFACT}.artifactbundle.tar.gz
 
-          ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ID} ${SWIFT_SDK_TARGET}
+          ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ARTIFACT} ${SWIFT_SDK_TARGET}
 
-          SWIFT_SDK_ARTIFACTBUNDLE="${SWIFT_SDK_ROOT}/${SWIFT_SDK_ID}.artifactbundle"
+          SWIFT_SDK_ARTIFACTBUNDLE="${SWIFT_SDK_ROOT}/${SWIFT_SDK_ARTIFACT}.artifactbundle"
         fi
 
         # extract the artifact ID from the info.plist in the SDK root
