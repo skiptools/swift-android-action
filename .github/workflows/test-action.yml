@@ -76,7 +76,8 @@ jobs:
         os: ['ubuntu-24.04', 'macos-26']
         #os: ['ubuntu-24.04', 'ubuntu-22.04', 'macos-13', 'macos-15', 'macos-26']
         #swift-version: ['6.0', '6.1', '6.2']
-        swift-version: ['6.1', '6.2']
+        #swift-version: ['6.1', '6.2']
+        swift-version: ['6.2', 'nightly-latest']
         ndk-version: ['27', 'latest']
     steps:
       - name: Checkout Action

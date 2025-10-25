@@ -204,7 +204,6 @@ runs:
           SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | ( grep -- '-SNAPSHOT' || true ) | head -n 1)
         elif [[ "${SWIFT_VERSION}" == 'nightly-main' ]]; then
           log "Checking nightly build for: ${SWIFT_VERSION}"
-          ### FIXME
           sdk_name="android"
           sdk_json=$(curl -fsSL --retry 8 --retry-connrefused "${SWIFT_API_INSTALL_ROOT}/dev/main/${sdk_name}-sdk.json")
           snapshot_tag=$(echo "$sdk_json" | jq -r '.[0].dir')
@@ -436,6 +435,14 @@ runs:
           ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ARTIFACT} ${SWIFT_SDK_TARGET} || ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ARTIFACT//_android/-android} ${SWIFT_SDK_TARGET}
 
           SWIFT_SDK_ARTIFACTBUNDLE="${SWIFT_SDK_ROOT}/${SWIFT_SDK_ARTIFACT}.artifactbundle"
+          if [[ ! -d "${SWIFT_SDK_ARTIFACTBUNDLE}" ]]; then
+            # fix nightly snapshot bug where artifactbundle underscore is dash
+            SWIFT_SDK_ARTIFACTBUNDLE="${SWIFT_SDK_ROOT}/${SWIFT_SDK_ARTIFACT//_android/-android}.artifactbundle"
+            if [[ ! -d "${SWIFT_SDK_ARTIFACTBUNDLE}" ]]; then
+              echo "::error::artifactbundle not found at ${SWIFT_SDK_ARTIFACTBUNDLE}"
+              exit 1
+            fi
+          fi
         fi
 
         # extract the artifact ID from the info.plist in the SDK root
