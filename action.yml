@@ -399,7 +399,7 @@ runs:
             SWIFT_SDK_ARTIFACT="${SWIFT_SDK_ID}_android-${SWIFT_SDK_VERSION}"
 
             # TODO: nightly-main will have a different root from release
-            if [[ "${{ inputs.swift-version }}" ~= "nightly-" ]]; then
+            if [[ "${{ inputs.swift-version }}" =~ "nightly-" ]]; then
               ANDROID_SDK_URL_ROOT="https://download.swift.org/development/android-sdk"
             else
               ANDROID_SDK_URL_ROOT="https://download.swift.org/development/android-sdk"
