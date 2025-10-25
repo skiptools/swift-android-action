@@ -205,7 +205,8 @@ runs:
         elif [[ "${SWIFT_VERSION}" == 'nightly-main' ]]; then
           log "Checking nightly build for: ${SWIFT_VERSION}"
           ### FIXME
-          sdk_json=$(curl -fsSL --retry 8 --retry-connrefused "${SWIFT_API_INSTALL_ROOT}/dev/main/android-sdk.json")
+          sdk_name="android"
+          sdk_json=$(curl -fsSL --retry 8 --retry-connrefused "${SWIFT_API_INSTALL_ROOT}/dev/main/${sdk_name}-sdk.json")
           snapshot_tag=$(echo "$sdk_json" | jq -r '.[0].dir')
           checksum=$(echo "$sdk_json" | jq -r '.[0].checksum')
           if [[ -z "$checksum" || "$checksum" == "null" ]]; then
