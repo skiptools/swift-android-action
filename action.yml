@@ -391,18 +391,28 @@ runs:
             SWIFT_SDK_VERSION="0.1"
             SWIFT_SDK_ID="${{ steps.setup.outputs.swift-id }}"
 
+            # TODO: nightly-main will have a different root from release
+            ANDROID_SDK_DOWNLOAD_ROOT="https://download.swift.org/development/android-sdk"
+            # Swift Android SDK 6.1.1+ targets API 28+
+            SWIFT_SDK_ANROID_API="28"
+
+            # TODO: we will be excluding the SDK version from the
+            # artifactbundle name in the future
+            SWIFT_SDK_ID="${SWIFT_SDK_ID}_android-${SWIFT_SDK_VERSION}"
+
             # 6.0.x-6.1 (but not 6.1.1)
             if [[ "${SWIFT_SDK_ID}" =~ "-6.0" || "${SWIFT_SDK_ID}" =~ "-6.1-" ]]; then
               # Swift Android SDK 6.0/6.1 targets API 24+
               SWIFT_SDK_ANROID_API="24"
               SWIFT_SDK_ID="${SWIFT_SDK_ID}-android-${SWIFT_SDK_ANROID_API}-${SWIFT_SDK_VERSION}"
-            else
-              # Swift Android SDK 6.1.1+ targets API 28+
-              SWIFT_SDK_ANROID_API="28"
+              ANDROID_SDK_DOWNLOAD_ROOT="https://github.com/skiptools/swift-android-toolchain/releases/download"
+            elif [[ "${SWIFT_SDK_ID}" =~ "-6.1." || "${SWIFT_SDK_ID}" =~ "-6.2" ]]; then
               # 6.2+ no longer includes the API in the artifactbundle name
               SWIFT_SDK_ID="${SWIFT_SDK_ID}-android-${SWIFT_SDK_VERSION}"
+              ANDROID_SDK_DOWNLOAD_ROOT="https://github.com/skiptools/swift-android-toolchain/releases/download"
             fi
-            ANDROID_SDK_URL="https://github.com/skiptools/swift-android-toolchain/releases/download/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz"
+
+            ANDROID_SDK_URL="${ANDROID_SDK_DOWNLOAD_ROOT}/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ID}.artifactbundle.tar.gz"
 
             SWIFT_SDK_TARGET="${SWIFT_SDK_ARCH}-unknown-linux-android${SWIFT_SDK_ANROID_API}"
             echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
