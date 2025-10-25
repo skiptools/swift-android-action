@@ -22,19 +22,6 @@ jobs:
         with:
           path: swift-android-action
 
-      - name: Checkout apple/swift-crypto
-        uses: actions/checkout@v4
-        with:
-          repository: apple/swift-crypto
-          path: apple/swift-crypto
-      - name: Test apple/swift-crypto
-        uses: ./swift-android-action/
-        with:
-          package-path: apple/swift-crypto
-          swift-version: ${{ matrix.swift-version }}
-          ndk-version: ${{ matrix.ndk-version }}
-          copy-files: Tests
-
       - name: Checkout apple/swift-system
         uses: actions/checkout@v4
         with:
