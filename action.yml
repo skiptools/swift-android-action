@@ -119,6 +119,14 @@ runs:
       id: setup
       shell: bash
       run: |
+        set -euo pipefail
+
+        # much of the SDK installation logic is borrowed from
+        # https://github.com/swiftlang/github-workflows/blob/main/.github/workflows/scripts/install-and-build-with-sdk.sh
+        log() { printf -- "** %s\n" "$*" >&2; }
+        error() { printf -- "** ::error::%s\n" "$*" >&2; }
+        fatal() { error "$@"; exit 1; }
+
         if [ ${RUNNER_OS} == 'Linux' ]; then
           # enable KVM for hardware accelerated emulators on Linux runners
           # https://github.com/ReactiveCircus/android-emulator-runner?tab=readme-ov-file#running-hardware-accelerated-emulators-on-linux-runners
@@ -138,8 +146,7 @@ runs:
           # patchelf is needed to check whether an ELF binary contains the Testing library
           which patchelf 2>&1 > /dev/null || brew install patchelf
         else
-          echo "::error::Unsupported platform: ${RUNNER_OS}"
-          exit 1
+          fatal "Unsupported platform: ${RUNNER_OS}"
         fi
 
         # RUNNER_ARCH	The architecture of the runner executing the job. Possible values are X86, X64, ARM, or ARM64.
@@ -150,8 +157,7 @@ runs:
           echo "android-sdk-arch=aarch64" >> $GITHUB_OUTPUT
           echo "android-emulator-arch=arm64-v8a" >> $GITHUB_OUTPUT
         else
-          echo "::error::Unsupported architecture: ${RUNNER_ARCH}"
-          exit 1
+          fatal "Unsupported architecture: ${RUNNER_ARCH}"
         fi
 
         # when the swift-version contains a dash, that means we want to use a development toolchain
@@ -162,6 +168,9 @@ runs:
         # fetch the most recent release tag from the toolchain repo
         # disabled because it frequently gives "The requested URL returned error: 403"
         #LATEST_RELEASE=$(curl -fsSL -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" --retry 10 --retry-max-time 600 https://api.github.com/repos/skiptools/swift-android-toolchain/releases/latest | jq -r '.tag_name')
+
+        ### TODO: modernize to use official endpoint at https://www.swift.org/api/v1/install/releases.json
+        SWIFT_API_INSTALL_ROOT="https://www.swift.org/api/v1/install"
 
         # fetch the Atom feed for the latest releases
         curl -fsSL --retry 8 --retry-connrefused https://github.com/skiptools/swift-android-toolchain/releases.atom --output ${{ runner.temp }}/swift-releases.xml
@@ -193,7 +202,24 @@ runs:
           #SWIFT_VERSION="${LATEST_SNAPSHOT}"
           # use the latest snapshot release
           SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | ( grep -- '-SNAPSHOT' || true ) | head -n 1)
+        elif [[ "${SWIFT_VERSION}" == 'nightly-main' ]]; then
+          log "Checking nightly build for: ${SWIFT_VERSION}"
+          ### FIXME
+          sdk_json=$(curl -fsSL --retry 8 --retry-connrefused "${SWIFT_API_INSTALL_ROOT}/dev/main/android-sdk.json")
+          snapshot_tag=$(echo "$sdk_json" | jq -r '.[0].dir')
+          checksum=$(echo "$sdk_json" | jq -r '.[0].checksum')
+          if [[ -z "$checksum" || "$checksum" == "null" ]]; then
+              fatal "No checksum found for ${sdk_name}-sdk snapshot"
+          fi
+
+          log "Found ${sdk_name}-sdk checksum: ${checksum:0:12}..."
+          SWIFT_VERSION="${snapshot_tag}"
+
         elif [[ "${SWIFT_VERSION}" == nightly-* ]]; then
+          # TODO: for individual versions post-6.3, use the eventual endpoint
+          # https://www.swift.org/api/v1/install/dev/6.3/android-sdk.json
+          # e.g., like
+          # https://www.swift.org/api/v1/install/dev/6.2/wasm-sdk.json
           echo "Checking nightly build for: ${SWIFT_VERSION}"
           # e.g., nightly-6.2 will match 6.2-DEVELOPMENT-SNAPSHOT-*
           SWIFT_VERSION=$(echo ${SWIFT_VERSION} | sed 's;nightly-;;g')

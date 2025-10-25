@@ -68,14 +68,19 @@ jobs:
 The `swift-version` input can be set to a specific version number (e.g., "6.2" or "6.1.1").
 
 > [!NOTE]
-> The SDK that is installed is currently the unofficial de-facto Android SDK created from
-> the [swift-android-sdk](https://github.com/swift-android-sdk/swift-android-sdk) fork.
-> As the official Android WG is [formed](https://www.swift.org/android-workgroup/),
-> we anticipate the release of an official Android SDK, at which time this action will
-> transition to using the authoritative SDK bundle.
+> Prior to Swift 6.3, the SDK that is installed is the 
+> unofficial de-facto Swift SDK for Android created from the
+> [swift-android-sdk](https://github.com/swift-android-sdk/swift-android-sdk)
+> fork.
+> As of the [announcement of the official SDK](https://www.swift.org/blog/nightly-swift-sdk-for-android/)
+at swift.org,
+> the official toolchain can be used in testing, starting with the
+> `nightly-main` tag.
 
-Snapshots can be specified with their full name, like `6.2-DEVELOPMENT-SNAPSHOT-2025-08-28-a`,
-or the most recent snapshot/nightly build can be specified with `nightly-6.2`.
+Snapshots can be specified with their full name, like
+`swift-DEVELOPMENT-SNAPSHOT-2025-10-16-a`,
+or the most recent snapshot/nightly build can be specified with
+`nightly-main`.
 
 ### Configuration Options
 
@@ -107,7 +112,7 @@ or the most recent snapshot/nightly build can be specified with `nightly-6.2`.
 
 ### Platform Support
 
-This action can be run on any of the GitHub `ubuntu-*` and `macos-*` [runner images](https://github.com/actions/runner-images). However, due to the inability of macOS on ARM to run nested virtualization ([issue](https://github.com/ReactiveCircus/android-emulator-runner/issues/350)), the Android emulator cannot be run on these platforms, and so running on any macOS image that uses ARM (including `macos-14` and `macos-15`) requires disabling tests with `run-tests: false`. Running tests are supported on `macos-13`, as well as the large Intel macOS images like `macos-14-large` and `macos-15-large`.
+This action can be run on any of the GitHub `ubuntu-*` and `macos-*` [runner images](https://github.com/actions/runner-images). However, due to the inability of macOS on ARM to run nested virtualization ([issue](https://github.com/ReactiveCircus/android-emulator-runner/issues/350)), the Android emulator cannot be run on these platforms, and so running on any macOS image that uses ARM (including `macos-14` and `macos-15`) requires disabling tests with `run-tests: false`. Running tests are supported on the Intel runner `macos-15-intel`, as well as the large (paid) macOS images like `macos-14-large` and `macos-15-large`.
 
 An example of disabling running tests on ARM macOS images is:
 
@@ -229,7 +234,7 @@ jobs:
       - name: "Test Swift Package on macOS"
         run: swift test
       - name: "Test Swift Package on iOS"
-        run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=$(xcrun simctl list devices --json | jq -r '.devices | to_entries[] | .value[] | select(.availability == "(available)" or .isAvailable == true) | .name' | grep -E '^iPhone [0-9]+$' | sort -V | tail -n 1)" -scheme "$(xcodebuild -list -json | jq -r '.workspace.schemes[-1]')"
+        run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 17" -scheme "$(xcodebuild -list -json | jq -r '.workspace.schemes[-1]')"
   windows:
     runs-on: windows-latest
     steps:
