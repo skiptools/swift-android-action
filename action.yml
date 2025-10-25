@@ -399,7 +399,7 @@ runs:
             SWIFT_SDK_ARTIFACT="${SWIFT_SDK_ID}_android-${SWIFT_SDK_VERSION}"
 
             # TODO: nightly-main will have a different root from release
-            ANDROID_SDK_URL="https://github.com/skiptools/swift-android-toolchain/releases/download/${SWIFT_SDK_ID}/${SWIFT_SDK_ARTIFACT}.artifactbundle.tar.gz"
+            ANDROID_SDK_URL="https://download.swift.org/development/android-sdk/${SWIFT_SDK_ID}/${SWIFT_SDK_ARTIFACT}.artifactbundle.tar.gz"
 
             # 6.0.x-6.1 (but not 6.1.1)
             if [[ "${SWIFT_SDK_ID}" =~ "-6.0" || "${SWIFT_SDK_ID}" =~ "-6.1-" ]]; then
