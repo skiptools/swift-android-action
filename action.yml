@@ -399,7 +399,12 @@ runs:
             SWIFT_SDK_ARTIFACT="${SWIFT_SDK_ID}_android-${SWIFT_SDK_VERSION}"
 
             # TODO: nightly-main will have a different root from release
-            ANDROID_SDK_URL="https://download.swift.org/development/android-sdk/${SWIFT_SDK_ID}/${SWIFT_SDK_ARTIFACT}.artifactbundle.tar.gz"
+            if [[ "${{ inputs.swift-version }}" ~= "nightly-" ]]; then
+              ANDROID_SDK_URL_ROOT="https://download.swift.org/development/android-sdk"
+            else
+              ANDROID_SDK_URL_ROOT="https://download.swift.org/development/android-sdk"
+            fi
+            ANDROID_SDK_URL="${ANDROID_SDK_URL_ROOT}/${SWIFT_SDK_ID}/${SWIFT_SDK_ARTIFACT}.artifactbundle.tar.gz"
 
             # 6.0.x-6.1 (but not 6.1.1)
             if [[ "${SWIFT_SDK_ID}" =~ "-6.0" || "${SWIFT_SDK_ID}" =~ "-6.1-" ]]; then
@@ -423,7 +428,11 @@ runs:
           # first check if it already installed (we may be running this workflow multiple times for an action, in which case it will already be present)
           ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ARTIFACT} ${SWIFT_SDK_TARGET} &> /dev/null || ${SWIFT_INSTALLATION}/bin/swift sdk install ${SWIFT_SDK_ARTIFACT}.artifactbundle.tar.gz
 
-          ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ARTIFACT} ${SWIFT_SDK_TARGET}
+          # FIXME: the nightly-main artifactbundle is called
+          # swift-DEVELOPMENT-SNAPSHOT-2025-10-17-a_android-0.1.artifactbundle
+          # but the name in the config is (note underscore/hyphen difference):
+          # swift-DEVELOPMENT-SNAPSHOT-2025-10-17-a-android-0.1.artifactbundle
+          ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ARTIFACT_NAME} ${SWIFT_SDK_TARGET} || ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ARTIFACT_NAME//_android/-android} ${SWIFT_SDK_TARGET}
 
           SWIFT_SDK_ARTIFACTBUNDLE="${SWIFT_SDK_ROOT}/${SWIFT_SDK_ARTIFACT}.artifactbundle"
         fi
