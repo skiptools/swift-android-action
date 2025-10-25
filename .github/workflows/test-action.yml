@@ -17,31 +17,18 @@ jobs:
         swift-version: ['6.1', '6.2', 'nightly-main']
         ndk-version: ['27', 'latest']
     steps:
-      - name: Checkout Action
+      - name: Checkout apple/swift-crypto
         uses: actions/checkout@v4
         with:
-          path: swift-android-action
-
-      - name: Checkout jpsim/Yams
-        uses: actions/checkout@v4
-        with:
-          repository: jpsim/Yams
-          path: jpsim/Yams
-      - name: Fix jpsim/Yams for Android
-        working-directory: jpsim/Yams
-        run: |
-          # Android tests that use measure have too high a stddev
-          perl -pi -e 's;self.measure ;do ;g' Tests/YamsTests/PerformanceTests.swift
-          # fix another weird error that only happens with nightly-main
-          perl -pi -e 's;func testEncodingDate;func XXXtestEncodingDate;g' Tests/YamsTests/EncoderTests.swift
-      - name: Test jpsim/Yams
+          repository: apple/swift-crypto
+          path: apple/swift-crypto
+      - name: Test apple/swift-crypto
         uses: ./swift-android-action/
         with:
-          package-path: jpsim/Yams
+          package-path: apple/swift-crypto
           swift-version: ${{ matrix.swift-version }}
           ndk-version: ${{ matrix.ndk-version }}
           copy-files: Tests
-          test-env: TEST_WORKSPACE=1
 
       - name: Checkout apple/swift-system
         uses: actions/checkout@v4
@@ -79,7 +66,7 @@ jobs:
         #os: ['ubuntu-24.04', 'ubuntu-22.04', 'macos-13', 'macos-15', 'macos-26']
         #swift-version: ['6.0', '6.1', '6.2']
         #swift-version: ['6.1', '6.2']
-        swift-version: ['6.2', 'nightly-latest']
+        swift-version: ['6.2', 'nightly-main']
         ndk-version: ['27', 'latest']
     steps:
       - name: Checkout Action
