@@ -149,6 +149,8 @@ runs:
           fatal "Unsupported platform: ${RUNNER_OS}"
         fi
 
+        echo "runner-os=${RUNNER_OS}" >> $GITHUB_OUTPUT
+
         # RUNNER_ARCH	The architecture of the runner executing the job. Possible values are X86, X64, ARM, or ARM64.
         if [ ${RUNNER_ARCH} == 'X64' ]; then
           echo "android-sdk-arch=x86_64" >> $GITHUB_OUTPUT
@@ -576,14 +578,14 @@ runs:
         chmod +x ${SCRIPT_FILE}
 
     - name: Setup Android Emulator Cache
-      if: ${{ false && inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
+      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
       uses: actions/cache@v4
       id: avd-cache
       with:
         path: |
           ~/.android/avd/*
           ~/.android/adb*
-        key: 'avd-${{ inputs.android-profile }}_${{ inputs.android-channel }}_${{ inputs.android-target }}_${{ inputs.android-api-level }}-${{ steps.setup.outputs.android-emulator-arch }}'
+        key: 'avd-${{ inputs.android-profile }}_${{ inputs.android-channel }}_${{ inputs.android-target }}_${{ inputs.android-api-level }}-${{ steps.setup.outputs.runner-os }}-${{ steps.setup.outputs.android-emulator-arch }}'
 
     - name: Create Android Emulator Cache
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' && steps.avd-cache.outputs.cache-hit != 'true' }}
