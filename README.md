@@ -1,9 +1,9 @@
 # Swift Android native cross-compiler and test runner action
 
 This GitHub action will build and run Swift package tests on an Android emulator.
-This uses the [swift-android-toolchain](https://github.com/skiptools/swift-android-toolchain)
-project to provide a cross-compiler for building
-Swift natively for Android on a Linux or macOS host.
+This uses the official [Swift SDK for Android](https://github.com/marketplace/actions/swift-android-action)
+provide a cross-compilation Swift SDK for building
+Swift natively for Android from a Linux or macOS host.
 
 After building the package, it will run the SwiftPM
 test targets on an Android emulator (which is provided by the
@@ -69,9 +69,9 @@ The `swift-version` input can be set to a specific version number (e.g., "6.2" o
 
 > [!NOTE]
 > Prior to Swift 6.3, the SDK that is installed is the 
-> unofficial de-facto Swift SDK for Android created from the
+> pre-official Swift SDK for Android created from the
 > [swift-android-sdk](https://github.com/swift-android-sdk/swift-android-sdk)
-> fork.
+> repository.
 > As of the [announcement of the official SDK](https://www.swift.org/blog/nightly-swift-sdk-for-android/)
 at swift.org,
 > the official toolchain can be used in testing, starting with the
@@ -119,7 +119,7 @@ An example of disabling running tests on ARM macOS images is:
 ```yml
 jobs:
   macos-android:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
       - name: "Test Swift Package on macOS"
@@ -273,35 +273,36 @@ gh release create --generate-notes --latest
 
 These are some of the open-source projects using (or have used) the Swift Android Action:
 
-- [Alamofire](https://github.com/Alamofire/Alamofire/tree/master/.github/workflows)
-- [Bagbutik](https://github.com/MortenGregersen/Bagbutik/tree/main/.github/workflows)
-- [BigInt](https://github.com/attaswift/BigInt/tree/master/.github/workflows)
-- [CryptoSwift](https://github.com/krzyzanowskim/CryptoSwift/tree/main/.github/workflows)
-- [egeniq/app-remote-config](https://github.com/egeniq/app-remote-config/tree/main/.github/workflows)
-- [Forked](https://github.com/drewmccormack/Forked/tree/main/.github/workflows)
-- [GraphQL](https://github.com/GraphQLSwift/GraphQL/tree/main/.github/workflows)
-- [jose-swift](https://github.com/beatt83/jose-swift/tree/main/.github/workflows)
-- [MemoZ](https://github.com/marcprux/MemoZ/tree/main/.github/workflows)
-- [PromiseKit](https://github.com/mxcl/PromiseKit/tree/master/.github/workflows)
-- [ReactiveKit](https://github.com/DeclarativeHub/ReactiveKit/tree/master/.github/workflows)
-- [Skip](https://github.com/skiptools/actions/tree/main/.github/workflows)
-- [soto-core](https://github.com/soto-project/soto-core/tree/main/.github/workflows)
-- [SQLite.swift](https://github.com/stephencelis/SQLite.swift/tree/master/.github/workflows)
-- [supabase-swift](https://github.com/supabase/supabase-swift/tree/main/.github/workflows)
-- [swift-android-native](https://github.com/skiptools/swift-android-native/tree/main/.github/workflows)
-- [SwiftCBOR](https://github.com/valpackett/SwiftCBOR/tree/master/.github/workflows)
-- [SwiftDraw](https://github.com/swhitty/SwiftDraw/tree/main/.github/workflows)
-- [swift-fakes](https://github.com/Quick/swift-fakes/tree/main/.github/workflows)
-- [SwiftGodot](https://github.com/migueldeicaza/SwiftGodot/tree/main/.github/workflows)
-- [swift-issue-reporting](https://github.com/pointfreeco/swift-issue-reporting/tree/main/.github/workflows)
-- [swift-jni](https://github.com/skiptools/swift-jni/tree/main/.github/workflows)
-- [swift-macro-testing](https://github.com/pointfreeco/swift-macro-testing/tree/main/.github/workflows)
-- [swift-png](https://github.com/tayloraswift/swift-png/tree/master/.github/workflows)
-- [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing/tree/main/.github/workflows)
-- [swift-sqlcipher](https://github.com/skiptools/swift-sqlcipher/tree/main/.github/workflows)
-- [SwifterSwift](https://github.com/SwifterSwift/SwifterSwift/tree/master/.github/workflows)
-- [universal](https://github.com/marcprux/universal/tree/main/.github/workflows)
-- [vapor/ci](https://github.com/vapor/ci/tree/main/.github/workflows)
-- [WasmKit](https://github.com/swiftwasm/WasmKit/tree/main/.github/workflows)
-- [Yams](https://github.com/jpsim/Yams/tree/main/.github/workflows)
+![Alamofire/Alamofire](https://img.shields.io/github/stars/Alamofire/Alamofire?style=plastic&logoSize=auto&label=Alamofire%2FAlamofire&color=red&link=https%3A%2F%2Fgithub.com%2FAlamofire%2FAlamofire%2Ftree%2Fmaster%2F.github%2Fworkflows)
+![attaswift/BigInt](https://img.shields.io/github/stars/attaswift/BigInt?style=plastic&logoSize=auto&label=attaswift%2FBigInt&color=red&link=https%3A%2F%2Fgithub.com%2Fattaswift%2FBigInt%2Ftree%2Fmaster%2F.github%2Fworkflows)
+![krzyzanowskim/CryptoSwift](https://img.shields.io/github/stars/krzyzanowskim/CryptoSwift?style=plastic&logoSize=auto&label=krzyzanowskim%2FCryptoSwift&color=red&link=https%3A%2F%2Fgithub.com%2Fkrzyzanowskim%2FCryptoSwift%2Ftree%2Fmain%2F.github%2Fworkflows)
+![egeniq/app-remote-config](https://img.shields.io/github/stars/egeniq/app-remote-config?style=plastic&logoSize=auto&label=egeniq%2Fapp-remote-config&color=red&link=https%3A%2F%2Fgithub.com%2Fegeniq%2Fapp-remote-config%2Ftree%2Fmain%2F.github%2Fworkflows)
+![drewmccormack/Forked](https://img.shields.io/github/stars/drewmccormack/Forked?style=plastic&logoSize=auto&label=drewmccormack%2FForked&color=red&link=https%3A%2F%2Fgithub.com%2Fdrewmccormack%2FForked%2Ftree%2Fmain%2F.github%2Fworkflows)
+![GraphQLSwift/GraphQL](https://img.shields.io/github/stars/GraphQLSwift/GraphQL?style=plastic&logoSize=auto&label=GraphQLSwift%2FGraphQL&color=red&link=https%3A%2F%2Fgithub.com%2FGraphQLSwift%2FGraphQL%2Ftree%2Fmain%2F.github%2Fworkflows)
+![beatt83/jose-swift](https://img.shields.io/github/stars/beatt83/jose-swift?style=plastic&logoSize=auto&label=beatt83%2Fjose-swift&color=red&link=https%3A%2F%2Fgithub.com%2Fbeatt83%2Fjose-swift%2Ftree%2Fmain%2F.github%2Fworkflows)
+![marcprux/MemoZ](https://img.shields.io/github/stars/marcprux%2FMemoZ?style=plastic&logoSize=auto&label=marcprux%2FMemoZ&color=red&link=https%3A%2F%2Fgithub.com%2Fmarcprux%2FMemoZ%2Ftree%2Fmain%2F.github%2Fworkflows)
+![mxcl/PromiseKit](https://img.shields.io/github/stars/mxcl/PromiseKit?style=plastic&logoSize=auto&label=mxcl%2FPromiseKit&color=red&link=https%3A%2F%2Fgithub.com%2Fmxcl%2FPromiseKit%2Ftree%2Fmaster%2F.github%2Fworkflows)
+![MortenGregersen/Bagbutik](https://img.shields.io/github/stars/MortenGregersen/Bagbutik?style=plastic&logoSize=auto&label=MortenGregersen%2FBagbutik&color=red&link=https%3A%2F%2Fgithub.com%2FMortenGregersen%2FBagbutik%2Ftree%2Fmain%2F.github%2Fworkflows)
+![DeclarativeHub/ReactiveKit](https://img.shields.io/github/stars/DeclarativeHub/ReactiveKit?style=plastic&logoSize=auto&label=DeclarativeHub%2FReactiveKit&color=red&link=https%3A%2F%2Fgithub.com%2FDeclarativeHub%2FReactiveKit%2Ftree%2Fmaster%2F.github%2Fworkflows)
+![skiptools/Skip](https://img.shields.io/github/stars/skiptools/Skip?style=plastic&logoSize=auto&label=skiptools%2FSkip&color=red&link=https%3A%2F%2Fgithub.com%2Fskiptools%2Factions%2Ftree%2Fmain%2F.github%2Fworkflows)
+![soto-project/soto-core](https://img.shields.io/github/stars/soto-project/soto-core?style=plastic&logoSize=auto&label=soto-project%2Fsoto-core&color=red&link=https%3A%2F%2Fgithub.com%2Fsoto-project%2Fsoto-core%2Ftree%2Fmain%2F.github%2Fworkflows)
+![stephencelis/SQLite.swift](https://img.shields.io/github/stars/stephencelis/SQLite.swift?style=plastic&logoSize=auto&label=stephencelis%2FSQLite.swift&color=red&link=https%3A%2F%2Fgithub.com%2Fstephencelis%2FSQLite.swift%2Ftree%2Fmaster%2F.github%2Fworkflows)
+![supabase/supabase-swift](https://img.shields.io/github/stars/supabase/supabase-swift?style=plastic&logoSize=auto&label=supabase%2Fsupabase-swift&color=red&link=https%3A%2F%2Fgithub.com%2Fsupabase%2Fsupabase-swift%2Ftree%2Fmain%2F.github%2Fworkflows)
+![skiptools/swift-android-native](https://img.shields.io/github/stars/skiptools/swift-android-native?style=plastic&logoSize=auto&label=skiptools%2Fswift-android-native&color=red&link=https%3A%2F%2Fgithub.com%2Fskiptools%2Fswift-android-native%2Ftree%2Fmain%2F.github%2Fworkflows)
+![valpackett/SwiftCBOR](https://img.shields.io/github/stars/valpackett/SwiftCBOR?style=plastic&logoSize=auto&label=valpackett%2FSwiftCBOR&color=red&link=https%3A%2F%2Fgithub.com%2Fvalpackett%2FSwiftCBOR%2Ftree%2Fmaster%2F.github%2Fworkflows)
+![swhitty/SwiftDraw](https://img.shields.io/github/stars/swhitty/SwiftDraw?style=plastic&logoSize=auto&label=swhitty%2FSwiftDraw&color=red&link=https%3A%2F%2Fgithub.com%2Fswhitty%2FSwiftDraw%2Ftree%2Fmain%2F.github%2Fworkflows)
+![Quick/swift-fakes](https://img.shields.io/github/stars/Quick/swift-fakes?style=plastic&logoSize=auto&label=Quick%2Fswift-fakes&color=red&link=https%3A%2F%2Fgithub.com%2FQuick%2Fswift-fakes%2Ftree%2Fmain%2F.github%2Fworkflows)
+![migueldeicaza/SwiftGodot](https://img.shields.io/github/stars/migueldeicaza/SwiftGodot?style=plastic&logoSize=auto&label=migueldeicaza%2FSwiftGodot&color=red&link=https%3A%2F%2Fgithub.com%2Fmigueldeicaza%2FSwiftGodot%2Ftree%2Fmain%2F.github%2Fworkflows)
+![pointfreeco/swift-macro-testing](https://img.shields.io/github/stars/pointfreeco/swift-macro-testing?style=plastic&logoSize=auto&label=pointfreeco%2Fswift-macro-testing&color=red&link=https%3A%2F%2Fgithub.com%2Fpointfreeco%2Fswift-macro-testing%2Ftree%2Fmain%2F.github%2Fworkflows)
+![pointfreeco/swift-issue-reporting](https://img.shields.io/github/stars/pointfreeco/swift-issue-reporting?style=plastic&logoSize=auto&label=pointfreeco%2Fswift-issue-reporting&color=red&link=https%3A%2F%2Fgithub.com%2Fpointfreeco%2Fswift-issue-reporting%2Ftree%2Fmain%2F.github%2Fworkflows)
+![pointfreeco/swift-case-paths](https://img.shields.io/github/stars/pointfreeco/swift-case-paths?style=plastic&logoSize=auto&label=pointfreeco%2Fswift-case-paths&color=red&link=https%3A%2F%2Fgithub.com%2Fpointfreeco%2Fswift-case-paths%2Fblob%2Fmain%2F.github%2Fworkflows%2Fci.yml)
+![skiptools/swift-jni](https://img.shields.io/github/stars/skiptools/swift-jni?style=plastic&logoSize=auto&label=skiptools%2Fswift-jni&color=red&link=https%3A%2F%2Fgithub.com%2Fskiptools%2Fswift-jni%2Ftree%2Fmain%2F.github%2Fworkflows)
+![tayloraswift/swift-png](https://img.shields.io/github/stars/tayloraswift/swift-png?style=plastic&logoSize=auto&label=tayloraswift%2Fswift-png&color=red&link=https%3A%2F%2Fgithub.com%2Ftayloraswift%2Fswift-png%2Ftree%2Fmaster%2F.github%2Fworkflows)
+![pointfreeco/swift-snapshot-testing](https://img.shields.io/github/stars/pointfreeco/swift-snapshot-testing?style=plastic&logoSize=auto&label=pointfreeco%2Fswift-snapshot-testing&color=red&link=https%3A%2F%2Fgithub.com%2Fpointfreeco%2Fswift-snapshot-testing%2Ftree%2Fmain%2F.github%2Fworkflows)
+![skiptools/swift-sqlcipher](https://img.shields.io/github/stars/skiptools/swift-sqlcipher?style=plastic&logoSize=auto&label=skiptools%2Fswift-sqlcipher&color=red&link=https%3A%2F%2Fgithub.com%2Fskiptools%2Fswift-sqlcipher%2Ftree%2Fmain%2F.github%2Fworkflows)
+![SwifterSwift/SwifterSwift](https://img.shields.io/github/stars/SwifterSwift/SwifterSwift?style=plastic&logoSize=auto&label=SwifterSwift%2FSwifterSwift&color=red&link=https%3A%2F%2Fgithub.com%2FSwifterSwift%2FSwifterSwift%2Ftree%2Fmaster%2F.github%2Fworkflows)
+![marcprux/universal](https://img.shields.io/github/stars/marcprux%2Funiversal?style=plastic&logoSize=auto&label=marcprux%2FMemoZ&color=red&link=https%3A%2F%2Fgithub.com%2Fmarcprux%2Funiversal%2Ftree%2Fmain%2F.github%2Fworkflows)
+![vapor/ci](https://img.shields.io/github/stars/vapor/ci?style=plastic&logoSize=auto&label=vapor%2Fci&color=red&link=https%3A%2F%2Fgithub.com%2Fvapor%2Fci%2Ftree%2Fmain%2F.github%2Fworkflows)
+![swiftwasm/WasmKit](https://img.shields.io/github/stars/swiftwasm/WasmKit?style=plastic&logoSize=auto&label=swiftwasm%2FWasmKit&color=red&link=https%3A%2F%2Fgithub.com%2Fswiftwasm%2FWasmKit%2Ftree%2Fmain%2F.github%2Fworkflows)
+![jpsim/Yams](https://img.shields.io/github/stars/jpsim/Yams?style=plastic&logoSize=auto&label=jpsim%2FYams&color=red&link=https%3A%2F%2Fgithub.com%2Fjpsim%2FYams%2Ftree%2Fmain%2F.github%2Fworkflows)
 
