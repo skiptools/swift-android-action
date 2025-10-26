@@ -54,7 +54,7 @@ inputs:
   android-emulator-options:
     description: 'Options to pass to the Android emulator'
     required: true
-    default: '-no-window -gpu swiftshader_indirect -noaudio -no-boot-anim'
+    default: '-no-window -noaudio -no-boot-anim'
   android-emulator-boot-timeout:
     description: 'Emulator boot timeout in seconds'
     required: true
@@ -82,7 +82,7 @@ inputs:
   android-api-level:
     description: 'The API level of the Android emulator to run against'
     required: true
-    default: 30
+    default: 28
   android-channel:
     required: false
     type: string
@@ -90,11 +90,11 @@ inputs:
   android-profile:
     required: false
     type: string
-    default: 'pixel'
+    default: ''
   android-target:
     required: false
     type: string
-    default: 'aosp_atd'
+    default: 'default'
   installed-sdk:
     required: false
     type: string
