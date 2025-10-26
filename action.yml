@@ -576,7 +576,7 @@ runs:
         chmod +x ${SCRIPT_FILE}
 
     - name: Setup Android Emulator Cache
-      if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
+      if: ${{ false && inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
       uses: actions/cache@v4
       id: avd-cache
       with:
