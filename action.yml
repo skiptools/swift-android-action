@@ -224,11 +224,11 @@ runs:
           # https://www.swift.org/api/v1/install/dev/6.3/android-sdk.json
           # e.g., like
           # https://www.swift.org/api/v1/install/dev/6.2/wasm-sdk.json
-          echo "::notice::Checking nightly build for: ${SWIFT_VERSION}"
+          echo "Checking nightly build for: ${SWIFT_VERSION}"
           # e.g., nightly-6.2 will match 6.2-DEVELOPMENT-SNAPSHOT-*
           SWIFT_VERSION=$(echo ${SWIFT_VERSION} | sed 's;nightly-;;g')
           SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | ( grep -- "${SWIFT_VERSION}-DEVELOPMENT-SNAPSHOT" || true ) | head -n 1)
-          echo "::notice::Found nightly build: ${SWIFT_VERSION}"
+          echo "Found nightly build: ${SWIFT_VERSION}"
         else
           # match "6.0" to "6.0.3"
           # DO NOT match "6.1" to "6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a"
@@ -240,7 +240,7 @@ runs:
           exit 1
         fi
 
-        echo "::notice::SWIFT_VERSION: ${SWIFT_VERSION}"
+        echo "SWIFT_VERSION: ${SWIFT_VERSION}"
         echo "swift-version=${SWIFT_VERSION}" >> $GITHUB_OUTPUT
 
         # the swift-id is the basename of the host toolchain download
@@ -249,7 +249,7 @@ runs:
           # a bare version name like "6.0.3" will have "-RELEASE" tacked on to the end
           SWIFT_VERSION_ID="${SWIFT_VERSION_ID}-RELEASE"
         fi
-        echo "::notice::SWIFT_VERSION_ID: ${SWIFT_VERSION_ID}"
+        echo "SWIFT_VERSION_ID: ${SWIFT_VERSION_ID}"
         echo "swift-id=${SWIFT_VERSION_ID}" >> $GITHUB_OUTPUT
 
         SWIFT_BRANCH="${{ inputs.swift-branch }}"
@@ -265,7 +265,7 @@ runs:
             SWIFT_BRANCH="swift-${BASE_VERSION}-branch"
           fi
         fi
-        echo "::notice::SWIFT_BRANCH: ${SWIFT_BRANCH}"
+        echo "SWIFT_BRANCH: ${SWIFT_BRANCH}"
         echo "swift-branch=${SWIFT_BRANCH}" >> $GITHUB_OUTPUT
 
         NDK_VERSION="${{ inputs.ndk-version }}"
@@ -304,11 +304,11 @@ runs:
 
         if [ ${RUNNER_OS} == 'Linux' ]; then
           HOST_TOOLCHAIN_URL="${BASE_URL}/${{ steps.setup.outputs.osid }}/${{ steps.setup.outputs.swift-id }}/${{ steps.setup.outputs.swift-id }}-${{ steps.setup.outputs.osidpair }}.tar.gz"
-          echo "::notice::HOST_TOOLCHAIN_URL: ${HOST_TOOLCHAIN_URL}"
+          echo "HOST_TOOLCHAIN_URL: ${HOST_TOOLCHAIN_URL}"
           curl -fsSL --retry 8 --retry-connrefused ${HOST_TOOLCHAIN_URL} --output swift.tar.gz
         elif [ ${RUNNER_OS} == 'macOS' ]; then
           HOST_TOOLCHAIN_URL="${BASE_URL}/xcode/${{ steps.setup.outputs.swift-id }}/${{ steps.setup.outputs.swift-id }}-osx.pkg"
-          echo "::notice::HOST_TOOLCHAIN_URL: ${HOST_TOOLCHAIN_URL}"
+          echo "HOST_TOOLCHAIN_URL: ${HOST_TOOLCHAIN_URL}"
           curl -fsSL --retry 8 --retry-connrefused ${HOST_TOOLCHAIN_URL} --output swift.pkg
         else
           echo "::error::Unsupported platform: ${RUNNER_OS}"
@@ -423,7 +423,7 @@ runs:
             echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
           fi
 
-          echo "::notice::ANDROID_SDK_URL: ${ANDROID_SDK_URL}"
+          echo "ANDROID_SDK_URL: ${ANDROID_SDK_URL}"
           curl -fsSL --retry 8 --retry-connrefused ${ANDROID_SDK_URL} --output ${SWIFT_SDK_ARTIFACT}.artifactbundle.tar.gz
 
           # first check if it already installed (we may be running this workflow multiple times for an action, in which case it will already be present)
@@ -454,10 +454,10 @@ runs:
         # run the SDK setup script if it exists
         SWIFT_SDK_SETUP="${SWIFT_ARTIFACTBUNDLE_ROOT}/scripts/setup-android-sdk.sh"
         if [[ -x "${SWIFT_SDK_SETUP}" ]]; then
-          echo "::notice::Running SDK setup script at ${SWIFT_SDK_SETUP}"
+          echo "Running SDK setup script at ${SWIFT_SDK_SETUP}"
           ${SWIFT_SDK_SETUP}
         else
-          echo "::notice::No SDK setup script to run in ${SWIFT_ARTIFACTBUNDLE_ROOT}/scripts"
+          echo "No SDK setup script to run in ${SWIFT_ARTIFACTBUNDLE_ROOT}/scripts"
         fi
 
         # extract the sdkRootPath from the swift-sdk.json
@@ -482,7 +482,7 @@ runs:
     - name: Check Swift Version
       shell: bash
       run: |
-        echo "::notice::Swift Command: ${{ steps.install.outputs.swiftcmd }}"
+        echo "Swift Command: ${{ steps.install.outputs.swiftcmd }}"
         ${{ steps.install.outputs.swiftcmd }} --version
 
     - name: Build Swift Package with Android SDK
@@ -605,7 +605,7 @@ runs:
         arch: ${{ steps.setup.outputs.android-emulator-arch }}
         disable-animations: false
         working-directory: ${{ inputs.package-path }}/.build
-        script: echo "::notice::Generated Android Emulator snapshot for caching."
+        script: echo "Generated Android Emulator snapshot for caching."
 
     - name: Run Tests on Android emulator
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
