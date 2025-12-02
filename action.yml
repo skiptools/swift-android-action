@@ -208,7 +208,10 @@ runs:
           log "Checking nightly build for: ${SWIFT_VERSION}"
           sdk_name="android"
           sdk_json=$(curl -fsSL --retry 8 --retry-connrefused "${SWIFT_API_INSTALL_ROOT}/dev/main/${sdk_name}-sdk.json")
+          # e.g. swift-DEVELOPMENT-SNAPSHOT-2025-12-01-a
           snapshot_tag=$(echo "$sdk_json" | jq -r '.[0].dir')
+          # e.g. swift-DEVELOPMENT-SNAPSHOT-2025-12-01-a_android.artifactbundle.tar.gz
+          snapshot_download=$(echo "$sdk_json" | jq -r '.[0].download')
           checksum=$(echo "$sdk_json" | jq -r '.[0].checksum')
           if [[ -z "$checksum" || "$checksum" == "null" ]]; then
               fatal "No checksum found for ${sdk_name}-sdk snapshot"
@@ -218,7 +221,6 @@ runs:
           # trim the preceeding "swift-" from the beginning, because
           # we add it back in the SWIFT_VERSION_ID
           SWIFT_VERSION="${snapshot_tag//swift-/}"
-
         elif [[ "${SWIFT_VERSION}" == nightly-* ]]; then
           # TODO: for individual versions post-6.3, use the eventual endpoint
           # https://www.swift.org/api/v1/install/dev/6.3/android-sdk.json
@@ -395,9 +397,9 @@ runs:
             # Swift Android SDK 6.1.1+ targets API 28+
             SWIFT_SDK_ANROID_API="28"
 
-            # TODO: we will be excluding the SDK version from the
-            # artifactbundle name in the future
-            SWIFT_SDK_ARTIFACT="${SWIFT_SDK_ID}_android-${SWIFT_SDK_VERSION}"
+            # TODO: get this from the API's "download" property from
+            # https://www.swift.org/api/v1/install/dev/main/android-sdk.json
+            SWIFT_SDK_ARTIFACT="${SWIFT_SDK_ID}_android"
 
             # TODO: nightly-main will have a different root from release
             if [[ "${{ inputs.swift-version }}" =~ "nightly-" ]]; then
@@ -430,9 +432,9 @@ runs:
           ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ARTIFACT} ${SWIFT_SDK_TARGET} &> /dev/null || ${SWIFT_INSTALLATION}/bin/swift sdk install ${SWIFT_SDK_ARTIFACT}.artifactbundle.tar.gz
 
           # FIXME: the nightly-main artifactbundle is called
-          # swift-DEVELOPMENT-SNAPSHOT-2025-10-17-a_android-0.1.artifactbundle
+          # swift-DEVELOPMENT-SNAPSHOT-2025-10-17-a_android.artifactbundle
           # but the name in the config is (note underscore/hyphen difference):
-          # swift-DEVELOPMENT-SNAPSHOT-2025-10-17-a-android-0.1.artifactbundle
+          # swift-DEVELOPMENT-SNAPSHOT-2025-10-17-a-android.artifactbundle
           echo "${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ARTIFACT} ${SWIFT_SDK_TARGET} || ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ARTIFACT//_android/-android} ${SWIFT_SDK_TARGET}"
           ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ARTIFACT} ${SWIFT_SDK_TARGET} || ${SWIFT_INSTALLATION}/bin/swift sdk configure --show-configuration ${SWIFT_SDK_ARTIFACT//_android/-android} ${SWIFT_SDK_TARGET}
 
