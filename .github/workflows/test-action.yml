@@ -47,19 +47,6 @@ jobs:
           ndk-version: ${{ matrix.ndk-version }}
           run-tests: ${{ env.RUNNER_ARCH != 'ARM64' }} # no tests on macOS ARM
 
-      - name: Checkout skiptools/swift-android-native
-        uses: actions/checkout@v4
-        with:
-          repository: skiptools/swift-android-native
-          path: skiptools/swift-android-native
-      - name: Test skiptools/swift-android-native
-        uses: ./swift-android-action/
-        with:
-          package-path: skiptools/swift-android-native
-          swift-version: ${{ matrix.swift-version }}
-          ndk-version: ${{ matrix.ndk-version }}
-          run-tests: ${{ env.RUNNER_ARCH != 'ARM64' }} # no tests on macOS ARM
-
   toolchain-setup:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -82,13 +69,13 @@ jobs:
           build-package: false
           swift-version: ${{ matrix.swift-version }}
           ndk-version: ${{ matrix.ndk-version }}
-      - name: Checkout apple/swift-algorithms
+      - name: Checkout skiptools/swift-android-native
         uses: actions/checkout@v4
         with:
-          repository: apple/swift-algorithms
-          path: apple/swift-algorithms
+          repository: skiptools/swift-android-native
+          path: skiptools/swift-android-native
       - name: Build Package With Toolchain
-        working-directory: apple/swift-algorithms
+        working-directory: skiptools/swift-android-native
         run: |
           echo "SWIFT COMMAND: ${{ steps.setup-toolchain.outputs.swift-build }}"
           ${{ steps.setup-toolchain.outputs.swift-build }} -c debug
