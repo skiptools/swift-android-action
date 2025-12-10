@@ -37,6 +37,12 @@ jobs:
   linux-android:
     runs-on: ubuntu-latest
     steps:
+      # Ubuntu runners can run low on space can cause the emulator to fail to install
+      - name: "Free Disk Space"
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
+          docker image prune --all --force
+          docker builder prune -a
       - uses: actions/checkout@v4
       - name: "Test Swift Package on Linux"
         run: swift test
@@ -80,7 +86,7 @@ at swift.org,
 Snapshots can be specified with their full name, like
 `swift-DEVELOPMENT-SNAPSHOT-2025-10-16-a`,
 or the most recent snapshot/nightly build can be specified with
-`nightly-main`.
+`nightly-main` or `nightly-6.3`.
 
 ### Configuration Options
 
