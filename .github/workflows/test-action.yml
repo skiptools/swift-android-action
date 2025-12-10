@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  builds:
+  tests:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -23,10 +23,9 @@ jobs:
             sudo rm -rf /Applications/Xcode_14*.app /Applications/Xcode_15*.app /Applications/Xcode_16.app /Applications/Xcode_16.1.app /Applications/Xcode_16_2.app /Applications/Xcode_16.3.app
           else
             sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/share/chromium /opt/microsoft /opt/google /opt/az
+            docker image prune --all --force
+            docker builder prune -a
           fi
-
-          docker image prune --all --force
-          docker builder prune -a
           df -h
 
       - name: Checkout Action
@@ -47,7 +46,7 @@ jobs:
           ndk-version: ${{ matrix.ndk-version }}
           run-tests: ${{ env.RUNNER_ARCH != 'ARM64' }} # no tests on macOS ARM
 
-  toolchain-setup:
+  setup:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
