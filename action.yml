@@ -207,6 +207,12 @@ runs:
         elif [[ "${SWIFT_VERSION}" == nightly-* ]]; then
           log "Checking nightly build for: ${SWIFT_VERSION}"
           nightly_version=${SWIFT_VERSION/nightly-/}
+          if [[ "${nightly_version}" == 'main' ]]; then
+            SWIFT_BRANCH="development"
+          else
+            SWIFT_BRANCH="swift-${nightly_version}-branch"
+          endif
+
           sdk_name="android"
           sdk_json=$(curl -fsSL --retry 8 --retry-connrefused "${SWIFT_API_INSTALL_ROOT}/dev/${nightly_version}/${sdk_name}-sdk.json")
           # e.g. swift-DEVELOPMENT-SNAPSHOT-2025-12-01-a
