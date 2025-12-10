@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-24.04', 'macos-15-intel']
-        swift-version: ['6.2', 'nightly-main']
+        swift-version: ['6.2', 'nightly-6.3', 'nightly-main']
         ndk-version: ['27', 'latest']
     steps:
       - name: Checkout Action
@@ -51,10 +51,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-24.04', 'macos-26']
-        #os: ['ubuntu-24.04', 'ubuntu-22.04', 'macos-13', 'macos-15', 'macos-26']
-        #swift-version: ['6.0', '6.1', '6.2']
-        #swift-version: ['6.1', '6.2']
+        os: ['ubuntu-22.04', 'macos-26']
         swift-version: ['6.1', '6.2', 'nightly-6.3', 'nightly-main']
         ndk-version: ['27', 'latest']
     steps:
