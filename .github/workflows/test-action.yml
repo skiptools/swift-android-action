@@ -11,11 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-24.04', 'macos-15-intel']
-        #os: ['ubuntu-24.04', 'ubuntu-22.04', 'macos-13', 'macos-15', 'macos-26']
-        #swift-version: ['6.0', '6.1']
-        #swift-version: ['6.0', '6.1', '6.1.1', '6.2']
-        #swift-version: ['6.0.3', '6.1', '6.2', 'nightly-main']
-        swift-version: ['6.1', '6.2', 'nightly-main']
+        swift-version: ['6.2', 'nightly-main']
         ndk-version: ['27', 'latest']
     steps:
       - name: Checkout Action
@@ -23,17 +19,18 @@ jobs:
         with:
           path: swift-android-action
 
-      - name: Checkout apple/swift-system
+      - name: Checkout apple/swift-algorithms
         uses: actions/checkout@v4
         with:
-          repository: apple/swift-system
-          path: apple/swift-system
-      - name: Test apple/swift-system
+          repository: apple/swift-algorithms
+          path: apple/swift-algorithms
+      - name: Test apple/swift-algorithms
         uses: ./swift-android-action/
         with:
-          package-path: apple/swift-system
+          package-path: apple/swift-algorithms
           swift-version: ${{ matrix.swift-version }}
           ndk-version: ${{ matrix.ndk-version }}
+          run-tests: ${{ env.RUNNER_ARCH != 'ARM64' }} # no tests on macOS ARM
 
       - name: Checkout skiptools/swift-android-native
         uses: actions/checkout@v4
@@ -41,8 +38,6 @@ jobs:
           repository: skiptools/swift-android-native
           path: skiptools/swift-android-native
       - name: Test skiptools/swift-android-native
-        # disabled due to mysterious failures
-        if: false
         uses: ./swift-android-action/
         with:
           package-path: skiptools/swift-android-native
@@ -59,7 +54,7 @@ jobs:
         #os: ['ubuntu-24.04', 'ubuntu-22.04', 'macos-13', 'macos-15', 'macos-26']
         #swift-version: ['6.0', '6.1', '6.2']
         #swift-version: ['6.1', '6.2']
-        swift-version: ['6.2', 'nightly-main']
+        swift-version: ['6.1', '6.2', 'nightly-6.3', 'nightly-main']
         ndk-version: ['27', 'latest']
     steps:
       - name: Checkout Action
