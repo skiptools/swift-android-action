@@ -398,13 +398,7 @@ runs:
             # https://www.swift.org/api/v1/install/dev/main/android-sdk.json
             SWIFT_SDK_ARTIFACT="${SWIFT_SDK_ID}_android"
 
-            # TODO: nightly-main will have a different root from release
-            if [[ "${{ inputs.swift-version }}" =~ "nightly-" ]]; then
-              ANDROID_SDK_URL_ROOT="https://download.swift.org/development/android-sdk"
-            else
-              ANDROID_SDK_URL_ROOT="https://download.swift.org/development/android-sdk"
-            fi
-            ANDROID_SDK_URL="${ANDROID_SDK_URL_ROOT}/${SWIFT_SDK_ID}/${SWIFT_SDK_ARTIFACT}.artifactbundle.tar.gz"
+            ANDROID_SDK_URL="${BASE_URL}/android-sdk/${SWIFT_SDK_ID}/${SWIFT_SDK_ARTIFACT}.artifactbundle.tar.gz"
 
             # 6.0.x-6.1 (but not 6.1.1)
             if [[ "${SWIFT_SDK_ID}" =~ "-6.0" || "${SWIFT_SDK_ID}" =~ "-6.1-" ]]; then
