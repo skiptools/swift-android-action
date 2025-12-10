@@ -211,7 +211,7 @@ runs:
             SWIFT_BRANCH="development"
           else
             SWIFT_BRANCH="swift-${nightly_version}-branch"
-          endif
+          fi
 
           sdk_name="android"
           sdk_json=$(curl -fsSL --retry 8 --retry-connrefused "${SWIFT_API_INSTALL_ROOT}/dev/${nightly_version}/${sdk_name}-sdk.json")
