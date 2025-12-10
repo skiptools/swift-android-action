@@ -355,6 +355,8 @@ runs:
       shell: bash
       run: |
         set +x
+        BASE_URL="https://download.swift.org/${{ steps.setup.outputs.swift-branch }}"
+
         if [ ${RUNNER_OS} == 'Linux' ]; then
           SWIFT_SDK_ROOT="${HOME}/.config/swiftpm/swift-sdks"
         elif [ ${RUNNER_OS} == 'macOS' ]; then
