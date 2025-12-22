@@ -37,17 +37,14 @@ jobs:
   linux-android:
     runs-on: ubuntu-latest
     steps:
-      # Ubuntu runners can run low on space can cause the emulator to fail to install
-      - name: "Free Disk Space"
-        run: |
-          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
-          docker image prune --all --force
-          docker builder prune -a
       - uses: actions/checkout@v4
       - name: "Test Swift Package on Linux"
         run: swift test
       - name: "Test Swift Package on Android"
         uses: skiptools/swift-android-action@v2
+        with:
+          # Ubuntu runners low on space causes the emulator to fail to install
+          free-disk-space: true
 ```
 
 
@@ -103,6 +100,7 @@ or the most recent snapshot/nightly build can be specified with
 | custom-sdk-id | The ID of the custom SDK that will be installed |  |
 | installed-swift | The path to a pre-installed host Swift toolchain |  |
 | test-env | Test environment variables key=value |  |
+| free-disk-space | Free up disk space by deleting commonly-unused large folders | false |
 | build-package | Whether to build the Swit package | true |
 | build-tests | Whether to build the package tests or just the sources | true |
 | run-tests | Whether to run the tests or just perform the build | true |
@@ -209,7 +207,6 @@ while on macOS-15 it will be:
 /Users/runner/Library/Developer/Toolchains/swift-6.1-RELEASE.xctoolchain/usr/bin/swift build --swift-sdk aarch64-unknown-linux-android24
 ```
 
-
 ## Complete Universal CI Example
 
 Following is an example of a `ci.yml` workflow that checks out and tests a Swift package on each of macOS, iOS, Linux, Android, and Windows.
@@ -263,6 +260,51 @@ for the [swift-sqlite](https://github.com/swift-android-sdk/swift-sqlite/actions
 Recommendations for adding Android compatibility to
 existing Swift packages can be found at
 [Bringing Swift Packages to Android](https://skip.tools/blog/android-native-swift-packages/).
+
+## Troubleshooting
+
+### Error: Timeout waiting for emulator to boot
+
+If you encounter `Timeout waiting for emulator to boot`,
+chances are there was an error launching the emulator.
+In the action logs, expand the "Launch Emulator" section
+to see the true underlying cause.
+
+This is very frequently due to low disk space preventing the
+emulator from starting, which will be reported like:
+
+```
+  INFO         | Guest GLES Driver: Auto (ext controls)
+  WARNING      | Your GPU drivers may have a bug. Switching to software rendering.
+  library_mode swangle_indirect gpu mode swangle_indirect
+  INFO         | Checking system compatibility:
+  INFO         |   Checking: hasSufficientDiskSpace
+  INFO         |      Ok: Disk space requirements to run avd: `test` are met
+  INFO         |   Checking: hasSufficientHwGpu
+  INFO         |      Ok: Hardware GPU compatibility checks are not required
+  INFO         |   Checking: hasSufficientSystem
+  INFO         |      Ok: System requirements to run avd: `test` are met
+  FATAL        | Not enough space to create userdata partition. Available: 6791.23 MB at /home/runner/.android/avd/test.avd, need 7372.80 MB.
+```
+
+If this happens, you can either free disk space manually
+in an earlier step, or you can use the `free-disk-space: true`
+parameter to the workflow to try automatically deleting some
+commonly-unused large resources (see the
+[action.yml](https://github.com/skiptools/swift-android-action/blob/main/action.yml)
+source code to see exactly which folders are deleted, since they
+may be things you actually need to use).
+
+```yml
+  - name: "Test Swift Package on Android"
+    uses: skiptools/swift-android-action@v2
+    with:
+      # Ubuntu runners low on space causes the emulator to fail to install
+      free-disk-space: true
+```
+
+For more information on this problem, see
+[issue #11](https://github.com/skiptools/swift-android-action/issues/11).
 
 ## Releasing new versions
 

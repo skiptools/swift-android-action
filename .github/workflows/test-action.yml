@@ -15,19 +15,6 @@ jobs:
         swift-version: ['6.2', 'nightly-6.3', 'nightly-main']
         ndk-version: ['27', 'latest']
     steps:
-      - name: Free Disk Space
-        run: |
-          df -h
-
-          if [[ "${RUNNER_OS}" == "macOS" ]]; then
-            sudo rm -rf /Applications/Xcode_14*.app /Applications/Xcode_15*.app /Applications/Xcode_16.app /Applications/Xcode_16.1.app /Applications/Xcode_16_2.app /Applications/Xcode_16.3.app
-          else
-            sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/share/chromium /opt/microsoft /opt/google /opt/az
-            docker image prune --all --force
-            docker builder prune -a
-          fi
-          df -h
-
       - name: Checkout Action
         uses: actions/checkout@v4
         with:
@@ -44,6 +31,7 @@ jobs:
           package-path: apple/swift-algorithms
           swift-version: ${{ matrix.swift-version }}
           ndk-version: ${{ matrix.ndk-version }}
+          free-disk-space: true
           run-tests: ${{ env.RUNNER_ARCH != 'ARM64' }} # no tests on macOS ARM
 
   setup:

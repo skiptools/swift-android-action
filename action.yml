@@ -59,6 +59,10 @@ inputs:
     description: 'Emulator boot timeout in seconds'
     required: true
     default: 600
+  free-disk-space:
+    description: 'Whether to try freeing some disk space before launching Android emulator'
+    required: false
+    default: 'false'
   build-package:
     description: 'Whether to build the package or just set up the SDK'
     required: true
@@ -489,6 +493,10 @@ runs:
           BUILD_TESTS="--build-tests"
         fi
         ${{ steps.install.outputs.swiftcmd }} -c ${{ inputs.swift-configuration }} ${BUILD_TESTS}
+
+    - name: Free up disk space
+      if: ${{ inputs.free-disk-space == 'true' }}
+      run: sudo rm -rf /Applications/Xcode_1[4567]*.app /opt/microsoft /opt/google /opt/az /usr/share/miniconda /usr/share/az* /usr/share/glade* /usr/local/share/chromium /usr/local/share/powershell /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/julia* /opt/hostedtoolcache/CodeQL /usr/local/share/boost
 
     - name: Prepare Android Emulator Test Script
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
