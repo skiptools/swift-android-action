@@ -63,7 +63,7 @@ jobs:
       - name: "Test Swift Package on Android"
         uses: skiptools/swift-android-action@v2
         with:
-          swift-version: 6.2
+          swift-version: '6.2'
 ```
 
 ### Swift Versions
@@ -305,6 +305,24 @@ may be things you actually need to use).
 
 For more information on this problem, see
 [issue #11](https://github.com/skiptools/swift-android-action/issues/11).
+
+### Wrong Swift version is being used
+
+YAML interprets eg. `6.0` as a float, this action will then interpret that as `6` which will result in eg. Swift 6.2 being resolved. Quote your inputs! Thus:
+
+```
+- uses: skiptools/swift-android-action@v2
+  with:
+    swift-version: '6.0'
+```
+
+Not:
+
+```
+- uses: skiptools/swift-android-action@v2
+  with:
+    swift-version: 6.0
+```
 
 ## Releasing new versions
 
