@@ -496,6 +496,7 @@ runs:
 
     - name: Free up disk space
       if: ${{ inputs.free-disk-space == 'true' }}
+      shell: bash
       run: sudo rm -rf /Applications/Xcode_1[4567]*.app /opt/microsoft /opt/google /opt/az /usr/share/miniconda /usr/share/az* /usr/share/glade* /usr/local/share/chromium /usr/local/share/powershell /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/julia* /opt/hostedtoolcache/CodeQL /usr/local/share/boost
 
     - name: Prepare Android Emulator Test Script
