@@ -414,7 +414,12 @@ runs:
               ANDROID_SDK_URL="https://github.com/skiptools/swift-android-toolchain/releases/download/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ARTIFACT}.artifactbundle.tar.gz"
             elif [[ "${SWIFT_SDK_ID}" =~ "-6.1." || "${SWIFT_SDK_ID}" =~ "-6.2" ]]; then
               # 6.2+ no longer includes the API in the artifactbundle name
-              SWIFT_SDK_ARTIFACT="${SWIFT_SDK_ID}-android-${SWIFT_SDK_VERSION}"
+              if [[ "${SWIFT_SDK_ID}" =~ "-6.2.3" ]]; then
+                # 6.2.3 uses the new "_android" without a version
+                SWIFT_SDK_ARTIFACT="${SWIFT_SDK_ID}_android"
+              else
+                SWIFT_SDK_ARTIFACT="${SWIFT_SDK_ID}-android-${SWIFT_SDK_VERSION}"
+              fi
               ANDROID_SDK_URL="https://github.com/skiptools/swift-android-toolchain/releases/download/${{ steps.setup.outputs.swift-version }}/${SWIFT_SDK_ARTIFACT}.artifactbundle.tar.gz"
             fi
 
