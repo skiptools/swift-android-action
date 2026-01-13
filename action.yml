@@ -392,6 +392,7 @@ runs:
             SWIFT_SDK_TARGET="${{ inputs.installed-sdk }}"
             echo "SWIFT_SDK_TARGET=${SWIFT_SDK_TARGET}" >> $GITHUB_ENV
             SWIFT_SDK_ID="${{ inputs.custom-sdk-id }}"
+            SWIFT_SDK_ARTIFACT="${SWIFT_SDK_ID}"
           else
             # TODO: identify the version automatically
             SWIFT_SDK_VERSION="0.1"
