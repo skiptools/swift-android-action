@@ -259,7 +259,7 @@ for the [swift-sqlite](https://github.com/swift-android-sdk/swift-sqlite/actions
 
 Recommendations for adding Android compatibility to
 existing Swift packages can be found at
-[Bringing Swift Packages to Android](https://skip.tools/blog/android-native-swift-packages/).
+[Bringing Swift Packages to Android](https://skip.dev/blog/android-native-swift-packages/).
 
 ## Troubleshooting
 
