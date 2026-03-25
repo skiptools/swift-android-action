@@ -63,12 +63,12 @@ jobs:
       - name: "Test Swift Package on Android"
         uses: skiptools/swift-android-action@v2
         with:
-          swift-version: '6.2'
+          swift-version: '6.3'
 ```
 
 ### Swift Versions
 
-The `swift-version` input can be set to a specific version number (e.g., "6.2" or "6.1.1").
+The `swift-version` input can be set to a specific version number (e.g., "6.3").
 
 > [!NOTE]
 > Prior to Swift 6.3, the SDK that is installed is the 
@@ -89,7 +89,7 @@ or the most recent snapshot/nightly build can be specified with
 
 | Parameter | Description | Default  |
 |-----|-----|-----|
-| swift-version | The version of the Swift toolchain to use | 6.2 |
+| swift-version | The version of the Swift toolchain to use | 6.3 |
 | ndk-version | The version of the Android NDK to use | <default> |
 | package-path | The folder where the swift package is checked out | . |
 | swift-configuration | Whether to build with debug or release configuration | debug |
@@ -198,13 +198,13 @@ The actual `swift-build` command will vary between operating systems
 and architectures. For example, on Ubuntu 24.04, it might be:
 
 ```
-/home/runner/swift/toolchains/swift-6.1-RELEASE/usr/bin/swift build --swift-sdk x86_64-unknown-linux-android24
+/home/runner/swift/toolchains/swift-6.3-RELEASE/usr/bin/swift build --swift-sdk x86_64-unknown-linux-android24
 ```
 
 while on macOS-15 it will be:
 
 ```
-/Users/runner/Library/Developer/Toolchains/swift-6.1-RELEASE.xctoolchain/usr/bin/swift build --swift-sdk aarch64-unknown-linux-android24
+/Users/runner/Library/Developer/Toolchains/swift-6.3-RELEASE.xctoolchain/usr/bin/swift build --swift-sdk aarch64-unknown-linux-android24
 ```
 
 ## Complete Universal CI Example
@@ -245,8 +245,8 @@ jobs:
       - name: "Setup Swift on Windows"
         uses: compnerd/gha-setup-swift@main
         with:
-          branch: swift-6.2-release
-          tag: 6.2-RELEASE
+          branch: swift-6.3-release
+          tag: 6.3-RELEASE
       - name: "Test Swift Package on Windows"
         run: swift test
 
@@ -308,12 +308,12 @@ For more information on this problem, see
 
 ### Wrong Swift version is being used
 
-YAML interprets eg. `6.0` as a float, this action will then interpret that as `6` which will result in eg. Swift 6.2 being resolved. Quote your inputs! Thus:
+YAML interprets eg. `6.3` as a float, this action will then interpret that as `6` which will result in eg. Swift 6.3 being resolved. Quote your inputs! Thus:
 
 ```
 - uses: skiptools/swift-android-action@v2
   with:
-    swift-version: '6.0'
+    swift-version: '6.3'
 ```
 
 Not:
@@ -321,7 +321,7 @@ Not:
 ```
 - uses: skiptools/swift-android-action@v2
   with:
-    swift-version: 6.0
+    swift-version: 6.3
 ```
 
 ## Releasing new versions
