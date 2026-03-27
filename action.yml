@@ -198,6 +198,9 @@ runs:
         # note the "cat … | ( grep PATTERN || true )" technique so we don't error out if we don't match
         # since we have a nicer error message below when the pattern is unmatched
         if [[ "${SWIFT_VERSION}" == 'latest' ]]; then
+          # e.g., "6.3"
+          SWIFT_VERSION=$(curl -fsSL https://www.swift.org/api/v1/install/releases.json | jq -r '.[-1].name')
+        elif [[ "${SWIFT_VERSION}" == 'latest-6.2' ]]; then
           # translate swift-version "latest" into our known latest version
           #LATEST_RELEASE="6.0.3"
           #SWIFT_VERSION="${LATEST_RELEASE}"
@@ -236,7 +239,7 @@ runs:
           # use the exact development snapshot version as-is, without looking it up in the releases file
           # e.g. "6.3-DEVELOPMENT-SNAPSHOT-2025-12-07-a" or "DEVELOPMENT-SNAPSHOT-2025-12-07-a"
           log "Using explicit development snapshot: ${SWIFT_VERSION}"
-        else
+        elif [[ "${SWIFT_VERSION}" == 6.2* ]]; then
           # match "6.0" to "6.0.3"
           # DO NOT match "6.1" to "6.1-DEVELOPMENT-SNAPSHOT-2025-03-07-a"
           SWIFT_VERSION=$(cat ${SWIFT_VERSIONS_FILE} | ( grep -v -- '-SNAPSHOT' || true ) | ( grep -- "^${SWIFT_VERSION}" || true ) | head -n 1)
@@ -603,7 +606,7 @@ runs:
 
     - name: Create Android Emulator Cache
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' && steps.avd-cache.outputs.cache-hit != 'true' }}
-      uses: reactivecircus/android-emulator-runner@b530d96654c385303d652368551fb075bc2f0b6b # v2.35.0
+      uses: reactivecircus/android-emulator-runner@v2
       with:
         force-avd-creation: false
         api-level: ${{ inputs.android-api-level }}
@@ -620,7 +623,7 @@ runs:
 
     - name: Run Tests on Android emulator
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
-      uses: reactivecircus/android-emulator-runner@b530d96654c385303d652368551fb075bc2f0b6b # v2.35.0
+      uses: reactivecircus/android-emulator-runner@v2
       with:
         force-avd-creation: false
         api-level: ${{ inputs.android-api-level }}
