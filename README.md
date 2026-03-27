@@ -37,7 +37,7 @@ jobs:
   linux-android:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: "Test Swift Package on Linux"
         run: swift test
       - name: "Test Swift Package on Android"
@@ -57,7 +57,7 @@ jobs:
   linux-android:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: "Test Swift Package on Linux"
         run: swift test
       - name: "Test Swift Package on Android"
@@ -125,7 +125,7 @@ jobs:
   macos-android:
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: "Test Swift Package on macOS"
         run: swift test
       - name: "Build Swift Package on Android"
@@ -184,7 +184,7 @@ For example:
       # just set up the toolchain but don't build anything
       build-package: false
   - name: Checkout apple/swift-numerics
-    uses: actions/checkout@v4
+    uses: actions/checkout@v6
   - name: Build Package With Toolchain
     run: |
       # build twice, once with debug and once with release
@@ -225,7 +225,7 @@ jobs:
   linux-android:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: "Test Swift Package on Linux"
         run: swift test
       - name: "Test Swift Package on Android"
@@ -233,7 +233,7 @@ jobs:
   macos-ios:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: "Test Swift Package on macOS"
         run: swift test
       - name: "Test Swift Package on iOS"
@@ -241,7 +241,7 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: "Setup Swift on Windows"
         uses: compnerd/gha-setup-swift@main
         with:
