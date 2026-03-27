@@ -198,6 +198,9 @@ runs:
         # note the "cat … | ( grep PATTERN || true )" technique so we don't error out if we don't match
         # since we have a nicer error message below when the pattern is unmatched
         if [[ "${SWIFT_VERSION}" == 'latest' ]]; then
+          # e.g., "6.3"
+          SWIFT_VERSION=$(curl -fsSL https://www.swift.org/api/v1/install/releases.json | jq -r '.[-1].name')
+        elif [[ "${SWIFT_VERSION}" == 'latest-6.2' ]]; then
           # translate swift-version "latest" into our known latest version
           #LATEST_RELEASE="6.0.3"
           #SWIFT_VERSION="${LATEST_RELEASE}"
