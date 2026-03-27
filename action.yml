@@ -602,7 +602,7 @@ runs:
 
     - name: Create Android Emulator Cache
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' && steps.avd-cache.outputs.cache-hit != 'true' }}
-      uses: reactivecircus/android-emulator-runner@b530d96654c385303d652368551fb075bc2f0b6b # v2.35.0
+      uses: reactivecircus/android-emulator-runner@v2
       with:
         force-avd-creation: false
         api-level: ${{ inputs.android-api-level }}
@@ -619,7 +619,7 @@ runs:
 
     - name: Run Tests on Android emulator
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
-      uses: reactivecircus/android-emulator-runner@b530d96654c385303d652368551fb075bc2f0b6b # v2.35.0
+      uses: reactivecircus/android-emulator-runner@v2
       with:
         force-avd-creation: false
         api-level: ${{ inputs.android-api-level }}
