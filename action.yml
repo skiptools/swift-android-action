@@ -528,6 +528,10 @@ runs:
         mkdir -p ${PACK_DIR}
 
         # copy the built test binary
+        echo "======= xctest artifacts ======="
+        find ${BUILD_DIR} -name '*.xctest'
+        echo "======= done xctest artifacts ======="
+
         cp -va ${BUILD_DIR}/${SWIFT_SDK_TARGET}/${{ inputs.swift-configuration }}/*.xctest ${PACK_DIR}
 
         # copy any dependent .so files that may have been created
