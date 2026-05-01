@@ -50,19 +50,18 @@ jobs:
       - name: Setup Toolchain
         id: setup-toolchain
         uses: ./swift-android-action/
-        #uses: swift-android-sdk/swift-android-action@v2
         with:
           # just set up the toolchain and don't build anything
           build-package: false
           swift-version: ${{ matrix.swift-version }}
           ndk-version: ${{ matrix.ndk-version }}
-      - name: Checkout swift-android-sdk/swift-android-native
+      - name: Checkout swiftlang/swift-markdown
         uses: actions/checkout@v6
         with:
-          repository: swift-android-sdk/swift-android-native
-          path: swift-android-sdk/swift-android-native
+          repository: swiftlang/swift-markdown
+          path: swiftlang/swift-markdown
       - name: Build Package With Toolchain
-        working-directory: swift-android-sdk/swift-android-native
+        working-directory: swiftlang/swift-markdown
         run: |
           echo "SWIFT COMMAND: ${{ steps.setup-toolchain.outputs.swift-build }}"
           ${{ steps.setup-toolchain.outputs.swift-build }} -c debug
