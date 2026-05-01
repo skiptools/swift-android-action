@@ -494,6 +494,7 @@ runs:
         ${{ steps.install.outputs.swiftcmd }} --version
 
     - name: Build Swift Package with Android SDK
+      id: build
       if: ${{ inputs.build-package == 'true' }}
       shell: bash
       working-directory: ${{ inputs.package-path }}
@@ -503,8 +504,13 @@ runs:
         fi
         ${{ steps.install.outputs.swiftcmd }} -c ${{ inputs.swift-configuration }} ${BUILD_TESTS}
 
+        # remember the build output folder
+        BUILD_DIR=$(${{ steps.install.outputs.swiftcmd }} -c ${{ inputs.swift-configuration }} ${BUILD_TESTS} --show-bin-path)
+
+        echo "build-dir=${BUILD_DIR}" >> $GITHUB_OUTPUT
+
     - name: Free up disk space
-      if: ${{ inputs.free-disk-space == 'true' }}
+      if: ${{ inputs.free-disk-space == 'true' && inputs.run-tests == 'true' }}
       shell: bash
       run: sudo rm -rf /Applications/Xcode_1[4567]*.app /opt/microsoft /opt/google /opt/az /usr/share/miniconda /usr/share/az* /usr/share/glade* /usr/local/share/chromium /usr/local/share/powershell /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/julia* /opt/hostedtoolcache/CodeQL /usr/local/share/boost
 
@@ -522,18 +528,33 @@ runs:
         #inputs.android-emulator-test-folder = /data/local/tmp/android-xctest
         REMOTE_FOLDER=$(dirname "${{ inputs.android-emulator-test-folder }}")
         TEST_BASE_FOLDER=$(basename "${{ inputs.android-emulator-test-folder }}")
-        BUILD_DIR=".build"
+        BUILD_DIR="${{ steps.build.outputs.build-dir }}"
+
         PACK_DIR="${BUILD_DIR}/${TEST_BASE_FOLDER}"
 
         mkdir -p ${PACK_DIR}
 
-        cp -va ${BUILD_DIR}/${SWIFT_SDK_TARGET}/${{ inputs.swift-configuration }}/*.xctest ${PACK_DIR}
+        shopt -s nullglob # makes glob expand to empty list instead of literal pattern
+
+        xctest_files=("$BUILD_DIR"/*.xctest)
+        test_runner_files=("$BUILD_DIR"/*-test-runner)
+
+        if (( ${#xctest_files[@]} )); then
+          # old .xctest test runner binary
+          TEST_RUNNER_SUFFIX=".xctest"
+        else
+          # new swift-build test runner binary
+          TEST_RUNNER_SUFFIX="-test-runner"
+        fi
+
+        cp -va ${BUILD_DIR}/*${TEST_RUNNER_SUFFIX} ${PACK_DIR}
 
         # copy any dependent .so files that may have been created
-        cp -va ${BUILD_DIR}/${SWIFT_SDK_TARGET}/${{ inputs.swift-configuration }}/*.so ${PACK_DIR} || true
+        cp -va ${BUILD_DIR}/*.so ${PACK_DIR} || true
 
         # copy any optional resource bundles
-        cp -vaf ${BUILD_DIR}/${SWIFT_SDK_TARGET}/${{ inputs.swift-configuration }}/*.resources ${PACK_DIR} || true
+        cp -vaf ${BUILD_DIR}/*.resources ${PACK_DIR} || true
+
         # 6.0.2 keeps libraries in per-API folders
         cp -vaf ${SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH}/usr/lib/${{ steps.setup.outputs.android-sdk-arch }}-linux-android/24/lib*.so ${PACK_DIR} || true
 
@@ -557,7 +578,7 @@ runs:
         cd ${BUILD_DIR}
         echo '#!/bin/sh -ex' > ${SCRIPT_FILE}
         echo "adb push ${TEST_BASE_FOLDER} ${REMOTE_FOLDER}" >> ${SCRIPT_FILE}
-        for XCTEST in ${TEST_BASE_FOLDER}/*.xctest; do
+        for XCTEST in ${TEST_BASE_FOLDER}/*${TEST_RUNNER_SUFFIX}; do
           XCTEST_BASE=$(basename "${XCTEST}")
           TEST_CMD="${{ inputs.test-env }} ./${XCTEST_BASE} ${{ inputs.swift-test-flags }}"
           # Conditionally prepend LD_LIBRARY_PATH for Android 23 and below, since DT_RUNPATH support was added in 24
