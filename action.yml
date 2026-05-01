@@ -530,6 +530,7 @@ runs:
         # copy the built test binary
         echo "======= xctest artifacts ======="
         find . -name '*.xctest'
+        ls -lart .build/
         echo "======= done xctest artifacts ======="
 
         cp -va ${BUILD_DIR}/${SWIFT_SDK_TARGET}/${{ inputs.swift-configuration }}/*.xctest ${PACK_DIR}
