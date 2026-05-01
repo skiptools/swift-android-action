@@ -16,12 +16,12 @@ jobs:
         ndk-version: ['27', 'latest']
     steps:
       - name: Checkout Action
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: swift-android-action
 
       - name: Checkout apple/swift-algorithms
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: apple/swift-algorithms
           path: apple/swift-algorithms
@@ -39,30 +39,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-22.04', 'macos-26']
+        os: ['ubuntu-24.04', 'macos-26']
         swift-version: ['6.1', '6.2', 'nightly-6.3', 'nightly-main']
         ndk-version: ['27', 'latest']
     steps:
       - name: Checkout Action
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: swift-android-action
       - name: Setup Toolchain
         id: setup-toolchain
         uses: ./swift-android-action/
-        #uses: swift-android-sdk/swift-android-action@v2
         with:
           # just set up the toolchain and don't build anything
           build-package: false
           swift-version: ${{ matrix.swift-version }}
           ndk-version: ${{ matrix.ndk-version }}
-      - name: Checkout skiptools/swift-android-native
-        uses: actions/checkout@v4
+      - name: Checkout swiftlang/swift-markdown
+        uses: actions/checkout@v6
         with:
-          repository: skiptools/swift-android-native
-          path: skiptools/swift-android-native
+          repository: swiftlang/swift-markdown
+          path: swiftlang/swift-markdown
       - name: Build Package With Toolchain
-        working-directory: skiptools/swift-android-native
+        working-directory: swiftlang/swift-markdown
         run: |
           echo "SWIFT COMMAND: ${{ steps.setup-toolchain.outputs.swift-build }}"
           ${{ steps.setup-toolchain.outputs.swift-build }} -c debug
