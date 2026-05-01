@@ -515,6 +515,7 @@ runs:
       run: sudo rm -rf /Applications/Xcode_1[4567]*.app /opt/microsoft /opt/google /opt/az /usr/share/miniconda /usr/share/az* /usr/share/glade* /usr/local/share/chromium /usr/local/share/powershell /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/julia* /opt/hostedtoolcache/CodeQL /usr/local/share/boost
 
     - name: Prepare Android Emulator Test Script
+      id: test-script
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
       shell: bash
       working-directory: ${{ inputs.package-path }}
@@ -610,6 +611,8 @@ runs:
 
         chmod +x ${SCRIPT_FILE}
 
+        echo "test-runner-script=${PWD}/${SCRIPT_FILE}" >> $GITHUB_OUTPUT
+
     - name: Setup Android Emulator Cache
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
       uses: actions/cache@v5
@@ -652,5 +655,5 @@ runs:
         arch: ${{ steps.setup.outputs.android-emulator-arch }}
         disable-animations: true
         working-directory: ${{ inputs.package-path }}/.build
-        script: ./run-android-tests.sh
+        script: ${{ steps.test-script.outputs.test-runner-script }}
 

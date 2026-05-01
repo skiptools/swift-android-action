@@ -65,7 +65,7 @@ jobs:
         run: |
           echo "SWIFT COMMAND: ${{ steps.setup-toolchain.outputs.swift-build }}"
           ${{ steps.setup-toolchain.outputs.swift-build }} -c debug
-          ls -la .build/${{ steps.setup-toolchain.outputs.swift-sdk }}/debug
+          ls -lah .build/debug/
           ${{ steps.setup-toolchain.outputs.swift-build }} -c release
-          ls -la .build/${{ steps.setup-toolchain.outputs.swift-sdk }}/release
+          ls -lah .build/release/
 
