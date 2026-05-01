@@ -40,7 +40,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-24.04', 'macos-26']
-        swift-version: ['6.1', '6.2', 'nightly-6.3', 'nightly-main']
+        swift-version: ['6.2', '6.3', 'nightly-6.3', 'nightly-main']
         ndk-version: ['27', 'latest']
     steps:
       - name: Checkout Action
@@ -65,7 +65,7 @@ jobs:
         run: |
           echo "SWIFT COMMAND: ${{ steps.setup-toolchain.outputs.swift-build }}"
           ${{ steps.setup-toolchain.outputs.swift-build }} -c debug
-          ls -la .build/${{ steps.setup-toolchain.outputs.swift-sdk }}/debug
+          ls -lah .build/debug/
           ${{ steps.setup-toolchain.outputs.swift-build }} -c release
-          ls -la .build/${{ steps.setup-toolchain.outputs.swift-sdk }}/release
+          ls -lah .build/release/
 
