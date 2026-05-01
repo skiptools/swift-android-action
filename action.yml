@@ -531,6 +531,8 @@ runs:
         echo "======= xctest artifacts ======="
         find . -name '*.xctest'
         ls -lart .build/
+        brew install tree || sudo apt install tree || true
+        tree .build/
         echo "======= done xctest artifacts ======="
 
         cp -va ${BUILD_DIR}/${SWIFT_SDK_TARGET}/${{ inputs.swift-configuration }}/*.xctest ${PACK_DIR}
