@@ -46,7 +46,7 @@ inputs:
   android-emulator-test-folder:
     description: 'Emulator folder where tests are copied and run'
     required: true
-    default: '/data/local/tmp/android-xctest'
+    default: '/data/local/tmp/swift-android-tests'
   test-env:
     description: 'Test environment variables key=value'
     required: true
@@ -577,7 +577,9 @@ runs:
         SCRIPT_FILE="run-android-tests.sh"
 
         cd ${BUILD_DIR}
+
         echo '#!/bin/sh -ex' > ${SCRIPT_FILE}
+        echo "cd ${BUILD_DIR}" >> ${SCRIPT_FILE}
         echo "adb push ${TEST_BASE_FOLDER} ${REMOTE_FOLDER}" >> ${SCRIPT_FILE}
         for XCTEST in ${TEST_BASE_FOLDER}/*${TEST_RUNNER_SUFFIX}; do
           XCTEST_BASE=$(basename "${XCTEST}")
