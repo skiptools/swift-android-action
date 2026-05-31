@@ -651,7 +651,7 @@ runs:
     - name: Run Tests on Android emulator
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
       uses: reactivecircus/android-emulator-runner@v2
-       with:
+      with:
         force-avd-creation: false
         api-level: ${{ inputs.android-api-level }}
         target: ${{ inputs.android-target }}
