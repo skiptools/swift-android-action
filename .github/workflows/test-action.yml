@@ -69,3 +69,54 @@ jobs:
           ${{ steps.setup-toolchain.outputs.swift-build }} -c release
           ls -lah .build/release/
 
+  api-levels:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        android-api-level: [23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
+    steps:
+      - name: Checkout Action
+        uses: actions/checkout@v6
+        with:
+          path: swift-android-action
+
+      - name: Create Test Package
+        id: create-package
+        shell: bash
+        run: |
+          TEMP_PKG="${RUNNER_TEMP}/ApiTest"
+          rm -rf "${TEMP_PKG}"
+          mkdir -p "${TEMP_PKG}"
+          cd "${TEMP_PKG}"
+          swift package init --type library --name ApiTest
+
+          NEXT_API=$(( ${{ matrix.android-api-level }} + 1 ))
+
+          cat > Tests/ApiTestTests/ApiTestTests.swift << SWIFT_EOF
+          import Testing
+
+          struct ApiTestTests {
+              @available(Android ${{ matrix.android-api-level }}, *)
+              @Test func availableAtTargetAPI() {
+                  #expect(Bool(true))
+              }
+
+              @available(Android ${NEXT_API}, *)
+              @Test func shouldNotRunAtHigherAPI() {
+                  #expect(Bool(false), "Test should not run on Android ${{ matrix.android-api-level }} (requires API ${NEXT_API}+)")
+              }
+          }
+          SWIFT_EOF
+
+          cat Tests/ApiTestTests/ApiTestTests.swift
+
+          echo "package-path=${TEMP_PKG}" >> $GITHUB_OUTPUT
+
+      - name: Test ApiTest with API ${{ matrix.android-api-level }}
+        uses: ./swift-android-action/
+        with:
+          package-path: ${{ steps.create-package.outputs.package-path }}
+          swift-version: nightly-main
+          android-api-level: ${{ matrix.android-api-level }}
+
