@@ -99,8 +99,7 @@ jobs:
           struct ApiTestTests {
               @available(Android ${{ matrix.android-api-level }}, *)
               @Test func availableAtTargetAPI() {
-                  // check for https://issuetracker.google.com/issues/36908392
-                  #expect(Bool(false), "Intentional failure")
+                  #expect(Bool(true))
               }
 
               @available(Android ${NEXT_API}, *)
