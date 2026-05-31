@@ -581,7 +581,9 @@ runs:
             # We additionally need to handle the special exit code EXIT_NO_TESTS_FOUND (69 on Android),
             # which can happen when the tests link to Testing, but no tests are executed
             # see: https://github.com/swiftlang/swift-package-manager/blob/1b593469e8ad3daf2cc10e798340bd2de68c402d/Sources/Commands/SwiftTestCommand.swift#L1542
-            patchelf --print-needed ${XCTEST} | grep libTesting.so && TEST_SHELL="${TEST_SHELL} && ${TEST_CMD} --testing-library swift-testing && [ \$? -eq 0 ] || [ \$? -eq 69 ]" || true
+            # TEMPORARY DIAGNOSTIC: capture the swift-testing run's real exit code into RC and print it,
+            # then apply the same accept-0-or-69 logic as before. Look for "SWIFT_TESTING_RC=" in the run log.
+            patchelf --print-needed ${XCTEST} | grep libTesting.so && TEST_SHELL="${TEST_SHELL} && ${TEST_CMD} --testing-library swift-testing; RC=\$?; echo \"SWIFT_TESTING_RC=\$RC\"; [ \$RC -eq 0 ] || [ \$RC -eq 69 ]" || true
           fi
           echo "adb shell '${TEST_SHELL}'" >> ${SCRIPT_FILE}
         done
@@ -624,7 +626,7 @@ runs:
     - name: Run Tests on Android emulator
       if: ${{ inputs.run-tests == 'true' && inputs.build-tests == 'true' && inputs.build-package == 'true' }}
       uses: reactivecircus/android-emulator-runner@v2
-      with:
+       with:
         force-avd-creation: false
         api-level: ${{ inputs.android-api-level }}
         target: ${{ inputs.android-target }}
