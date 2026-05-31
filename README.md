@@ -107,6 +107,7 @@ or the most recent snapshot/nightly build can be specified with
 | copy-files | Additional files to copy to emulator for testing | |
 | android-emulator-test-folder | Emulator folder where tests are copied | /data/local/tmp/android-xctest |
 | android-api-level | The API level of the Android emulator to run against | 28 |
+| compile-sdk-api-level | The Android API level for the compile SDK build triple (e.g., setting `23` produces a triple of `x86_64-unknown-linux-android23`). Defaults to the value of `android-api-level`. | |
 | android-channel | SDK component channel: stable, beta, dev, canary | stable |
 | android-profile | Hardware profile used for creating the AVD | pixel |
 | android-target | Target of the system image | aosp_atd |
