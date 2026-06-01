@@ -618,7 +618,19 @@ runs:
             # see: https://github.com/swiftlang/swift-package-manager/blob/1b593469e8ad3daf2cc10e798340bd2de68c402d/Sources/Commands/SwiftTestCommand.swift#L1542
             patchelf --print-needed ${XCTEST} | grep libTesting.so && TEST_SHELL="${TEST_SHELL} && ${TEST_CMD} --testing-library swift-testing && [ \$? -eq 0 ] || [ \$? -eq 69 ]" || true
           fi
-          echo "adb shell '${TEST_SHELL}'" >> ${SCRIPT_FILE}
+          if [ "${{ inputs.android-api-level }}" -le 23 ]; then
+            # On API 23 the exit code from `adb shell` does not get propagated back to the host, so a
+            # failing test run would still pass the job. Instead, write the run's exit code to a file
+            # on the device (TEST_SHELL already collapses to 0 for pass/no-tests, non-zero for
+            # failure), read it back over adb (stdout is forwarded fine), and fail the host script if
+            # it is not 0.
+            REMOTE_RC_FILE="${REMOTE_FOLDER}/${TEST_BASE_FOLDER}/xctest-exit-code"
+            echo "adb shell '${TEST_SHELL}; echo \$? > ${REMOTE_RC_FILE}'" >> ${SCRIPT_FILE}
+            echo "RC=\$(adb shell cat ${REMOTE_RC_FILE} | tr -d '\\r')" >> ${SCRIPT_FILE}
+            echo "[ \"\$RC\" = 0 ] || { echo \"::error::Android tests failed (exit \$RC)\"; exit 1; }" >> ${SCRIPT_FILE}
+          else
+            echo "adb shell '${TEST_SHELL}'" >> ${SCRIPT_FILE}
+          fi
         done
 
         # ensure the emulator stops when we are done
